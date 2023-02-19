@@ -80,8 +80,7 @@ def minmax_norm(df:DataFrame) -> Tuple[DataFrame, Tuple[Series, Series]]:
   df_n = (df - vmin) / (vmax - vmin)
   return df_n, (vmin, vmax)
 
-
-# ↑↑↑ above are valid preprocessor ↑↑↑
+# ↑↑↑ above are valid preprocessors ↑↑↑
 
 
 # ↓↓↓ below are innerly auto-called, DO NOT USE ↓↓↓

@@ -16,8 +16,8 @@
 ```yml
 misc:
   name: string      # 唯一任务名，留空会默认分配
-  target: string    # 任务目标，可选项为 ['all', 'dataset', 'train', 'eval']
   seed: int         # 全局随机数种子
+  target: string    # 任务目标，可选项为 modules/typing.py 文件内 RunTarget 各选项
 
 data: 
   - string          # 数据源，csv文件路径
@@ -26,9 +26,10 @@ preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内�
   - string          # 第一项必须在 ['to_hourly', 'to_daily'] 里二选一
 
 dataset:
-  train: int        # 重采样的训练集大小
-  test: int         # 重采样的测试集大小
-  lag: int          # 序列前瞻窗长，知 lag 推 1
+  train: int        # 采样出的训练集大小
+  test: int         # 采样出的测试集大小
+  in: int           # 已知窗长，知 in 推 out
+  out: int          # 预测窗长，知 in 推 out
 
 model:
   arch: string      # 模型架构，可选项为 modules/models 目录下各文件名

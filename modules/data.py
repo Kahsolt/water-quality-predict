@@ -1,45 +1,42 @@
 #!/usr/bin/env python3
 # Author: Armit
-# Create Time: 2022/09/15 
+# Create Time: 2023/02/19 
 
-import pickle as pkl
-from typing import Tuple
-
+import torch
 import numpy as np
-from torch.utils.data import Dataset
-import matplotlib.pyplot as plt
 
-import hparam as hp
+from modules.typing import *
 
 
-def load_data(fp:str) -> dict:
-  with open(fp, 'rb') as fh:
-    return pkl.load(fh)
+def resample_frame_dataset(x:np.ndarray, inlen:int=3, outlen:int=1, count:int=1000) -> Dataset:
+  ''' 在时间序列上重采样切片，知 inlen 推 outlen '''
+
+  # x.shape: [T, D=1]
+  assert len(x.shape) == 2
+
+  seg_size = inlen + outlen
+  rlim = len(x) - seg_size
+
+  X, Y = [], []
+  for _ in range(count):
+    r = np.random.randint(0, rlim)
+    seg = x[r : r+seg_size, :]
+    X.append(seg[:inlen])
+    Y.append(seg[inlen:])
+  X = np.stack(X, axis=0)     # [count, seg_size, D]
+  Y = np.stack(Y, axis=0)     # [count, seg_size, D]
+
+  return X, Y
 
 
-def save_data(data:dict, fp:str):
-  with open(fp, 'wb') as fh:
-    pkl.dump(data, fh)
+class FrameDataset(torch.utils.data.Dataset):
 
-
-class ResampleDataset(Dataset):
-
-  def __init__(self, fvmat, segment_size, count=5000):
-    self.length = len(fvmat)               # 实际序列的总长度
-    self.segment_size = segment_size       # 重采样样本的长度
-    self.count = count                     # 重采样次数 (count个采样就算作一个数据集)
-
-    self.weekdays   = fvmat[:, 0]    # [N]
-    self.hours      = fvmat[:, 1]    # [N]
-    self.COD_TN_NH_TP_PHs = fvmat[:, 2:]   # [N, D=5]
+  def __init__(self, X:np.ndarray, Y:np.ndarray):
+    self.X = X      # [N, in]
+    self.Y = Y      # [N, out]
 
   def __len__(self):
-    return self.count
+    return len(self.X)
 
   def __getitem__(self, idx):
-    # 在总序列上随机截取一个分段
-    w = self.weekdays  [idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
-    h = self.hours     [idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
-    d = self.COD_TN_NH_TP_PHs[idx : idx + self.segment_size, :].astype(np.float32)  # [segment_size, D=3]
-
-    return w, h, d
+    return self.X[idx], self.Y[idx]
