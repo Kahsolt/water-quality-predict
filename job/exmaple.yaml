@@ -1,0 +1,25 @@
+misc:
+  name: XGBoost
+  target: all
+  seed: 114514
+
+data:
+  - data/w21003.csv
+
+preprocess:
+#  - to_daily
+  - to_hourly
+#  - yichang
+#  - walvent
+  - log
+
+dataset:
+  train: 10000
+  test: 1000
+  lag: 24
+
+model:
+  arch: XGBoost
+
+train:
+  kfold: 0

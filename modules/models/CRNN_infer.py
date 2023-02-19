@@ -11,7 +11,7 @@ import numpy as np
 import torch
 
 import hparam as hp
-from model import CRNN
+from CRNN import CRNN
 from data import load_data
 from util import *
 
@@ -98,7 +98,6 @@ if __name__ == '__main__':
   nh_f=[]
   tp_f=[]
   ph_f=[]
-  breakpoint()
   for i in range(infer_len,len(fvmat)-hp.SEGMENT_SIZE,hp.INFER_STEPS):
       if i+hp.SEGMENT_SIZE+2<len(fvmat):
           lst=[i+hp.SEGMENT_SIZE,i+hp.SEGMENT_SIZE+1,i+hp.SEGMENT_SIZE+2]
@@ -152,3 +151,9 @@ if __name__ == '__main__':
   pht=fvmat0[infer_len+hp.SEGMENT_SIZE:,6]
   
   plot_predict([codt,tnt,nht,tpt,pht], [codf,tnf,nhf,tpf,phf], save_fp=os.path.join('log', f'model_200.png'))
+
+result_csv(codf,codt,os.path.join('log', f'cod.csv'))
+result_csv(tnf,tnt,os.path.join('log', f'tn.csv'))
+result_csv(nhf,nht,os.path.join('log', f'nh.csv'))
+result_csv(tpf,tpt,os.path.join('log', f'tp.csv'))
+result_csv(phf,pht,os.path.join('log', f'ph.csv')) 
