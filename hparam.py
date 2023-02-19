@@ -14,44 +14,31 @@ TEST_DATA_COUNT  = 1000    # 用1k个重采样序列切片做测试
 NOTE：按理说，三倍的数据量才能预测一倍数据，如果要预测3天的话你至少得看前9天
 实际上由于混沌效应，在输入因素确定后，一定存在某个时间临界点，其之后的值是无论如何无法被预测的……
 '''
+
+#预测方式：单步滚动预测
+
 SEGMENT_SIZE = 168      # 一周
 #SEGMENT_SIZE = 360     # 半个月
 #SEGMENT_SIZE = 720     # 一个月
 
-# True: 分类
-# False: 回归
-USE_QT = True
-
 ''' Model '''
-# 数值特征数目，根据 `preprocess.preprocess()` 里的 `features` 调整
-N_FEATURES        = 3
-EMBED_WEEKDAY_DIM = 7
-EMBED_HOUR_DIM    = 24
-
-if USE_QT:      # 处理为分类问题
-  QT_N_BIN    = 100
-  FATURE_DIM  = 128
-  INPUT_DIM   = EMBED_WEEKDAY_DIM + EMBED_HOUR_DIM + N_FEATURES * FATURE_DIM
-  OUTPUT_DIM  = QT_N_BIN    # 处理为分类任务
-else:           # 处理为回归问题
-  QT_N_BIN      = 100
-  FATURE_DIM    = 128
-  INPUT_DIM     = EMBED_WEEKDAY_DIM + EMBED_HOUR_DIM + N_FEATURES * FATURE_DIM
-  OUTPUT_DIM    = N_FEATURES
-
+EMBED_WEEKDAY_DIM   = 8
+EMBED_HOUR_DIM      = 24
+INPUT_DIM           = EMBED_WEEKDAY_DIM + EMBED_HOUR_DIM + 5
+OUTPUT_DIM          = 5  #5个因子PH、COD、氨氮、总氮、总磷
 
 ''' Train '''
-BATCH_SIZE    = 128
-EPOCHS        = 1000
+train_size    = 0.8
+test_size     = 0.1
+BATCH_SIZE    = 24
+EPOCHS        = 200
 LR            = 2e-4
 BETAS         = (0.9, 0.999)
 WEIGHT_DECAY  = 1e-5
 
 DATA_PATH     = 'data'
-if USE_QT:
-  DATA_FILE   = 'data/data_qt.pkl'
-else:
-  DATA_FILE   = 'data/data.pkl'
+DATA_FILE     = 'data/data.pkl'
+DATA_FILE1    = 'data/datatrue.pkl'
 LOG_PATH      = 'log'
 LOG_INTERVAL  = 1000
 CKPT_INTERVAL = 100
@@ -59,4 +46,6 @@ RANDSEED      = 114514
 
 ''' Infer '''
 # 知三推一
-INFER_STEPS   = SEGMENT_SIZE // 3
+#INFER_STEPS   = SEGMENT_SIZE // 3
+infer_size    =0.1
+INFER_STEPS   = 3

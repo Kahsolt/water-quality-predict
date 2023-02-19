@@ -6,6 +6,7 @@ import os
 import sys
 import logging
 
+import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
@@ -36,6 +37,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None):
 def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
   logger.info(f"Saving model and optimizer state at iteration {iteration} to {checkpoint_path}")
   if hasattr(model, 'module'):
+     #只保存模型参数
     state_dict = model.module.state_dict()
   else:
     state_dict = model.state_dict()
@@ -62,12 +64,47 @@ def get_logger(model_dir, filename="train.log"):
 
 def plot_predict(ys:list, y_hats:list, save_fp:str='predict.png'):
   n_figs = len(ys)
+  fig = plt.figure(figsize=(12,8))
+  lst=['COD','TN','NH3-N','TP','PH']  #注意根据因子修改
+  a=0
   for i, (y, y_hat) in enumerate(zip(ys, y_hats), start=1):
     plt.subplot(n_figs, 1, i)
-    plt.plot(y_hat, 'r')
-    plt.plot(y, 'b')
-
+    plt.plot(y_hat, 'r',label='forcast')
+    plt.plot(y, 'b',label='true')
+    plt.ylabel(lst[a])
+    a+=1
+    if a==1:
+        legend = plt.legend(ncol=2,loc='best')
+  fig.tight_layout(pad=0.5, w_pad=0, h_pad=0)
   print(f'[plot_predict] save to {save_fp}')
-  plt.savefig(save_fp)
+  plt.savefig(save_fp,dpi=500)
 
   plt.show()
+
+
+
+def buzhi(npArray):
+    if len(npArray.shape) == 1:
+        npArray = npArray.copy().reshape(-1, 1)
+    else:
+        npArray = npArray.copy()
+    fArray = npArray[:, -1]
+
+    X = np.array([i for i in range(len(npArray))])
+    X = X.reshape(len(X), 1)
+
+    # 首尾用临近值补值
+    ValidDataIndex = X[np.where(np.isnan(npArray) == 0)]
+    if ValidDataIndex[-1] < len(npArray) - 1:
+        npArray[ValidDataIndex[-1] + 1:, 0] = npArray[ValidDataIndex[-1], 0]
+        # 如果第一个正常数据的序号不是0，则表明第一个正常数据前存在缺失数据
+    if ValidDataIndex[0] >= 1:
+        npArray[:ValidDataIndex[0], 0] = npArray[ValidDataIndex[0], 0]
+
+    Y_0 = npArray[np.where(np.isnan(npArray) != 1)]
+    X_0 = X[np.where(np.isnan(npArray) != 1)]
+    IRFunction = interp1d(X_0, Y_0, kind='linear')
+    Fill_X = X[np.where(np.isnan(npArray) == 1)]
+    Fill_Y = IRFunction(Fill_X)
+    npArray[Fill_X, 0] = Fill_Y
+    return npArray

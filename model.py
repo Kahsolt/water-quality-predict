@@ -24,17 +24,17 @@ class PreNet(nn.Module):
   def forward(self, x: torch.Tensor) -> torch.Tensor:
     return self.net(x)
 
-# downsample x8
+
 class TriConv1d(nn.Module):
   def __init__(self, in_dim):
     super().__init__()
-    self.prenet = PreNet(in_dim, 32, 128)
+    self.prenet = PreNet(in_dim, 32, 32)
     self.convs = nn.Sequential(
-      nn.Conv1d(128, 128, 15, 2),
+      nn.Conv1d(32, 32, 15, 1, 7),
       nn.ReLU(),
-      nn.Conv1d(128, 128, 15, 2),
+      nn.Conv1d(32, 32, 15, 1, 7),
       nn.ReLU(),
-      nn.Conv1d(128, 128, 15, 2),
+      nn.Conv1d(32, 32, 15, 1, 7),
       nn.ReLU(),
     )
 
@@ -44,13 +44,42 @@ class TriConv1d(nn.Module):
     return x.transpose(1, 2)
 
 
-class DuoLSTM(nn.Module):
+class LSTM(nn.Module):
   def __init__(self):
     super().__init__()
-    self.prenet = PreNet(hp.OUTPUT_DIM, 128, 128)
-    self.lstm1 = nn.LSTM(128 + 128, 128, batch_first=True)
-    self.lstm2 = nn.LSTM(128, 128, batch_first=True)
-    self.proj = nn.Linear(128, hp.OUTPUT_DIM, bias=False)
+    self.prenet = PreNet(hp.OUTPUT_DIM, 32, 32)
+    self.lstm = nn.LSTM(32 + 32, 64, batch_first=True)
+    self.proj = nn.Linear(64, hp.OUTPUT_DIM, bias=False)
+
+  def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
+    y = self.prenet(y)
+    x, _ = self.lstm(torch.cat((x, y), dim=-1))   # [64, 191, 96]
+    return self.proj(x)
+
+  @torch.inference_mode()
+  def generate(self, xs: torch.Tensor) -> torch.Tensor:
+    y = torch.zeros(xs.size(0), hp.OUTPUT_DIM, device=xs.device)
+    h = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    c = torch.zeros(1, xs.size(0), 64, device=xs.device)
+
+    ys = []
+    for x in torch.unbind(xs, dim=1):
+      y = self.prenet(y)
+      x = torch.cat((x, y), dim=1).unsqueeze(1)
+      x, (h, c) = self.lstm(x, (h, c))
+      y = self.proj(x).squeeze(1)
+      ys.append(y)
+    return torch.stack(ys, dim=1)
+
+
+class TriLSTM(nn.Module):
+  def __init__(self):
+    super().__init__()
+    self.prenet = PreNet(hp.OUTPUT_DIM, 32, 32)
+    self.lstm1 = nn.LSTM(32 + 32, 64, batch_first=True)
+    self.lstm2 = nn.LSTM(64, 64, batch_first=True)
+    self.lstm3 = nn.LSTM(64, 64, batch_first=True)
+    self.proj = nn.Linear(64, hp.OUTPUT_DIM, bias=False)
 
   def forward(self, x: torch.Tensor, y: torch.Tensor) -> torch.Tensor:
     y = self.prenet(y)
@@ -58,15 +87,20 @@ class DuoLSTM(nn.Module):
     res = x
     x, _ = self.lstm2(x)
     x = res + x
+    res = x
+    x, _ = self.lstm3(x)
+    x = res + x
     return self.proj(x)
 
   @torch.inference_mode()
   def generate(self, xs: torch.Tensor) -> torch.Tensor:
     y = torch.zeros(xs.size(0), hp.OUTPUT_DIM, device=xs.device)
-    h1 = torch.zeros(1, xs.size(0), 128, device=xs.device)
-    c1 = torch.zeros(1, xs.size(0), 128, device=xs.device)
-    h2 = torch.zeros(1, xs.size(0), 128, device=xs.device)
-    c2 = torch.zeros(1, xs.size(0), 128, device=xs.device)
+    h1 = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    c1 = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    h2 = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    c2 = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    h3 = torch.zeros(1, xs.size(0), 64, device=xs.device)
+    c3 = torch.zeros(1, xs.size(0), 64, device=xs.device)
 
     ys = []
     for x in torch.unbind(xs, dim=1):
@@ -75,6 +109,8 @@ class DuoLSTM(nn.Module):
       x1, (h1, c1) = self.lstm1(x, (h1, c1))
       x2, (h2, c2) = self.lstm2(x1, (h2, c2))
       x = x1 + x2
+      x3, (h3, c3) = self.lstm3(x, (h3, c3))
+      x = x + x3
       y = self.proj(x).squeeze(1)
       ys.append(y)
     return torch.stack(ys, dim=1)
@@ -84,26 +120,21 @@ class DuoLSTM(nn.Module):
 class CRNN(nn.Module):
   def __init__(self):
     super().__init__()
-    self.embd_weekday = nn.Embedding(7,  hp.EMBED_WEEKDAY_DIM)
-    self.embd_hour    = nn.Embedding(24, hp.EMBED_HOUR_DIM)
-    self.embd_features = nn.ModuleList([
-      nn.Embedding(hp.QT_N_BIN, hp.FATURE_DIM) for _ in range(hp.N_FEATURES)
-    ])
-    self.encoder      = TriConv1d(hp.INPUT_DIM)
-    self.decoder      = DuoLSTM()
+    self.embd_weekday = nn.Embedding(7,  8)  #[24,719,1] → [24,719,8]
+    self.embd_hour    = nn.Embedding(24, 24) #[24,719,1] → [24,719,24]
+    self.encoder      = TriConv1d(hp.INPUT_DIM)        #24+8+5=37
+    self.decoder      = LSTM() 
+    #self.decoder      = TriLSTM()
 
-  def forward(self, w, h, d_x, d_y):
-    w = self.embd_weekday(w)                  # [B=32, T=191, D=8]
-    h = self.embd_hour(h)                     # [B=32, T=191, D=24]
-    e_d_x = [self.embd_features[i](ft) for i, ft in enumerate(d_x)]
-    x = torch.concat([w, h, *e_d_x], axis=-1) # [B=32, T=191, D=35]
-
-    e_d_y = self.embd_features[0](d_y)
+  def forward(self, w, h, d_x, d_y):          #训练时使用，告知正确值
+    w = self.embd_weekday(w)                  #[B=24, T=719, D=8]
+    h = self.embd_hour(h)                     #[B=24, T=719, D=24]
+    x = torch.concat([w, h, d_x], axis=-1)    #[B=24, T=719, D=37]
     
     x = self.encoder(x)
-    return self.decoder(x, e_d_y)             # d_y.shape == [32, 191, 3]
+    return self.decoder(x, d_y)               # d_y.shape == [24,719,5]
 
-  @torch.inference_mode()
+  @torch.inference_mode()                     #验证/测试时使用，不能告知正确值
   def generate(self, w, h, d):
     w = self.embd_weekday(w)
     h = self.embd_hour(h)

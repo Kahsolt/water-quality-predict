@@ -34,9 +34,11 @@ def inspect_data():
   print(stats)
 
   COD = fvmat[:, 2].astype(np.float32)
-  PH  = fvmat[:, 3].astype(np.float32)
+  TN  = fvmat[:, 3].astype(np.float32)
   NH  = fvmat[:, 4].astype(np.float32)
-
+  TP  = fvmat[:, 5].astype(np.float32)
+  PH  = fvmat[:, 6].astype(np.float32)
+  
   if not 'denorm':
     COD = np.asarray((COD + stats['COD'][0]) * (stats['COD'][1] - stats['COD'][0]))
     PH  = np.asarray((PH + stats['PH'][0])  * (stats['PH'][1]  - stats['PH'][0]))
@@ -67,24 +69,17 @@ class ResampleDataset(Dataset):
 
     self.weekdays   = fvmat[:, 0]    # [N]
     self.hours      = fvmat[:, 1]    # [N]
-    self.features   = fvmat[:, 2:]   # [N, D]
+    self.COD_TN_NH_TP_PHs = fvmat[:, 2:]   # [N, D=5]
 
   def __len__(self):
     return self.count
 
-  def __getitem__(self, ignore):
+  def __getitem__(self, idx):
     # 在总序列上随机截取一个分段
-    idx = np.random.randint(0, self.length - self.segment_size - 1)
+    w = self.weekdays  [idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
+    h = self.hours     [idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
+    d = self.COD_TN_NH_TP_PHs[idx : idx + self.segment_size, :].astype(np.float32)  # [segment_size, D=3]
 
-    w = self.weekdays[idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
-    h = self.hours   [idx : idx + self.segment_size]   .astype(np.int32)    # [segment_size]
-    #d = self.features[idx : idx + self.segment_size, :].astype(np.float32)  # [segment_size, D]
-    d = [                                                                   # D * [segment_size]
-      self.features[idx : idx + self.segment_size, i].astype(np.int32)
-        for i in range(self.features.shape[-1])
-    ]
-
-    # (np.array, np.array, List[np.array])
     return w, h, d
 
 
