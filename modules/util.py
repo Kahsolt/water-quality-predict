@@ -5,6 +5,7 @@
 import os
 import sys
 import random
+import yaml
 from pathlib import Path
 from datetime import datetime
 import pickle as pkl
@@ -59,15 +60,15 @@ def save_metrics(truth, pred, fp:Path, task:ModelTask='clf'):
       fh.write(f'{s}\n')
       print(s)
 
-    if task == 'clf':
+    if   task == 'clf':
       prec, recall, f1, supp = precision_recall_fscore_support(truth, pred)
       log(f'prec:   {prec:.3%}')
       log(f'recall: {recall:.3%}')
       log(f'f1:     {f1:.3%}')
     elif task == 'rgr':
       mae = mean_absolute_error(truth, pred)
-      mse = mean_squared_error(truth, pred)
-      r2  = r2_score(truth, pred)
+      mse = mean_squared_error (truth, pred)
+      r2  = r2_score           (truth, pred)
       log(f'mae: {mae:.3f}')
       log(f'mse: {mse:.3f}')
       log(f'r2:  {r2:.3f}')
@@ -89,6 +90,15 @@ def save_pickle(data:CachedData, fp:Path):
   print(f'  save pickle to {fp}')
   with open(fp, 'wb') as fh:
     pkl.dump(data, fh)
+
+
+def load_job(fp:Path) -> Job:
+  with open(fp, 'r', encoding='utf-8') as fh:
+    return yaml.safe_load(fh)
+
+def save_job(job:Job, fp:Path) -> Job:
+  with open(fp, 'w', encoding='utf-8') as fh:
+    yaml.safe_dump(job, fh, sort_keys=False)
 
 
 def load_checkpoint(checkpoint_path, model, optimizer=None):

@@ -1,11 +1,11 @@
 misc:
   name: XGBoost
   seed: 114514
-#  target: all
-#  target: data
-#  target: train
-#  target: eval
-  target: infer
+  target:
+#   - all
+#   - data
+#   - train
+#   - eval
 
 data:
   - data/w21003.csv
@@ -34,6 +34,3 @@ model:
     verbose: 2
     n_jobs: -1
     scoring: 'neg_median_absolute_error'
-  
-train:
-  kfold: 0

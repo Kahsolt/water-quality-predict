@@ -10,6 +10,8 @@ from pandas import DataFrame, Series
 from scipy.interpolate import interp1d
 import pywt
 
+from modules.typing import *
+
 
 def to_hourly(df:DataFrame) -> DataFrame:
   return df[df.columns[1:]]     # drop T
@@ -67,15 +69,15 @@ def walvent(df:DataFrame, wavelet:str='db8', threshold:float=0.04) -> DataFrame:
   return df.apply(process, axis=1)
 
 
-def log(df:DataFrame) -> DataFrame:
-  return df.apply(lambda x: np.log(x + 1e-8), axis=1)
+def log(df:DataFrame) -> Tuple[DataFrame, Stat]:
+  return df.apply(lambda x: np.log(x + 1e-8), axis=1), tuple()
 
-def std_norm(df:DataFrame) -> Tuple[DataFrame, Tuple[Series, Series]]:
+def std_norm(df:DataFrame) -> Tuple[DataFrame, Stat]:
   avg, std = df.mean(axis=1), df.std(axis=1)
   df_n = (df - avg) / std
   return df_n, (avg, std)
 
-def minmax_norm(df:DataFrame) -> Tuple[DataFrame, Tuple[Series, Series]]:
+def minmax_norm(df:DataFrame) -> Tuple[DataFrame, Stat]:
   vmin, vmax = df.min(axis=1), df.max(axis=1)
   df_n = (df - vmin) / (vmax - vmin)
   return df_n, (vmin, vmax)

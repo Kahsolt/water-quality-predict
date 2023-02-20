@@ -17,9 +17,10 @@
 misc:
   name: string      # 唯一任务名，留空会默认分配
   seed: int         # 全局随机数种子
-  target: string    # 任务目标，可选项为 modules/typing.py 文件内 RunTarget 各选项
+  target:
+    - string        # 任务目标列表，可选项为 modules/typing.py 文件内 RunTarget 各选项
 
-data: 
+data:
   - string          # 数据源，csv文件路径
 
 preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内各函数名

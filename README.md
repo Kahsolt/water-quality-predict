@@ -4,32 +4,16 @@
 
 ----
 
-### TODO
-
-[LSTM]
-data：是原数据经过处理后方便带入模型的数据
-input_preprocess：对输入数据进行预处理的函数
-model：LSTM模型结构
-mytools：定义了训练和测试的一些函数
-train_eval：定义从数据处理到训练与测试过程的函数
-
-PS：缺少代码（1）调参（2）参数保存（3）输入最新数据进行预测
-
-[XGBoost]
-data：是原数据经过处理后方便带入模型的数据
-3h数值预测分类XGBoost：读取‘w21003_补值.csv’进行计算。
-缺少代码（1）能否进行分类（3类＞1%）判断的代码（2）输入最新数据进行预测
-24h数值预测分类XGBoost：读取‘w21003_补值.csv’进行计算。
-缺少代码（1）能否进行分类（3类＞5%）判断（2）将X转化为每天0:00（3）输入最新数据进行预测
-日均值预测分类XGBoost：读取‘w21003_日均值.csv’进行计算。
-缺少代码（1）能否进行分类（超标＞5%）判断（2）输入最新数据进行预测
-
 ### Quick Start
 
-- extract features: `python preprocess.py`
-- inspect into data: `python data.py`
-- train model: `python train.py`
-- test predict: `python infer.py log\model-100.pt`
+⚪ Data & Train & Eval
+
+- write a job file, see guide => [job/README.md](job/README.md)
+- run `python run.py -J path/to/*.yaml`
+
+⚪ Infer
+
+- run `python run_infer.py`
 
 
 ### Dataset

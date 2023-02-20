@@ -18,8 +18,8 @@ def eval(model:Model, dataset:Datasets, log_dp:Path):
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 
-def infer(model:Model, seq:Seq, stats:Stats):
-  ''' make pred on time sequence '''
+def infer(model:Model, x:Frame) -> Frame:
+  ''' predict on one time step '''
   raise NotImplementedError
 
 def save(model:Model, log_dp:Path):
