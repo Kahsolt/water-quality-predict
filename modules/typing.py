@@ -1,5 +1,5 @@
 from numpy import ndarray
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from torch import Tensor
 from logging import Logger
 from typing import *
@@ -17,6 +17,9 @@ RunTarget = Union[
   Literal['all'],       # 全部 = 数据 + 训练 + 评估 (糖！)
 ]
 
+# 含时间轴的 DataFrame
+TDataFrame = DataFrame
+TimeAndData = Tuple[Series, DataFrame]
 # 预处理后的数据帧序列
 Seq   = ndarray      # [T, D]
 Frame = ndarray      # [I/O, D]
@@ -40,5 +43,8 @@ ModelTask = Union[
   Literal['rgr'],       # 回归
 ]
 
-# 预处理函数中可逆的那些
-Transform = Callable[[DataFrame], Stat]
+# job 的 dataset/encoder
+Encoder = {
+  'name': str,
+  'params': Dict[str, Any],
+}

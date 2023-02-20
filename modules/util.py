@@ -13,6 +13,7 @@ import logging
 
 import torch
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import precision_recall_fscore_support
@@ -33,7 +34,7 @@ def get_logger(name, log_dp=Path('.')) -> Logger:
     logger.setLevel(logging.DEBUG)
 
     formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
-    h = logging.FileHandler(log_dp / 'log.log')
+    h = logging.FileHandler(log_dp / 'job.log')
     h.setLevel(logging.DEBUG)
     h.setFormatter(formatter)
     logger.addHandler(h)
@@ -51,6 +52,34 @@ def seed_everything(seed:int):
 
 def timestr():
   return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-').split('.')[0]
+
+
+def read_csv(fp:str) -> DataFrame:
+  return pd.read_csv(fp, encoding='utf-8')
+
+def save_csv(df:DataFrame, fp:str) -> None:
+  df.to_csv(fp, encoding='utf-8')
+
+
+def load_pickle(fp:Path) -> CachedData:
+  if not fp.exists(): return
+  logger.info(f'  load pickle from {fp}')
+  with open(fp, 'rb') as fh:
+    return pkl.load(fh)
+
+def save_pickle(data:CachedData, fp:Path):
+  logger.info(f'  save pickle to {fp}')
+  with open(fp, 'wb') as fh:
+    pkl.dump(data, fh)
+
+
+def load_job(fp:Path) -> Job:
+  with open(fp, 'r', encoding='utf-8') as fh:
+    return yaml.safe_load(fh)
+
+def save_job(job:Job, fp:Path) -> Job:
+  with open(fp, 'w', encoding='utf-8') as fh:
+    yaml.safe_dump(job, fh, sort_keys=False)
 
 
 def save_metrics(truth, pred, fp:Path, task:ModelTask='clf'):
@@ -79,27 +108,6 @@ def save_figure(fp:Path, title:str=None):
   plt.suptitle(title)
   plt.savefig(fp, dpi=400)
   logger.info(f'  save figure to {fp}')
-
-
-def load_pickle(fp:Path) -> CachedData:
-  if not fp.exists(): return
-  logger.info(f'  load pickle from {fp}')
-  with open(fp, 'rb') as fh:
-    return pkl.load(fh)
-
-def save_pickle(data:CachedData, fp:Path):
-  logger.info(f'  save pickle to {fp}')
-  with open(fp, 'wb') as fh:
-    pkl.dump(data, fh)
-
-
-def load_job(fp:Path) -> Job:
-  with open(fp, 'r', encoding='utf-8') as fh:
-    return yaml.safe_load(fh)
-
-def save_job(job:Job, fp:Path) -> Job:
-  with open(fp, 'w', encoding='utf-8') as fh:
-    yaml.safe_dump(job, fh, sort_keys=False)
 
 
 def load_checkpoint(checkpoint_path, model, optimizer=None):

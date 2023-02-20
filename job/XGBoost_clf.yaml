@@ -1,0 +1,46 @@
+misc:
+  name: XGBoost_clf
+  seed: 114514
+  target:
+    - all
+
+data:
+  - data/w21003.csv
+
+preprocess:
+  filter_T:
+    - ltrim_vacant
+  project:
+#    - to_hourly
+    - to_daily
+  filter_V:
+#    - yichang
+#    - walvent
+
+dataset:
+  train: 10000
+  eval: 1000
+  in: 128
+  out: 24
+  encoder:
+    name: ex_std
+#    name: ex_std_3h
+#    name: ex_std_24H
+    params:
+      thresh: 0.1
+
+dataloader:
+  transform:
+    - log
+
+model:
+  arch: XGBoost_clf
+  params:
+    param_grid:
+      max_depth: [3, 5]
+      n_estimators: [20]
+      learning_rate: [0.1, 0.15]
+    cv: 5
+    verbose: 2
+    n_jobs: -1
+    scoring: 'accuracy'

@@ -1,5 +1,5 @@
 misc:
-  name: XGBoost
+  name: XGBoost_rgr
   seed: 114514
   target:
     - all
@@ -11,11 +11,14 @@ data:
   - data/w21003.csv
 
 preprocess:
-#  - to_daily
-  - to_hourly
-#  - yichang
-#  - walvent
-  - log
+  filter_T:
+    - ltrim_vacant
+  project:
+    - to_hourly
+#    - to_daily
+  filter_V:
+#    - yichang
+#    - walvent
 
 dataset:
   train: 10000
@@ -23,13 +26,17 @@ dataset:
   in: 128
   out: 24
 
+dataloader:
+  transform:
+    - log
+
 model:
   arch: XGBoost_rgr
   params:
     param_grid:
-      max_depth: [3, 4, 5, 6, 7]
-      n_estimators: [20, 25, 30, 35, 50]
-      learning_rate: [0.1, 0.12, 0.125, 0.13, 0.15]
+      max_depth: [3, 5]
+      n_estimators: [20]
+      learning_rate: [0.1, 0.15]
     cv: 5
     verbose: 2
     n_jobs: -1

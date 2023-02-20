@@ -31,6 +31,7 @@ dataset:
   test: int         # 采样出的测试集大小
   in: int           # 已知窗长，知 in 推 out
   out: int          # 预测窗长，知 in 推 out
+  encode: string    # 分类目标编码，可选项为 modules/dataset.py 文件内各函数名
 
 model:
   arch: string      # 模型架构，可选项为 modules/models 目录下各文件名

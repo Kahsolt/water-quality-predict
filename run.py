@@ -3,6 +3,7 @@
 # Create Time: 2023/02/19 
 
 from time import time
+from copy import deepcopy
 from pathlib import Path
 from argparse import ArgumentParser
 from pprint import pformat
@@ -13,7 +14,7 @@ from importlib import import_module
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from modules.dataset import resample_frame_dataset
+from modules.dataset import *
 from modules.preprocess import *
 from modules.util import *
 from modules.typing import *
@@ -26,7 +27,7 @@ DATASET_FILE = 'dataset.pkl'
 
 job: Job = None
 env: Env = { }
-logger: Logger = None
+logger: Logger = logger
 
 def job_get(path:str, value=None) -> Any:
   global job
@@ -37,7 +38,7 @@ def job_get(path:str, value=None) -> Any:
       r = r[s]
     else:
       return value
-  return r
+  return r or value
 
 def job_set(path:str, value=None, overwrite=False) -> Any:
   global job
@@ -72,14 +73,51 @@ def require_data(fn:Callable[..., Any]):
     global env
 
     if 'seq' not in env:
-      env['seq'] = load_pickle(env['log_dp'] / SEQ_FILE)
+      seq: Seq = load_pickle(env['log_dp'] / SEQ_FILE)    # [T, D=1]
+      seq_r = deepcopy(seq)
 
-    if 'stats' not in env:
-      stats = load_pickle(env['log_dp'] / STATS_FILE)
-      env['stats'] = stats or []
+      stats: Stats = []    # keep ordered
+      for proc in job_get('dataloader/transform', []):
+        if not symbol_defined(proc): continue
+        try:
+          seq, st = globals()[proc](seq)
+          stats.append((proc, st))
+        except:
+          logger.error(format_exc())
+
+      if 'plot timeline':
+        plt.clf()
+        plt.subplot(211) ; plt.title('preprocessed')
+        for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
+        plt.subplot(212) ; plt.title('transformed')
+        for col in range(seq.shape[-1]): plt.plot(seq[:, col])
+        save_figure(env['log_dp'] / 'timeline_T.png')
+
+      if 'plot histogram':
+        plt.clf()
+        plt.subplot(211) ; plt.title('preprocessed')
+        for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)
+        plt.subplot(212) ; plt.title('transformed')
+        for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
+        save_figure(env['log_dp'] / 'hist_T.png')
+
+      env['seq']   = seq
+      env['stats'] = stats
 
     if 'dataset' not in env:
-      env['dataset'] = load_pickle(env['log_dp'] / DATASET_FILE)
+      (X_train, y_train), (X_test, y_test) = load_pickle(env['log_dp'] / DATASET_FILE)
+
+      encoder: Encoder = job_get('dataset/encoder')
+      for (proc, st) in env['stats']:
+        logger.info(f'  re-apply {proc} on dataset...')
+        proc_fn = globals()[f'{proc}_apply']
+        X_train = proc_fn(X_train, *st)
+        X_test  = proc_fn(X_test,  *st)
+        if encoder is None:    # rgr
+          y_train = proc_fn(y_train, *st)
+          y_test  = proc_fn(y_test,  *st)
+
+      env['dataset'] = (X_train, y_train), (X_test, y_test)
 
     return fn(*args, **kwargs)
   return wrapper
@@ -92,7 +130,7 @@ def require_model(fn:Callable[..., Any]):
       model_name = job_get('model/arch') ; assert model_name
       manager = import_module(f'modules.models.{model_name}')
       env['manager'] = manager
-    
+
     if 'model' not in env:
       model = manager.init(job_get('model/params', {}))
       env['model'] = model
@@ -100,14 +138,20 @@ def require_model(fn:Callable[..., Any]):
     return fn(*args, **kwargs)
   return wrapper
 
+def symbol_defined(proc:str) -> bool:
+  found = proc in globals()
+  if not found: logger.error(f'  preprocessor {proc!r} not found!')
+  else:         logger.info (f'  apply {proc}...')
+  return found
+
 
 @task
 def process_df():
   global job, env
 
-  df: pd.DataFrame = None     # 总原始数据
+  df: TDataFrame = None       # 总原始数据
   T = None                    # 唯一时间轴
-  for fp in job_get('data', []):
+  for fp in job_get('data'):
     try:
       df_new = read_csv(fp)
       cols = list(df_new.columns)
@@ -137,37 +181,33 @@ def process_df():
 def process_seq():
   global job, env
 
-  if env['df'] is None:
-    logger.info('>> no data frame prepared for preprocess...')
-    return
+  df: TDataFrame = env['df']
+  _, df_r = split_time_and_data(df)
 
-  df: DataFrame = env['df']
-  assert isinstance(df, DataFrame)
-  df_r = df.copy(deep=True)
+  if 'filter T':
+    for proc in job_get('preprocess/filter_T', []):
+      if not symbol_defined(proc): continue
+      try:    df = globals()[proc](df)
+      except: logger.error(format_exc())
 
-  stats: Stats = []    # keep ordered
-  namespace = globals()
-  for proc in job_get('preprocess', []):
-    if proc not in namespace:
-      logger.info(f'>> Error: processor {proc!r} not found!')
-      continue
-    
-    try:
-      logger.info(f'  apply {proc}...')
+  if 'project':   # NOTE: this is required!
+    proc = job_get('preprocess/project')
+    assert proc and len(proc) == 1
+    proc = proc[0]
+    assert symbol_defined(proc)
+    try:    T, df = globals()[proc](df)
+    except: logger.error(format_exc())
 
-      ret = namespace[proc](df)
-      if isinstance(ret, Tuple):
-        df, st = ret
-        stats.append((proc, st))
-      else:
-        df = ret
-    except:
-      logger.error(format_exc())
+  if 'filter V':
+    for proc in job_get('preprocess/filter_V', []):
+      if not symbol_defined(proc): continue
+      try:    df = globals()[proc](df)
+      except: logger.error(format_exc())
 
   if 'plot timeline':
     plt.clf()
     plt.subplot(211) ; plt.title('original')
-    for col in df_r.columns[1:]: plt.plot(df_r[col], label=col)   # ignore T
+    for col in df_r.columns: plt.plot(df_r[col], label=col)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.plot(df[col], label=col)
     save_figure(env['log_dp'] / 'timeline.png')
@@ -175,35 +215,40 @@ def process_seq():
   if 'plot histogram':
     plt.clf()
     plt.subplot(211) ; plt.title('original')
-    for col in df_r.columns[1:]: plt.hist(df_r[col], label=col, bins=50)  # ignore T
+    for col in df_r.columns: plt.hist(df_r[col], label=col, bins=50)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.hist(df[col], label=col, bins=50)
     save_figure(env['log_dp'] / 'hist.png')
 
-  seq: np.ndarray = df.to_numpy()
-  assert len(seq.shape) == 2
+  T: Series = T
+  seq: Seq = df.to_numpy()
+  assert len(T) == len(seq)
   save_pickle(seq, env['log_dp'] / SEQ_FILE)
-  if stats: save_pickle(stats, env['log_dp'] / STATS_FILE)
 
+  logger.info(f'  T.shape: {T.shape}')
   logger.info(f'  seq.shape: {seq.shape}')
-  logger.info(f'  stats: {stats}')
 
-  env['seq']   = seq
-  env['stats'] = stats
+  env['T']   = T
+  env['seq'] = seq
 
 @task
 def process_dataset():
   global job, env
 
-  seq: np.ndarray = env['seq']
-  assert isinstance(seq, np.ndarray)
+  T: Series = env['T']
+  seq: Seq  = env['seq']
 
-  inlen    = job_get('dataset/in')    ; assert inlen   > 0
-  outlen   = job_get('dataset/out')   ; assert outlen  > 0
-  n_train  = job_get('dataset/train') ; assert n_train > 0
-  n_eval   = job_get('dataset/eval')  ; assert n_eval  > 0
-  trainset = resample_frame_dataset(seq, inlen, outlen, n_train)
-  evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval)
+  inlen   = job_get('dataset/in')    ; assert inlen   > 0
+  outlen  = job_get('dataset/out')   ; assert outlen  > 0
+  n_train = job_get('dataset/train') ; assert n_train > 0
+  n_eval  = job_get('dataset/eval')  ; assert n_eval  > 0
+  encoder: Encoder = job_get('dataset/encoder')
+  if encoder is None:    # rgr
+    trainset = resample_frame_dataset(seq, inlen, outlen, n_train)
+    evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval)
+  else:                  # clf
+    trainset = resample_frame_dataset_and_encode(seq, T, encoder, inlen, outlen, n_train)
+    evalset  = resample_frame_dataset_and_encode(seq, T, encoder, inlen, outlen, n_eval)
   dataset  = (trainset, evalset)
 
   logger.info(f'  train set')
@@ -221,6 +266,11 @@ def target_data():
   process_df()
   process_seq()
   process_dataset()
+
+  del env['df']
+  del env['T']
+  del env['seq']
+  del env['dataset']
 
 @require_data
 @require_model

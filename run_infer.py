@@ -120,7 +120,7 @@ class App:
 
     seq = RT.env['seq']
     inlen = RT.job_get('dataset/in')
-    print('  seq.shape:', seq.shape)
+    logger.info('  seq.shape:', seq.shape)
     seqlen = len(seq)
     res = max(seqlen // 100, inlen)
     tick = round(seqlen // 10 / 100) * 100
@@ -168,12 +168,10 @@ class App:
         loc += len(y)
       preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
 
-    if 'inv preprocess' and args.draw_rolling:
-      namespace = globals()
+    if 'inv preprocess':
       for (proc, st) in stats:
-        invproc = namespace.get(f'{proc}_inv')
-        if not invproc: continue
-        print(f'  apply inv of {proc}')
+        logger.info(f'  apply inv of {proc}')
+        invproc = globals().get(f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)
         if args.draw_rolling:
