@@ -19,16 +19,14 @@ preprocess:
   filter_V:
 #    - yichang
 #    - walvent
+  transform:
+    - log
 
 dataset:
   train: 10000
   eval: 1000
   in: 128
   out: 24
-
-dataloader:
-  transform:
-    - log
 
 model:
   arch: XGBoost_rgr

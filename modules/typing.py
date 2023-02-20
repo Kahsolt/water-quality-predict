@@ -17,9 +17,11 @@ RunTarget = Union[
   Literal['all'],       # 全部 = 数据 + 训练 + 评估 (糖！)
 ]
 
-# 含时间轴的 DataFrame
-TDataFrame = DataFrame
-TimeAndData = Tuple[Series, DataFrame]
+# 含时间轴的原始数据
+TimeSeq = DataFrame
+Time = Series
+Data = DataFrame
+TimeAndData = Tuple[Time, Data]
 # 预处理后的数据帧序列
 Seq   = ndarray      # [T, D]
 Frame = ndarray      # [I/O, D]
@@ -27,7 +29,7 @@ Frame = ndarray      # [I/O, D]
 Stat  = Tuple[Any]
 Stats = List[Tuple[str, Stat]]
 # 数据集：(输入X, 输出Y)
-Dataset = Tuple[ndarray, ndarray]
+Dataset = Tuple[Seq, Seq]
 # 数据集组：(训练集, 测试集)
 Datasets = Tuple[Dataset, Dataset]
 # 所有缓存的数据
@@ -43,7 +45,7 @@ ModelTask = Union[
   Literal['rgr'],       # 回归
 ]
 
-# job 的 dataset/encoder
+# 标签编码
 Encoder = {
   'name': str,
   'params': Dict[str, Any],

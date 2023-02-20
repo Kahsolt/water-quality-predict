@@ -5,7 +5,6 @@
 from typing import Tuple
 
 import numpy as np
-from pandas import DataFrame, Series
 from scipy.interpolate import interp1d
 import pywt
 
@@ -13,16 +12,16 @@ from modules.typing import *
 
 
 ''' filter_T: 数据选择 '''
-def ltrim_vacant(df:TDataFrame) -> TDataFrame:
+def ltrim_vacant(df:TimeSeq) -> TimeSeq:
   # TODO: 沿时间线向前回溯，若遇到长度大于 168(一周) 的数据空白期，则丢弃之前的所有数据
   return df
 
 
 ''' project: 分离时间轴和数据 '''
-def to_hourly(df:TDataFrame) -> TimeAndData:
+def to_hourly(df:TimeSeq) -> TimeAndData:
   return split_time_and_data(df)
 
-def to_daily(df:TDataFrame) -> TimeAndData:
+def to_daily(df:TimeSeq) -> TimeAndData:
   T = df.columns[0]
   df[T] = df[T].map(lambda x: x.split(' ')[0])    # get date part from timestr
   df = df.groupby(T).mean().reset_index()
@@ -76,7 +75,7 @@ def walvent(df:DataFrame, wavelet:str='db8', threshold:float=0.04) -> DataFrame:
 # ↑↑↑ above are valid preprocessors ↑↑↑
 
 
-''' transform: 数值变换用于训练，必须是可逆的 '''
+''' transform: 数值变换，用于训练 (必须是可逆的) '''
 def log(seq:Seq) -> Tuple[Seq, Stat]:
   return log_apply(seq), tuple()
 
@@ -97,7 +96,7 @@ def minmax_norm(seq:Seq) -> Tuple[Seq, Stat]:
 
 # ↓↓↓ below are innerly auto-called, SHOULD NOT USE in job.yaml ↓↓↓
 
-def split_time_and_data(df:TDataFrame) -> TimeAndData:
+def split_time_and_data(df:TimeSeq) -> TimeAndData:
   cols = df.columns
   return df[cols[0]], df[cols[1:]]
 

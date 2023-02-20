@@ -11,11 +11,13 @@ preprocess:
   filter_T:
     - ltrim_vacant
   project:
-#    - to_hourly
-    - to_daily
+    - to_hourly
+#    - to_daily
   filter_V:
 #    - yichang
 #    - walvent
+  transform:
+    - log
 
 dataset:
   train: 10000
@@ -23,15 +25,11 @@ dataset:
   in: 128
   out: 24
   encoder:
-    name: ex_std
-#    name: ex_std_3h
-#    name: ex_std_24H
+    name: ex_thresh
+#    name: ex_thresh_3h
+#    name: ex_thresh_24H
     params:
-      thresh: 0.1
-
-dataloader:
-  transform:
-    - log
+      thresh: 1.5
 
 model:
   arch: XGBoost_clf

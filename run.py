@@ -21,9 +21,11 @@ from modules.typing import *
 
 # log folder caches
 JOB_FILE     = 'job.yaml'
-SEQ_FILE     = 'seq.pkl'
-STATS_FILE   = 'stats.pkl'
-DATASET_FILE = 'dataset.pkl'
+SEQ_RAW_FILE = 'seq-raw.pkl'    # seq preprocessed
+LABEL_FILE   = 'label.pkl'      # seq label for 'clf'
+STATS_FILE   = 'stats.pkl'      # transforming stats for seq
+SEQ_FILE     = 'seq.pkl'        # seq transformed
+DATASET_FILE = 'dataset.pkl'    # dataset transformed
 
 job: Job = None
 env: Env = { }
@@ -73,51 +75,18 @@ def require_data(fn:Callable[..., Any]):
     global env
 
     if 'seq' not in env:
-      seq: Seq = load_pickle(env['log_dp'] / SEQ_FILE)    # [T, D=1]
-      seq_r = deepcopy(seq)
+      env['seq'] = load_pickle(env['log_dp'] / SEQ_FILE)
 
-      stats: Stats = []    # keep ordered
-      for proc in job_get('dataloader/transform', []):
-        if not symbol_defined(proc): continue
-        try:
-          seq, st = globals()[proc](seq)
-          stats.append((proc, st))
-        except:
-          logger.error(format_exc())
-
-      if 'plot timeline':
-        plt.clf()
-        plt.subplot(211) ; plt.title('preprocessed')
-        for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
-        plt.subplot(212) ; plt.title('transformed')
-        for col in range(seq.shape[-1]): plt.plot(seq[:, col])
-        save_figure(env['log_dp'] / 'timeline_T.png')
-
-      if 'plot histogram':
-        plt.clf()
-        plt.subplot(211) ; plt.title('preprocessed')
-        for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)
-        plt.subplot(212) ; plt.title('transformed')
-        for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
-        save_figure(env['log_dp'] / 'hist_T.png')
-
-      env['seq']   = seq
-      env['stats'] = stats
+    if 'stats' not in env:
+      stats = load_pickle(env['log_dp'] / STATS_FILE)
+      env['stats'] = stats or []
 
     if 'dataset' not in env:
-      (X_train, y_train), (X_test, y_test) = load_pickle(env['log_dp'] / DATASET_FILE)
+      env['dataset'] = load_pickle(env['log_dp'] / DATASET_FILE)
 
-      encoder: Encoder = job_get('dataset/encoder')
-      for (proc, st) in env['stats']:
-        logger.info(f'  re-apply {proc} on dataset...')
-        proc_fn = globals()[f'{proc}_apply']
-        X_train = proc_fn(X_train, *st)
-        X_test  = proc_fn(X_test,  *st)
-        if encoder is None:    # rgr
-          y_train = proc_fn(y_train, *st)
-          y_test  = proc_fn(y_test,  *st)
-
-      env['dataset'] = (X_train, y_train), (X_test, y_test)
+    if 'label' not in env:
+      label = load_pickle(env['log_dp'] / LABEL_FILE)
+      env['label'] = label
 
     return fn(*args, **kwargs)
   return wrapper
@@ -138,7 +107,7 @@ def require_model(fn:Callable[..., Any]):
     return fn(*args, **kwargs)
   return wrapper
 
-def symbol_defined(proc:str) -> bool:
+def defined_preprocessor(proc:str) -> bool:
   found = proc in globals()
   if not found: logger.error(f'  preprocessor {proc!r} not found!')
   else:         logger.info (f'  apply {proc}...')
@@ -149,7 +118,7 @@ def symbol_defined(proc:str) -> bool:
 def process_df():
   global job, env
 
-  df: TDataFrame = None       # 总原始数据
+  df: TimeSeq = None       # 总原始数据
   T = None                    # 唯一时间轴
   for fp in job_get('data'):
     try:
@@ -181,12 +150,12 @@ def process_df():
 def process_seq():
   global job, env
 
-  df: TDataFrame = env['df']
+  df: TimeSeq = env['df']
   _, df_r = split_time_and_data(df)
 
   if 'filter T':
     for proc in job_get('preprocess/filter_T', []):
-      if not symbol_defined(proc): continue
+      if not defined_preprocessor(proc): continue
       try:    df = globals()[proc](df)
       except: logger.error(format_exc())
 
@@ -194,13 +163,13 @@ def process_seq():
     proc = job_get('preprocess/project')
     assert proc and len(proc) == 1
     proc = proc[0]
-    assert symbol_defined(proc)
+    assert defined_preprocessor(proc)
     try:    T, df = globals()[proc](df)
     except: logger.error(format_exc())
 
   if 'filter V':
     for proc in job_get('preprocess/filter_V', []):
-      if not symbol_defined(proc): continue
+      if not defined_preprocessor(proc): continue
       try:    df = globals()[proc](df)
       except: logger.error(format_exc())
 
@@ -220,10 +189,10 @@ def process_seq():
     for col in df.columns: plt.hist(df[col], label=col, bins=50)
     save_figure(env['log_dp'] / 'hist.png')
 
-  T: Series = T
+  T: Time = T
   seq: Seq = df.to_numpy()
   assert len(T) == len(seq)
-  save_pickle(seq, env['log_dp'] / SEQ_FILE)
+  save_pickle(seq, env['log_dp'] / SEQ_RAW_FILE)
 
   logger.info(f'  T.shape: {T.shape}')
   logger.info(f'  seq.shape: {seq.shape}')
@@ -235,21 +204,21 @@ def process_seq():
 def process_dataset():
   global job, env
 
-  T: Series = env['T']
-  seq: Seq  = env['seq']
+  T: Time  = env['T']
+  seq: Seq = env['seq']
+
+  encoder: Encoder = job_get('dataset/encoder')
+  if encoder is not None:    # clf
+    label = encode_seq(seq, T, encoder)
+  else:
+    label = None
 
   inlen   = job_get('dataset/in')    ; assert inlen   > 0
   outlen  = job_get('dataset/out')   ; assert outlen  > 0
   n_train = job_get('dataset/train') ; assert n_train > 0
   n_eval  = job_get('dataset/eval')  ; assert n_eval  > 0
-  encoder: Encoder = job_get('dataset/encoder')
-  if encoder is None:    # rgr
-    trainset = resample_frame_dataset(seq, inlen, outlen, n_train)
-    evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval)
-  else:                  # clf
-    trainset = resample_frame_dataset_and_encode(seq, T, encoder, inlen, outlen, n_train)
-    evalset  = resample_frame_dataset_and_encode(seq, T, encoder, inlen, outlen, n_eval)
-  dataset  = (trainset, evalset)
+  trainset = resample_frame_dataset(seq, inlen, outlen, n_train, y=label)
+  evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval,  y=label)
 
   logger.info(f'  train set')
   logger.info(f'    input:  {trainset[0].shape}')
@@ -258,19 +227,73 @@ def process_dataset():
   logger.info(f'    input:  {evalset[0].shape}')
   logger.info(f'    target: {evalset[1].shape}')
 
+  dataset = (trainset, evalset)
   save_pickle(dataset, env['log_dp'] / DATASET_FILE)
-
+  if label is not None: save_pickle(label, env['log_dp'] / LABEL_FILE)
+  
+  env['label']   = label
   env['dataset'] = dataset
+
+@task
+def process_transform():
+  if 'extract stats from seq':
+    seq: Seq = env['seq']   # [T, D=1]
+    seq_r = deepcopy(seq)
+
+    stats: Stats = []    # keep ordered
+    for proc in job_get('preprocess/transform', []):
+      if not defined_preprocessor(proc): continue
+      try:
+        seq, st = globals()[proc](seq)
+        stats.append((proc, st))
+      except:
+        logger.error(format_exc())
+
+    if 'plot timeline T':
+      plt.clf()
+      plt.subplot(211) ; plt.title('preprocessed')
+      for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
+      plt.subplot(212) ; plt.title('transformed')
+      for col in range(seq.shape[-1]): plt.plot(seq[:, col])
+      save_figure(env['log_dp'] / 'timeline_T.png')
+
+    if 'plot histogram T':
+      plt.clf()
+      plt.subplot(211) ; plt.title('preprocessed')
+      for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)
+      plt.subplot(212) ; plt.title('transformed')
+      for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
+      save_figure(env['log_dp'] / 'hist_T.png')
+
+    save_pickle(seq, env['log_dp'] / SEQ_FILE)
+    if stats: save_pickle(stats, env['log_dp'] / STATS_FILE)
+    
+    env['seq']   = seq
+    env['stats'] = stats
+
+  if 'reapply stats on dataset':
+    (X_train, y_train), (X_test, y_test) = env['dataset']
+
+    encoder: Encoder = job_get('dataset/encoder')
+    for (proc, st) in env['stats']:
+      logger.info(f'  reapply {proc}...')
+      proc_fn = globals()[f'{proc}_apply']
+      X_train = proc_fn(X_train, *st)
+      X_test  = proc_fn(X_test,  *st)
+      if encoder is None:    # rgr
+        y_train = proc_fn(y_train, *st)
+        y_test  = proc_fn(y_test,  *st)
+
+    dataset = (X_train, y_train), (X_test, y_test)
+    save_pickle(dataset, env['log_dp'] / DATASET_FILE)
+
+    env['dataset'] = dataset
 
 def target_data():
   process_df()
   process_seq()
   process_dataset()
-
-  del env['df']
-  del env['T']
-  del env['seq']
-  del env['dataset']
+  process_transform()
 
 @require_data
 @require_model

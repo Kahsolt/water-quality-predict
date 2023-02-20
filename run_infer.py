@@ -10,8 +10,10 @@ import tkinter.filedialog as tkfdlg
 from traceback import print_exc
 
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+from modules.preprocess import *
 from modules.util import *
 from modules.typing import *
 import run as RT
@@ -118,9 +120,9 @@ class App:
       RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
     load_model_and_data()
 
-    seq = RT.env['seq']
-    inlen = RT.job_get('dataset/in')
-    logger.info('  seq.shape:', seq.shape)
+    seq: Seq = RT.env['seq']
+    inlen: int = RT.job_get('dataset/in')
+    logger.info(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
     res = max(seqlen // 100, inlen)
     tick = round(seqlen // 10 / 100) * 100
@@ -140,10 +142,12 @@ class App:
     if L >= R: return
 
     seq: Seq     = RT.env['seq']
+    label: Seq   = RT.env['label']
     stats: Stats = RT.env['stats']
     manager      = RT.env['manager']
     model: Model = RT.env['model']
     inlen: int   = RT.job_get('dataset/in')
+    is_task_rgr  = manager.TASK_TYPE == 'rgr'
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
@@ -168,9 +172,9 @@ class App:
         loc += len(y)
       preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
 
-    if 'inv preprocess':
+    if 'inv preprocess' and is_task_rgr:
       for (proc, st) in stats:
-        logger.info(f'  apply inv of {proc}')
+        logger.debug(f'  apply inv of {proc}')
         invproc = globals().get(f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)
@@ -178,7 +182,8 @@ class App:
           preds_r = invproc(preds_r, *st)
 
     if 'select range & channel':
-      truth   = seq    [L:R,    0]
+      if is_task_rgr: truth = seq  [L:R, 0]
+      else:           truth = label[L:R, 0]
       preds_o = preds_o[:R-L+1, 0]      # [T'=R-L+1]
       if args.draw_rolling:
         preds_r = preds_r[:R-L+1, 0]    # [T'=R-L+1]
@@ -188,6 +193,8 @@ class App:
     self.ax.plot(preds_o, 'r', label='pred (oracle)')
     if args.draw_rolling:
       self.ax.plot(preds_r, 'g', label='pred (rolling)')
+    if not is_task_rgr:
+      self.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     self.fig.legend()
     self.fig.tight_layout()
     self.cvs.draw()

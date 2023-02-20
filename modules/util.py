@@ -91,7 +91,7 @@ def save_metrics(truth, pred, fp:Path, task:ModelTask='clf'):
       logger.info(s)
 
     if   task == 'clf':
-      prec, recall, f1, supp = precision_recall_fscore_support(truth, pred)
+      prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
       log(f'prec:   {prec:.3%}')
       log(f'recall: {recall:.3%}')
       log(f'f1:     {f1:.3%}')
