@@ -120,7 +120,7 @@ class App:
 
     seq = RT.env['seq']
     inlen = RT.job_get('dataset/in')
-    print('seq.shape:', seq.shape)
+    print('  seq.shape:', seq.shape)
     seqlen = len(seq)
     res = max(seqlen // 100, inlen)
     tick = round(seqlen // 10 / 100) * 100

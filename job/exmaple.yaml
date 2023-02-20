@@ -2,10 +2,10 @@ misc:
   name: XGBoost
   seed: 114514
   target:
-#   - all
-#   - data
-#   - train
-#   - eval
+    - all
+#    - data
+#　  - train
+#　  - eval
 
 data:
   - data/w21003.csv

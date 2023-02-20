@@ -1,5 +1,7 @@
 from numpy import ndarray
 from pandas import DataFrame
+from torch import Tensor
+from logging import Logger
 from typing import *
 
 # 任务描述文件

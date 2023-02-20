@@ -5,9 +5,9 @@
 from time import time
 from pathlib import Path
 from argparse import ArgumentParser
-from pprint import pprint as pp
+from pprint import pformat
 from typing import Callable, Any
-from traceback import print_exc
+from traceback import format_exc
 from importlib import import_module
 
 import pandas as pd
@@ -26,6 +26,7 @@ DATASET_FILE = 'dataset.pkl'
 
 job: Job = None
 env: Env = { }
+logger: Logger = None
 
 def job_get(path:str, value=None) -> Any:
   global job
@@ -49,7 +50,7 @@ def job_set(path:str, value=None, overwrite=False) -> Any:
     if s in r:
       r = r[s]
     else:
-      print(f'Error: canot find path {path!r}')
+      logger.error(f'canot find path {path!r}')
       return
 
   if r[key] is None or overwrite:
@@ -59,10 +60,10 @@ def job_set(path:str, value=None, overwrite=False) -> Any:
 def task(fn:Callable[..., Any]):
   def wrapper(*args, **kwargs):
     task = fn.__name__.split('_')[-1]
-    print(f'>> run task: {task!r}')
+    logger.info(f'>> run task: {task!r}')
     t = time()
     r = fn(*args, **kwargs)
-    print(f'<< task done ({time() - t:.3f}s)')
+    logger.info(f'<< task done ({time() - t:.3f}s)')
     return r
   return wrapper
 
@@ -115,20 +116,20 @@ def process_df():
         T = T_new
       else:
         if len(T) != len(T_new):
-          print(f'>> ignore file {fp!r} due to length mismatch with former ones')
+          logger.info(f'>> ignore file {fp!r} due to length mismatch with former ones')
           continue
         if not (T == T_new).all():
-          print(f'>> ignore file {fp!r} due to timeline mismatch with former ones')
+          logger.info(f'>> ignore file {fp!r} due to timeline mismatch with former ones')
           continue
       if df is None:
         df = df_new
       else:
         df = pd.concat([df_new, data_new], axis='column', ignore_index=True, copy=False)
     except:
-      print_exc()
+      logger.error(format_exc())
 
-  print(f'  found {len(df)} records')
-  print(f'  column names: {list(df.columns)}')
+  logger.info(f'  found {len(df)} records')
+  logger.info(f'  column names: {list(df.columns)}')
 
   env['df'] = df              # 第一列为时间戳，其余列为数值特征
 
@@ -137,7 +138,7 @@ def process_seq():
   global job, env
 
   if env['df'] is None:
-    print('>> no data frame prepared for preprocess...')
+    logger.info('>> no data frame prepared for preprocess...')
     return
 
   df: DataFrame = env['df']
@@ -148,11 +149,11 @@ def process_seq():
   namespace = globals()
   for proc in job_get('preprocess', []):
     if proc not in namespace:
-      print(f'>> Error: processor {proc!r} not found!')
+      logger.info(f'>> Error: processor {proc!r} not found!')
       continue
     
     try:
-      print(f'  apply {proc}...')
+      logger.info(f'  apply {proc}...')
 
       ret = namespace[proc](df)
       if isinstance(ret, Tuple):
@@ -161,7 +162,7 @@ def process_seq():
       else:
         df = ret
     except:
-      print_exc()
+      logger.error(format_exc())
 
   if 'plot timeline':
     plt.clf()
@@ -184,8 +185,8 @@ def process_seq():
   save_pickle(seq, env['log_dp'] / SEQ_FILE)
   if stats: save_pickle(stats, env['log_dp'] / STATS_FILE)
 
-  print(f'  seq.shape: {seq.shape}')
-  print(f'  stats: {stats}')
+  logger.info(f'  seq.shape: {seq.shape}')
+  logger.info(f'  stats: {stats}')
 
   env['seq']   = seq
   env['stats'] = stats
@@ -205,12 +206,12 @@ def process_dataset():
   evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval)
   dataset  = (trainset, evalset)
 
-  print(f'  train set')
-  print(f'    input:  {trainset[0].shape}')
-  print(f'    target: {trainset[1].shape}')
-  print(f'  eval set')
-  print(f'    input:  {evalset[0].shape}')
-  print(f'    target: {evalset[1].shape}')
+  logger.info(f'  train set')
+  logger.info(f'    input:  {trainset[0].shape}')
+  logger.info(f'    target: {trainset[1].shape}')
+  logger.info(f'  eval set')
+  logger.info(f'    input:  {evalset[0].shape}')
+  logger.info(f'    target: {evalset[1].shape}')
 
   save_pickle(dataset, env['log_dp'] / DATASET_FILE)
 
@@ -243,7 +244,7 @@ def target_eval():
 
 
 def run(args):
-  global job, env
+  global job, env, logger
 
   job = load_job(args.job_file)
 
@@ -253,11 +254,12 @@ def run(args):
     name: str = job_set('misc/name', auto_name, overwrite=False)
     seed_everything(job_get('misc/seed', 114514))
 
-    print('Job Info:')
-    pp(job)
-
   log_dp: Path = args.log_path / name
   log_dp.mkdir(exist_ok=True)
+  logger = get_logger(name, log_dp)   # NOTE: assure no print before logger init
+
+  logger.info('Job Info:')
+  logger.info(pformat(job))
 
   env.update({
     'args':   args,

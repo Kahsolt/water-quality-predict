@@ -25,19 +25,20 @@ plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging
 
-
-def get_logger(name, base_path=Path('log')):
+def get_logger(name, log_dp=Path('.')) -> Logger:
   global logger
-  logger = logging.getLogger(name)
-  logger.setLevel(logging.DEBUG)
-  
-  formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
-  h = logging.FileHandler(base_path / name / 'log.log')
-  h.setLevel(logging.DEBUG)
-  h.setFormatter(formatter)
-  logger.addHandler(h)
-  return logger
 
+  if logger is logging:
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
+    h = logging.FileHandler(log_dp / 'log.log')
+    h.setLevel(logging.DEBUG)
+    h.setFormatter(formatter)
+    logger.addHandler(h)
+
+  return logger
 
 def seed_everything(seed:int):
   random.seed(seed)
@@ -58,7 +59,7 @@ def save_metrics(truth, pred, fp:Path, task:ModelTask='clf'):
   with open(fp, 'w', encoding='utf-8') as fh:
     def log(s:str):
       fh.write(f'{s}\n')
-      print(s)
+      logger.info(s)
 
     if   task == 'clf':
       prec, recall, f1, supp = precision_recall_fscore_support(truth, pred)
@@ -77,17 +78,17 @@ def save_figure(fp:Path, title:str=None):
   plt.tight_layout()
   plt.suptitle(title)
   plt.savefig(fp, dpi=400)
-  print(f'  save figure to {fp}')
+  logger.info(f'  save figure to {fp}')
 
 
 def load_pickle(fp:Path) -> CachedData:
   if not fp.exists(): return
-  print(f'  load pickle from {fp}')
+  logger.info(f'  load pickle from {fp}')
   with open(fp, 'rb') as fh:
     return pkl.load(fh)
 
 def save_pickle(data:CachedData, fp:Path):
-  print(f'  save pickle to {fp}')
+  logger.info(f'  save pickle to {fp}')
   with open(fp, 'wb') as fh:
     pkl.dump(data, fh)
 
@@ -126,23 +127,3 @@ def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path)
               'iteration': iteration,
               'optimizer': optimizer.state_dict(),
               'learning_rate': learning_rate}, checkpoint_path)
-
-
-def plot_predict(ys:list, y_hats:list, save_fp:str='predict.png'):
-  n_figs = len(ys)
-  fig = plt.figure(figsize=(12,8))
-  lst=['COD','TN','NH3-N','TP','PH']  #注意根据因子修改
-  a=0
-  for i, (y, y_hat) in enumerate(zip(ys, y_hats), start=1):
-    plt.subplot(n_figs, 1, i)
-    plt.plot(y_hat, 'r',label='forcast')
-    plt.plot(y, 'b',label='true')
-    plt.ylabel(lst[a])
-    a+=1
-    if a==1:
-        legend = plt.legend(ncol=2,loc='best')
-  fig.tight_layout(pad=0.5, w_pad=0, h_pad=0)
-  print(f'[plot_predict] save to {save_fp}')
-  plt.savefig(save_fp,dpi=500)
-
-  plt.show()

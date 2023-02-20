@@ -8,7 +8,7 @@ from pathlib import Path
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import save_metrics
+from modules.util import save_metrics, logger
 from modules.preprocess import *
 from modules.typing import *
 
@@ -27,7 +27,7 @@ def train(model:GridSearchCV, dataset:Datasets):
   X_train = X_train.squeeze(axis=-1)  # [N, I]
   y_train = y_train.squeeze(axis=-1)  # [N, O]
   model.fit(X_train, y_train)
-  print('best: %f using %s' % (model.best_score_, model.best_params_))
+  logger.info('best: %f using %s' % (model.best_score_, model.best_params_))
 
 
 def eval(model:GridSearchCV, dataset:Datasets, log_dp:Path):
