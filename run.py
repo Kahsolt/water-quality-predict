@@ -347,7 +347,7 @@ def run(args):
     'log_dp': log_dp,
   })
 
-  targets: List[RunTarget] = job_get('misc/target', ['all'])
+  targets: List[JobTarget] = job_get('misc/target', ['all'])
   if 'all' in targets:
     targets = ['data', 'train', 'eval']
   for tgt in targets:

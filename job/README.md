@@ -7,10 +7,6 @@
 => 参考 [YMAL语法](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html)
 
 
-⚪ 样例
-
-见 [exmaple](exmaple.yaml)
-
 ⚪ 数据类型
 
 ```yml
@@ -23,12 +19,19 @@ misc:
 data:
   - string          # 数据源，csv文件路径
 
-preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内各函数名
-  - string          # 第一项必须在 ['to_hourly', 'to_daily'] 里二选一
+preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内节的各函数名
+  filter_T:
+    - string
+  project:
+    - string        # 第一项必须在 ['to_hourly', 'to_daily'] 里二选一
+  filter_V:
+    - string
+  transform:
+    - string
 
 dataset:
   train: int        # 采样出的训练集大小
-  test: int         # 采样出的测试集大小
+  eval: int         # 采样出的测试集大小
   in: int           # 已知序列窗长，知 in 推 out
   out: int          # 预测序列窗长，知 in 推 out
   encode:           # 分类任务的目标编码

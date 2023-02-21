@@ -88,8 +88,8 @@ def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, count:int=1000, y:S
     seg_y = y[r:r+seg_size, :]
     X.append(seg_x[:inlen])   # [I, D], FrameIn
     Y.append(seg_y[inlen:])   # [O, D], FrameOut
-  X = np.stack(X, axis=0)     # [N, I, D]
-  Y = np.stack(Y, axis=0)     # [N, O, D]
+  X: Frames = np.stack(X, axis=0)     # [N, I, D]
+  Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
 
   return X, Y
 
@@ -97,8 +97,8 @@ def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, count:int=1000, y:S
 class FrameDataset(torch.utils.data.Dataset):
 
   def __init__(self, dataset:Dataset):
-    self.X = dataset[0]      # [N, I]
-    self.Y = dataset[1]      # [N, O]
+    self.X: Frames = dataset[0]      # [N, I]
+    self.Y: Frames = dataset[1]      # [N, O]
 
     assert len(self.X) == len(self.Y)
 
