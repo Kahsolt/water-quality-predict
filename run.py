@@ -335,6 +335,7 @@ def run(args):
     seed_everything(job_get('misc/seed', 114514))
 
   log_dp: Path = args.log_path / name
+  if log_dp.exists() and args.no_overwrite: return
   log_dp.mkdir(exist_ok=True, parents=True)
   logger = get_logger(name, log_dp)   # NOTE: assure no print before logger init
 
@@ -359,6 +360,7 @@ if __name__ == '__main__':
   parser = ArgumentParser()
   parser.add_argument('-J', '--job_file', required=True, help='path to a *.yaml job file')
   parser.add_argument('--log_path', default=Path('log'), type=Path, help='path to log root folder')
+  parser.add_argument('--no_overwrite', action='store_true', help='no overwrite if log folder exists')
   args = parser.parse_args()
 
   run(args)
