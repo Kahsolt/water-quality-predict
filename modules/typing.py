@@ -1,4 +1,4 @@
-from numpy import ndarray
+from numpy import array, ndarray
 from pandas import DataFrame, Series
 from torch import Tensor
 from logging import Logger
@@ -35,8 +35,9 @@ Data = DataFrame
 TimeAndData = Tuple[Time, Data]
 # 预处理后的数据帧序列
 Seq     = ndarray      # [T, D]
-Frames  = ndarray      # [N, I/O, D]
+Array   = ndarray      # [T]
 Frame   = ndarray      # [I/O, D]
+Frames  = ndarray      # [N, I/O, D]
 # 预处理过程中记录的一些统计量
 Stat  = Tuple[Any]
 Stats = List[Tuple[str, Stat]]

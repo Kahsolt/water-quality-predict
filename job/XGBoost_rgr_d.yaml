@@ -16,8 +16,8 @@ preprocess:
   project:
     - to_daily
   filter_V:
-#    - yichang
-#    - walvent
+    - remove_outlier
+    - wavlet_transform
   transform:
     - log
 

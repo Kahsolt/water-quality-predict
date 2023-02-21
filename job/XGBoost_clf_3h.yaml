@@ -13,8 +13,8 @@ preprocess:
   project:
     - to_hourly
   filter_V:
-#    - yichang
-#    - walvent
+    - remove_outlier
+    - wavlet_transform
   transform:
     - log
 

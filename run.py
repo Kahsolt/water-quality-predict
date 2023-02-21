@@ -162,7 +162,7 @@ def process_seq():
   if 'filter T':
     for proc in job_get('preprocess/filter_T', []):
       if not defined_preprocessor(proc): continue
-      try:    df = globals()[proc](df)
+      try:    df: TimeSeq = globals()[proc](df)
       except: logger.error(format_exc())
 
   if 'project':   # NOTE: this is required!
@@ -176,7 +176,7 @@ def process_seq():
   if 'filter V':
     for proc in job_get('preprocess/filter_V', []):
       if not defined_preprocessor(proc): continue
-      try:    df = globals()[proc](df)
+      try:    df: Data = globals()[proc](df)
       except: logger.error(format_exc())
 
   if 'plot timeline':

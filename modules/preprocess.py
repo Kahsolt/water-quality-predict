@@ -6,8 +6,10 @@ from typing import Tuple
 
 import numpy as np
 from scipy.interpolate import interp1d
+import matplotlib.pyplot as plt
 import pywt
 
+from modules.util import logger
 from modules.typing import *
 
 
@@ -29,48 +31,86 @@ def to_daily(df:TimeSeq) -> TimeAndData:
 
 
 ''' filter_V: 数值修正 '''
-def yichang(df:DataFrame) -> DataFrame:
-  def process(seq:Series) -> Series:
-    '''异常值处理与补值'''
-    if len(seq.shape) == 1: 
-      seq = seq.copy().reshape(-1,1)
-    else:
-      seq = seq.copy()
-    fArray = seq[:,-1]
-    avg=seq.mean()
-    st=np.std(seq)
-    seq[:,-1] = np.array([e if e > 0 and (avg-3*st <= e <= 3*st+avg) else np.nan for e in fArray])
-    X=np.array([i for i in range(len(seq))])
-    X=X.reshape(len(X),1)
-    #首尾用临近值补值
-    ValidDataIndex = X[np.where(np.isnan(seq) == 0)]
-    if ValidDataIndex[-1] < len(seq) - 1: 
-        seq[ValidDataIndex[-1] + 1:,0] = seq[ValidDataIndex[-1],0]  
-    # 如果第一个正常数据的序号不是0，则表明第一个正常数据前存在缺失数据
-    if ValidDataIndex[0] >= 1:
-        seq[:ValidDataIndex[0],0] = seq[ValidDataIndex[0],0] 
+def remove_outlier(df:Data) -> Data:
+  global logger
 
-    Y_0 =seq[np.where(np.isnan(seq) != 1)]
-    X_0 = X[np.where(np.isnan(seq) != 1)]
-    IRFunction = interp1d(X_0, Y_0, kind = 'linear')
-    Fill_X = X[np.where(np.isnan(seq) == 1)]
-    Fill_Y = IRFunction(Fill_X)
-    seq[Fill_X,0] = Fill_Y 
-    return seq
+  def process(x:Series) -> Series:
+    x = x.fillna(method='ffill')
+    arr: Array = np.asarray(x)
+    tmp = [(arr, 'original')]
 
-  return df.apply(process, axis=1)
+    if 'map 3-sigma outliers to NaN':
+      arr_n, (avg, std) = std_norm(log_apply(arr))
+      L = avg - 3 * std
+      H = avg + 3 * std
+      logger.info(f'  outlier: [{L}, {H}]')
+      arr_clip = arr_n.clip(L, H)
+      arr = log_inv(std_norm_inv(arr_clip, avg, std))
 
-def walvent(df:DataFrame, wavelet:str='db8', threshold:float=0.04) -> DataFrame:
-  def process(seq:Series) -> Series:
-    w = pywt.Wavelet(wavelet)                             # 选用Daubechies8小波
-    maxlev = pywt.dwt_max_level(len(seq), w.dec_len)
-    coeffs = pywt.wavedec(seq, wavelet, level=maxlev)     # 将信号进行小波分解
-    for i in range(1, len(coeffs)):
-      coeffs[i] = pywt.threshold(coeffs[i], threshold*max(coeffs[i]))     # 将噪声滤波
-    seq = pywt.waverec(coeffs, wavelet)                   # 将信号进行小波重构
-    return seq
+      tmp.append((arr, '3-sigma outlier'))
 
-  return df.apply(process, axis=1)
+    if 'padding by edge for NaNs at two endings':
+      i = 0
+      while np.isnan(arr[i]): i += 1
+      j = len(arr) - 1
+      while np.isnan(arr[j]): j -= 1
+
+      arrlen = len(arr)
+      arr = np.pad(arr[i: j+1], (i, arrlen - j - 1), mode='edge')
+      assert len(arr) == arrlen
+
+      tmp.append((arr, 'pad edge'))
+    
+    if 'interpolate for inner NaNs':
+      mask = np.isnan(arr)
+      X = range(len(arr))                         # gen dummy x-axis seq
+      interp = interp1d(X, arr, kind='linear')    # fit the model
+      arr_interp = interp(X)                      # predict
+      arr = arr_interp * mask + arr * ~mask
+
+      tmp.append((arr, 'interp'))
+
+    if not 'show debug':
+      plt.clf()
+      n_fig = len(tmp)
+      for i, (arr, title) in enumerate(tmp):
+        plt.subplot(n_fig, 1, i+1)
+        plt.plot(arr)
+        plt.title(title)
+      plt.show()
+
+    return Series(arr)
+
+  return df.apply(process)
+
+def wavlet_transform(df:Data, wavelet:str='db8', threshold:float=0.04) -> Data:
+  def process(x:Series) -> Series:
+    arr: Array = np.asarray(x)
+    tmp = [(arr, 'original')]
+
+    if 'wavlet transform':
+      w = pywt.Wavelet(wavelet)                             # 选用Daubechies8小波
+      maxlev = pywt.dwt_max_level(len(arr), w.dec_len)
+      coeffs = pywt.wavedec(arr, wavelet, level=maxlev)     # 将信号进行小波分解
+      for i in range(1, len(coeffs)):
+        coeffs[i] = pywt.threshold(coeffs[i], threshold*max(coeffs[i]))     # 将噪声滤波
+      arr = pywt.waverec(coeffs, wavelet)                   # 将信号进行小波重构
+      arr = arr.clip(min=0.0)     # positive fix
+
+      tmp.append((arr, 'wavlet'))
+
+    if not 'show debug':
+      plt.clf()
+      n_fig = len(tmp)
+      for i, (arr, title) in enumerate(tmp):
+        plt.subplot(n_fig, 1, i+1)
+        plt.plot(arr)
+        plt.title(title)
+      plt.show()
+
+    return Series(arr)
+
+  return df.apply(process)
 
 # ↑↑↑ above are valid preprocessors ↑↑↑
 
