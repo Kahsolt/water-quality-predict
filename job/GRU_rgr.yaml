@@ -1,5 +1,5 @@
 misc:
-  name: LSTM_rgr
+  name: GRU_rgr
   seed: 114514
   target:
     - all
@@ -27,7 +27,7 @@ dataset:
 model:
   name: RNN_rgr
   config:
-    model: LSTM
+    model: GRU
     d_in: 1
     d_out: 6        # := dataset.out
     d_hidden: 32

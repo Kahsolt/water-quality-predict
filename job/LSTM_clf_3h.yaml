@@ -22,19 +22,19 @@ dataset:
   train: 10000
   eval: 1000
   in: 72
-  out: 1            # := 1, fixed
+  out: 1            # must be 1 for clf
   encode:
     name: ex_thresh_3h
     params:
       thresh: 1.5
 
 model:
-  name: LSTM_clf
+  name: RNN_clf
   config:
     model: LSTM
     d_in: 1
     d_out: 4        # := num_class
-    d_hidden: 128
+    d_hidden: 32
     n_layers: 1
     epochs: 30
     batch_size: 32

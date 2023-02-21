@@ -190,7 +190,7 @@ class App:
 
     if 'show acc':
       if is_task_rgr:
-        mae = (truth - preds_o).abs().mean()
+        mae = np.abs(truth - preds_o).mean()
         logger.debug(f'>> mae: {mae:.3%}')
       else:
         acc = (truth == preds_o).sum() / len(truth)

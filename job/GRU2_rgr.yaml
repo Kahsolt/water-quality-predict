@@ -1,5 +1,5 @@
 misc:
-  name: LSTM_rgr
+  name: GRU2_rgr
   seed: 114514
   target:
     - all
@@ -27,11 +27,12 @@ dataset:
 model:
   name: RNN_rgr
   config:
-    model: LSTM
+    model: GRU
     d_in: 1
     d_out: 6        # := dataset.out
     d_hidden: 32
-    n_layers: 1
+    n_layers: 2
+    dropout: 0.5
     epochs: 30
     batch_size: 32
     optimizer: Adam

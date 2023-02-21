@@ -1,5 +1,5 @@
 misc:
-  name: LSTM_rgr
+  name: GRU_clf_3h
   seed: 114514
   target:
     - all
@@ -21,15 +21,19 @@ preprocess:
 dataset:
   train: 10000
   eval: 1000
-  in: 96
-  out: 6
+  in: 72
+  out: 1            # must be 1 for clf
+  encode:
+    name: ex_thresh_3h
+    params:
+      thresh: 1.5
 
 model:
-  name: RNN_rgr
+  name: RNN_clf
   config:
-    model: LSTM
+    model: GRU
     d_in: 1
-    d_out: 6        # := dataset.out
+    d_out: 4        # := num_class
     d_hidden: 32
     n_layers: 1
     epochs: 30
@@ -37,4 +41,4 @@ model:
     optimizer: Adam
     lr: 1e-3
     weight_decay: 1e-5
-    loss: mse_loss
+    loss: cross_entropy
