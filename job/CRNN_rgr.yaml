@@ -1,5 +1,5 @@
 misc:
-  name: GRU_clf_3h
+  name: CRNN_rgr
   seed: 114514
   target:
     - all
@@ -21,19 +21,22 @@ preprocess:
 dataset:
   train: 10000
   eval: 1000
-  in: 72
-  out: 1            # must be 1 for clf
-  encode:
-    name: ex_thresh_3h
-    params:
-      thresh: 1.5
+  in: 96
+  out: 6
 
 model:
-  name: CRNN_clf
+  name: CRNN_rgr
   config:
+    cnn_layers: 2
+    cnn_k: 3
+    cnn_stride: 2
+    cnn_in: 1
+    cnn_out: 16
+    cnn_hidden: 16
+    cnn_act: leaky_relu
     rnn_type: GRU
-    rnn_in: 1
-    rnn_out: 4        # := num_class
+    rnn_in: 16
+    rnn_out: 6        # := dataset.out
     rnn_hidden: 32
     rnn_layers: 1
     epochs: 30
@@ -41,4 +44,4 @@ model:
     optimizer: Adam
     lr: 1e-3
     weight_decay: 1e-5
-    loss: cross_entropy
+    loss: mse_loss

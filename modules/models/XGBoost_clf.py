@@ -7,7 +7,7 @@ from pathlib import Path
 from xgboost import XGBClassifier, XGBRFClassifier
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics, logger
+from modules.util import get_metrics
 from modules.preprocess import *
 from modules.typing import *
 from modules.models.XGBoost_rgr import train, save, load     # just proxy by

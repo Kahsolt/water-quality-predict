@@ -9,7 +9,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pywt
 
-from modules.util import logger
+from modules.util import get_logger
 from modules.typing import *
 
 
@@ -32,7 +32,7 @@ def to_daily(df:TimeSeq) -> TimeAndData:
 
 ''' filter_V: 数值修正 '''
 def remove_outlier(df:Data) -> Data:
-  global logger
+  logger = get_logger()
 
   def process(x:Series) -> Series:
     x = x.fillna(method='ffill')

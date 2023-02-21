@@ -28,7 +28,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging
 
-def get_logger(name, log_dp=Path('.')) -> Logger:
+def get_logger(name=None, log_dp=Path('.')) -> Logger:
   global logger
 
   if logger is logging:

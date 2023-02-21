@@ -9,14 +9,14 @@ import torch
 from modules.util import *
 from modules.preprocess import *
 from modules.typing import *
-from modules.models.RNN import *
-from modules.models.RNN_rgr import init, save, load     # just proxy by
+from modules.models.CRNN import *
+from modules.models.CRNN_rgr import init, save, load     # just proxy by
 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
-def train(model:RNN, dataset:Datasets, config:Config):
-  global logger
+def train(model:CRNN, dataset:Datasets, config:Config):
+  logger = get_logger()
 
   dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, config)
 
@@ -43,9 +43,7 @@ def train(model:RNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def eval(model:RNN, dataset:Datasets, config:Config):
-  global logger
-
+def eval(model:CRNN, dataset:Datasets, config:Config):
   dataloader, y_test = prepare_for_eval(model, dataset, config)
   
   preds = []
@@ -61,7 +59,7 @@ def eval(model:RNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def infer(model:RNN, x:Frame) -> Frame:
+def infer(model:CRNN, x:Frame) -> Frame:
   x = torch.from_numpy(x)
   x = x.to(device)
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]

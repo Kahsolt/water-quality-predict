@@ -2,6 +2,7 @@ from numpy import ndarray
 from pandas import DataFrame, Series
 from torch import Tensor
 from torch.nn import Module
+from torch.optim import Optimizer
 from logging import Logger
 from typing import *
 

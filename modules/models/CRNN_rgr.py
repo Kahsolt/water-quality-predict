@@ -9,21 +9,28 @@ import torch
 from modules.util import *
 from modules.preprocess import *
 from modules.typing import *
-from modules.models.RNN import *
+from modules.models.CRNN import *
 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:Config) -> RNN:
-  global logger
+def init(config:Config) -> CRNN:
+  logger = get_logger()
 
-  model = RNN(
-    rnn_type=config['model'],
-    d_in    =config.get('d_in', 1),
-    d_out   =config.get('d_out', 1),
-    d_hidden=config.get('d_hidden', 32),
-    n_layers=config.get('n_layers', 1),
-    dropout =config.get('dropout', 0),
+  model = CRNN(
+    r_type    = config['rnn_type'],
+    r_in      = config.get('rnn_in',      1),
+    r_out     = config.get('rnn_out',     1),
+    r_hidden  = config.get('rnn_hidden',  32),
+    r_layers  = config.get('rnn_layers',  1),
+    r_dropout = config.get('rnn_dropout', 0.0),
+    c_layers  = config.get('cnn_layers',  0),
+    c_k       = config.get('cnn_k',       3),
+    c_stride  = config.get('cnn_stride',  2),
+    c_in      = config.get('cnn_in',      32),
+    c_out     = config.get('cnn_out',     32),
+    c_hidden  = config.get('cnn_hidden',  32),
+    c_act     = config.get('cnn_act',     'leaky_relu'),
   )
   param_cnt = sum([p.numel() for p in model.parameters() if p.requires_grad])
   logger.info(f'  param_cnt: {param_cnt}')
@@ -31,8 +38,8 @@ def init(config:Config) -> RNN:
   return model.to(device)
 
 
-def train(model:RNN, dataset:Datasets, config:Config):
-  global logger
+def train(model:CRNN, dataset:Datasets, config:Config):
+  logger = get_logger()
 
   dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, config)
 
@@ -51,9 +58,7 @@ def train(model:RNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def eval(model:RNN, dataset:Datasets, config:Config):
-  global logger
-
+def eval(model:CRNN, dataset:Datasets, config:Config):
   dataloader, y_test = prepare_for_eval(model, dataset, config)
 
   preds = []
@@ -68,7 +73,7 @@ def eval(model:RNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def infer(model:RNN, x:Frame) -> Frame:
+def infer(model:CRNN, x:Frame) -> Frame:
   x = torch.from_numpy(x)
   x = x.to(device)          # [I=96, D=1]
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]
@@ -77,9 +82,9 @@ def infer(model:RNN, x:Frame) -> Frame:
   return y
 
 
-def save(model:RNN, log_dp:Path):
+def save(model:CRNN, log_dp:Path):
   save_checkpoint(model, log_dp / 'model.pth')
 
 
-def load(model:RNN, log_dp:Path) -> RNN:
+def load(model:CRNN, log_dp:Path) -> CRNN:
   return load_checkpoint(model, log_dp / 'model.pth')
