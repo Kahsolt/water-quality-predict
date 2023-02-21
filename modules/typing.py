@@ -5,19 +5,16 @@ from logging import Logger
 from typing import *
 
 # 运行目标
-JobTarget = Union[
+Target = Union[
   Literal['data'],      # 仅制作数据
   Literal['train'],     # 仅训练
   Literal['eval'],      # 仅评估
   Literal['all'],       # 全部 = 数据 + 训练 + 评估 (糖！)
 ]
 # 模型参数
-JobModel = {
-  'model': str,
-  'config': Dict[str, Any],
-}
-# 标签编码
-JobEncode = {
+Config = Dict[str, Any]
+# 分类标签编码
+Encode = {
   'name': str,
   'params': Dict[str, Any],
 }

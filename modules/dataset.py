@@ -3,6 +3,7 @@
 # Create Time: 2023/02/19 
 
 import torch
+from torch.utils.data import DataLoader
 import numpy as np
 
 from modules.typing import *
@@ -66,7 +67,7 @@ def ex_thresh_24h(seq:Seq, T:Time, **kwargs) -> Seq:
 
 # ↑↑↑ above are valid encoders ↑↑↑
 
-def encode_seq(x:Seq, T:Time, encode:JobEncode) -> Seq:
+def encode_seq(x:Seq, T:Time, encode:Encode) -> Seq:
   label_func = globals()[encode['name']]
   label_func_params = encode.get('params') or {}
   return label_func(x, T, **label_func_params)

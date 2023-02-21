@@ -15,13 +15,13 @@ from modules.typing import *
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:JobModel) -> GridSearchCV:
+def init(config:Config) -> GridSearchCV:
   model: XGBRegressor = globals()[config['model']](objective=config['objective']) 
   model_gs = GridSearchCV(model, **config['gs_params'])
   return model_gs
 
 
-def train(model:GridSearchCV, dataset:Datasets):
+def train(model:GridSearchCV, dataset:Datasets, config:Config):
   (X_train, y_train), _ = dataset
   assert X_train.shape[-1] == 1
   X_train = X_train.squeeze(axis=-1)  # [N, I]
@@ -30,7 +30,7 @@ def train(model:GridSearchCV, dataset:Datasets):
   logger.info('best: %f using %s' % (model.best_score_, model.best_params_))
 
 
-def eval(model:GridSearchCV, dataset:Datasets):
+def eval(model:GridSearchCV, dataset:Datasets, config:Config):
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]

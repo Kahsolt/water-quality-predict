@@ -15,7 +15,7 @@ from modules.models.XGBoost_rgr import init, train, save, load     # just proxy 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:JobModel) -> GridSearchCV:
+def init(config:Config) -> GridSearchCV:
   model: XGBClassifier = globals()[config['model']](
     objective=config['objective'], 
   )
@@ -31,7 +31,7 @@ def infer(model:GridSearchCV, x:Frame) -> Frame:
   return y
 
 
-def eval(model:GridSearchCV, dataset:Datasets):
+def eval(model:GridSearchCV, dataset:Datasets, config:Config):
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]

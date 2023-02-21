@@ -196,12 +196,13 @@ def process_seq():
     save_figure(env['log_dp'] / 'hist.png')
 
   T: Time = T
-  seq: Seq = df.to_numpy()
+  seq: Seq = df.to_numpy().astype(np.float32)
   assert len(T) == len(seq)
   save_pickle(seq, env['log_dp'] / SEQ_RAW_FILE)
 
   logger.info(f'  T.shape: {T.shape}')
   logger.info(f'  seq.shape: {seq.shape}')
+  logger.info(f'  seq.dtype: {seq.dtype}')
 
   env['T']   = T
   env['seq'] = seq
@@ -213,7 +214,7 @@ def process_dataset():
   T: Time  = env['T']
   seq: Seq = env['seq']
 
-  encode: JobEncode = job_get('dataset/encode')
+  encode: Encode = job_get('dataset/encode')
   if encode is not None:    # clf
     label = encode_seq(seq, T, encode)
     freq = Counter(label.flatten())
@@ -309,7 +310,7 @@ def target_train():
   global job, env
 
   manager, model = env['manager'], env['model']
-  manager.train(model, env['dataset'])
+  manager.train(model, env['dataset'], job_get('model/config'))
   manager.save(model, env['log_dp'])
 
 @require_data
@@ -320,7 +321,7 @@ def target_eval():
 
   manager, model = env['manager'], env['model']
   model = manager.load(model, env['log_dp'])
-  manager.eval(model, env['dataset'])
+  manager.eval(model, env['dataset'], job_get('model/config'))
 
   
 def run(args):
@@ -347,7 +348,7 @@ def run(args):
     'log_dp': log_dp,
   })
 
-  targets: List[JobTarget] = job_get('misc/target', ['all'])
+  targets: List[Target] = job_get('misc/target', ['all'])
   if 'all' in targets:
     targets = ['data', 'train', 'eval']
   for tgt in targets:

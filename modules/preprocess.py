@@ -89,13 +89,15 @@ def wavlet_transform(df:Data, wavelet:str='db8', threshold:float=0.04) -> Data:
     tmp = [(arr, 'original')]
 
     if 'wavlet transform':
+      arrlen = len(arr)
       w = pywt.Wavelet(wavelet)                             # 选用Daubechies8小波
-      maxlev = pywt.dwt_max_level(len(arr), w.dec_len)
+      maxlev = pywt.dwt_max_level(arrlen, w.dec_len)
       coeffs = pywt.wavedec(arr, wavelet, level=maxlev)     # 将信号进行小波分解
       for i in range(1, len(coeffs)):
         coeffs[i] = pywt.threshold(coeffs[i], threshold*max(coeffs[i]))     # 将噪声滤波
       arr = pywt.waverec(coeffs, wavelet)                   # 将信号进行小波重构
       arr = arr.clip(min=0.0)     # positive fix
+      arr = arr[:arrlen]          # length fix
 
       tmp.append((arr, 'wavlet'))
 

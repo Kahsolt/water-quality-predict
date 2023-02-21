@@ -1,0 +1,41 @@
+misc:
+  name: LSTM_rgr
+  seed: 114514
+  target:
+#    - all
+    - train
+
+data:
+  - data/w21003.csv
+
+preprocess:
+  filter_T:
+    - ltrim_vacant
+  project:
+    - to_hourly
+  filter_V:
+    - remove_outlier
+    - wavlet_transform
+  transform:
+    - log
+
+dataset:
+  train: 10000
+  eval: 1000
+  in: 168
+  out: 168
+
+model:
+  name: LSTM_rgr
+  config:
+    model: LSTM
+    d_in: 1
+    d_out: 1
+    d_hidden: 4
+    n_layers: 1
+    epochs: 30
+    batch_size: 32
+    optimizer: Adam
+    lr: 1e-3
+    weight_decay: 1e-5
+    loss: mse_loss
