@@ -104,11 +104,15 @@ def require_model(fn:Callable[..., Any]):
       model_name = job_get('model/name') ; assert model_name
       manager = import_module(f'modules.models.{model_name}')
       env['manager'] = manager
+      logger.info('model unit:')
+      logger.info(manager)
 
     if 'model' not in env:
       manager = env['manager']
       model = manager.init(job_get('model/config', {}))
       env['model'] = model
+      logger.info('model arch:')
+      logger.info(model)
 
     return fn(*args, **kwargs)
   return wrapper

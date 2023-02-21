@@ -109,28 +109,12 @@ def save_figure(fp:Path, title:str=None):
   logger.info(f'  save figure to {fp}')
 
 
-def load_checkpoint(checkpoint_path, model, optimizer=None):
-  checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
-  iteration = checkpoint_dict['iteration']
-  learning_rate = checkpoint_dict['learning_rate']
-  if optimizer is not None:
-    optimizer.load_state_dict(checkpoint_dict['optimizer'])
-  state_dict = checkpoint_dict['model']
-  new_state_dict= {}
-  for k, v in model.state_dict().items():
-    try:
-      new_state_dict[k] = state_dict[k]
-    except:
-      logger.info("%s is not in the checkpoint" % k)
-      new_state_dict[k] = v
-  model.load_state_dict(new_state_dict)
-  logger.info(f"Loaded checkpoint '{checkpoint_path}' (iteration {iteration})")
-  return model, optimizer, learning_rate, iteration
+def load_checkpoint(model:PyTorchModel, fp:Path, device='cpu'):
+  logger.info(f'load model from {fp}')
+  state_dict = torch.load(fp, map_location=device)
+  model.load_state_dict(state_dict)
+  return model
 
-def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
-  logger.info(f"Saving model and optimizer state at iteration {iteration} to {checkpoint_path}")
-  state_dict = model.state_dict()
-  torch.save({'model': state_dict,
-              'iteration': iteration,
-              'optimizer': optimizer.state_dict(),
-              'learning_rate': learning_rate}, checkpoint_path)
+def save_checkpoint(model:PyTorchModel, fp:Path):
+  logger.info(f'save model to {fp}')
+  torch.save(model.state_dict(), fp)

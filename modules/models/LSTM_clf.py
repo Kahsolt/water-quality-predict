@@ -81,8 +81,11 @@ def infer(model:LSTM, x:Frame) -> Frame:
 
 
 def save(model:LSTM, log_dp:Path):
-  save_checkpoint(model, log_dp / 'model.pth')
+  state_dict = model.state_dict()
+  save_checkpoint(state_dict, log_dp / 'model.pth')
 
 
 def load(model:LSTM, log_dp:Path) -> LSTM:
-  return load_checkpoint(model, log_dp / 'model.pth')
+  state_dict = load_checkpoint(model, log_dp / 'model.pth')
+  model.load_state_dict(state_dict)
+  return model

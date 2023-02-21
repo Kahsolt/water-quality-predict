@@ -1,6 +1,7 @@
-from numpy import array, ndarray
+from numpy import ndarray
 from pandas import DataFrame, Series
 from torch import Tensor
+from torch.nn import Module
 from logging import Logger
 from typing import *
 
@@ -47,6 +48,7 @@ CachedData = Union[Seq, Stats, Datasets]
 
 # 模型
 Model = object()
+PyTorchModel = Module
 # 模型任务类型
 ModelTask = Union[
   Literal['clf'],       # 分类
