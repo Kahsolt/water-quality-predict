@@ -12,10 +12,11 @@
 
 ### Quick Start
 
-⚪ Train & Eval
+⚪ Dataset & Train & Eval
 
 - write a job file, see guide => [job/README.md](job/README.md)
 - run `python run.py -J path/to/*.yaml`
+  - run all demo experiments: `run_experiments.cmd`
 
 ⚪ Infer
 

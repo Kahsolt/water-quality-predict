@@ -6,6 +6,7 @@ from time import time
 from copy import deepcopy
 from pathlib import Path
 from argparse import ArgumentParser
+from collections import Counter
 from pprint import pformat
 from typing import Callable, Any
 from traceback import format_exc
@@ -75,14 +76,18 @@ def require_data(fn:Callable[..., Any]):
     global env
 
     if 'seq' not in env:
-      env['seq'] = load_pickle(env['log_dp'] / SEQ_FILE)
+      seq = load_pickle(env['log_dp'] / SEQ_FILE)
+      assert seq is not None
+      env['seq'] = seq
 
     if 'stats' not in env:
       stats = load_pickle(env['log_dp'] / STATS_FILE)
-      env['stats'] = stats or []
+      env['stats'] = stats if stats is not None else []
 
     if 'dataset' not in env:
-      env['dataset'] = load_pickle(env['log_dp'] / DATASET_FILE)
+      dataset = load_pickle(env['log_dp'] / DATASET_FILE)
+      assert dataset is not None
+      env['dataset'] = dataset
 
     if 'label' not in env:
       label = load_pickle(env['log_dp'] / LABEL_FILE)
@@ -96,12 +101,13 @@ def require_model(fn:Callable[..., Any]):
     global env
 
     if 'manager' not in env:
-      model_name = job_get('model/arch') ; assert model_name
+      model_name = job_get('model/name') ; assert model_name
       manager = import_module(f'modules.models.{model_name}')
       env['manager'] = manager
 
     if 'model' not in env:
-      model = manager.init(job_get('model/params', {}))
+      manager = env['manager']
+      model = manager.init(job_get('model/config', {}))
       env['model'] = model
 
     return fn(*args, **kwargs)
@@ -207,9 +213,11 @@ def process_dataset():
   T: Time  = env['T']
   seq: Seq = env['seq']
 
-  encoder: Encoder = job_get('dataset/encoder')
-  if encoder is not None:    # clf
-    label = encode_seq(seq, T, encoder)
+  encode: JobEncode = job_get('dataset/encode')
+  if encode is not None:    # clf
+    label = encode_seq(seq, T, encode)
+    freq = Counter(label.flatten())
+    logger.info(f'  label freq: {freq}')
   else:
     label = None
 
@@ -237,7 +245,7 @@ def process_dataset():
 @task
 def process_transform():
   if 'extract stats from seq':
-    seq: Seq = env['seq']   # [T, D=1]
+    seq: Seq = env['seq']     # [T, D=1]
     seq_r = deepcopy(seq)
 
     stats: Stats = []    # keep ordered
@@ -274,13 +282,12 @@ def process_transform():
   if 'reapply stats on dataset':
     (X_train, y_train), (X_test, y_test) = env['dataset']
 
-    encoder: Encoder = job_get('dataset/encoder')
     for (proc, st) in env['stats']:
       logger.info(f'  reapply {proc}...')
       proc_fn = globals()[f'{proc}_apply']
       X_train = proc_fn(X_train, *st)
       X_test  = proc_fn(X_test,  *st)
-      if encoder is None:    # rgr
+      if env['label'] is None:          # is_task_rgr
         y_train = proc_fn(y_train, *st)
         y_test  = proc_fn(y_test,  *st)
 
@@ -313,22 +320,22 @@ def target_eval():
 
   manager, model = env['manager'], env['model']
   model = manager.load(model, env['log_dp'])
-  manager.eval(model, env['dataset'], env['log_dp'])
+  manager.eval(model, env['dataset'])
 
-
+  
 def run(args):
   global job, env, logger
 
   job = load_job(args.job_file)
 
   if 'job init':
-    arch = job_get('model/arch') ; assert arch
-    auto_name = f'{arch}_{timestr()}'
+    model_name = job_get('model/name') ; assert model_name
+    auto_name = f'{model_name}_{timestr()}'
     name: str = job_set('misc/name', auto_name, overwrite=False)
     seed_everything(job_get('misc/seed', 114514))
 
   log_dp: Path = args.log_path / name
-  log_dp.mkdir(exist_ok=True)
+  log_dp.mkdir(exist_ok=True, parents=True)
   logger = get_logger(name, log_dp)   # NOTE: assure no print before logger init
 
   logger.info('Job Info:')
@@ -340,10 +347,10 @@ def run(args):
   })
 
   targets: List[RunTarget] = job_get('misc/target', ['all'])
-  if 'all' in targets: targets = ['data', 'train', 'eval']
-  namespace = globals()
+  if 'all' in targets:
+    targets = ['data', 'train', 'eval']
   for tgt in targets:
-    namespace[f'target_{tgt}']()
+    globals()[f'target_{tgt}']()
 
   save_job(job, log_dp / JOB_FILE)
 

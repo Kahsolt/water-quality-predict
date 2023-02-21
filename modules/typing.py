@@ -37,16 +37,19 @@ CachedData = Union[Seq, Stats, Datasets]
 
 # 模型
 Model = object()
-# 模型参数
-ModelParams = dict
 # 模型任务类型
 ModelTask = Union[
   Literal['clf'],       # 分类
   Literal['rgr'],       # 回归
 ]
 
+# 模型参数
+JobModel = {
+  'model': str,
+  'config': Dict[str, Any],
+}
 # 标签编码
-Encoder = {
+JobEncode = {
   'name': str,
   'params': Dict[str, Any],
 }

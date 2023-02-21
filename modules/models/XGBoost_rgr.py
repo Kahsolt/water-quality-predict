@@ -8,16 +8,16 @@ from pathlib import Path
 from xgboost import XGBRegressor, XGBRFRegressor
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import save_metrics, logger
+from modules.util import get_metrics, logger
 from modules.preprocess import *
 from modules.typing import *
 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
-def init(params:ModelParams) -> GridSearchCV:
-  model = XGBRegressor() 
-  model_gs = GridSearchCV(model, **params)
+def init(config:JobModel) -> GridSearchCV:
+  model: XGBRegressor = globals()[config['model']](objective=config['objective']) 
+  model_gs = GridSearchCV(model, **config['gs_params'])
   return model_gs
 
 
@@ -30,13 +30,13 @@ def train(model:GridSearchCV, dataset:Datasets):
   logger.info('best: %f using %s' % (model.best_score_, model.best_params_))
 
 
-def eval(model:GridSearchCV, dataset:Datasets, log_dp:Path):
+def eval(model:GridSearchCV, dataset:Datasets):
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]
   y_test = y_test.squeeze(axis=-1)  # [N, O]
   pred = model.predict(X_test)      # [N, I] => [N, O]
-  save_metrics(y_test, pred, fp=log_dp/'metrics.txt', task=TASK_TYPE)
+  get_metrics(y_test, pred, task=TASK_TYPE)
 
 
 def infer(model:GridSearchCV, x:Frame) -> Frame:

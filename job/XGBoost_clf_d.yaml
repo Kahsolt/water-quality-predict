@@ -1,0 +1,44 @@
+misc:
+  name: XGBoost_clf_d
+  seed: 114514
+  target:
+    - all
+
+data:
+  - data/w21003.csv
+
+preprocess:
+  filter_T:
+    - ltrim_vacant
+  project:
+    - to_daily
+  filter_V:
+#    - yichang
+#    - walvent
+  transform:
+    - log
+
+dataset:
+  train: 10000
+  eval: 1000
+  in: 21
+  out: 1
+  encode:
+    name: ex_thresh
+    params:
+      thresh: 1.5
+
+model:
+  name: XGBoost_clf
+  config:
+    model: XGBClassifier
+    objective: 'binary:logistic'
+    gs_params:
+      param_grid:
+        max_depth: [3, 5]
+        n_estimators: [20]
+        learning_rate: [0.1, 0.15]
+      cv: 5
+      verbose: 2
+      n_jobs: -1
+      scoring: accuracy

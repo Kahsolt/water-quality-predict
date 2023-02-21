@@ -188,6 +188,14 @@ class App:
       if args.draw_rolling:
         preds_r = preds_r[:R-L+1, 0]    # [T'=R-L+1]
 
+    if 'show acc':
+      if is_task_rgr:
+        mae = (truth - preds_o).abs().mean()
+        logger.debug(f'>> mae: {mae:.3%}')
+      else:
+        acc = (truth == preds_o).sum() / len(truth)
+        logger.debug(f'>> acc: {acc:.3%}')
+
     self.ax.cla()
     self.ax.plot(truth,   'b', label='truth')
     self.ax.plot(preds_o, 'r', label='pred (oracle)')

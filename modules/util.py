@@ -50,7 +50,7 @@ def seed_everything(seed:int):
   torch.backends.cudnn.deterministic = True
   torch.backends.cudnn.benchmark = False
 
-def timestr():
+def timestr() -> str:
   return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-').split('.')[0]
 
 
@@ -82,26 +82,25 @@ def save_job(job:Job, fp:Path) -> Job:
     yaml.safe_dump(job, fh, sort_keys=False)
 
 
-def save_metrics(truth, pred, fp:Path, task:ModelTask='clf'):
+def get_metrics(truth, pred, task:ModelTask='clf') -> Tuple[float, ...]:
+  global logger
+
   assert task in ['clf', 'rgr'], ValueError(f'unknown task {task!r}')
 
-  with open(fp, 'w', encoding='utf-8') as fh:
-    def log(s:str):
-      fh.write(f'{s}\n')
-      logger.info(s)
-
-    if   task == 'clf':
-      prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
-      log(f'prec:   {prec:.3%}')
-      log(f'recall: {recall:.3%}')
-      log(f'f1:     {f1:.3%}')
-    elif task == 'rgr':
-      mae = mean_absolute_error(truth, pred)
-      mse = mean_squared_error (truth, pred)
-      r2  = r2_score           (truth, pred)
-      log(f'mae: {mae:.3f}')
-      log(f'mse: {mse:.3f}')
-      log(f'r2:  {r2:.3f}')
+  if   task == 'clf':
+    prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
+    logger.info(f'prec:   {prec:.3%}')
+    logger.info(f'recall: {recall:.3%}')
+    logger.info(f'f1:     {f1:.3%}')
+    return prec, recall, f1
+  elif task == 'rgr':
+    mae = mean_absolute_error(truth, pred)
+    mse = mean_squared_error (truth, pred)
+    r2  = r2_score           (truth, pred)
+    logger.info(f'mae: {mae:.3f}')
+    logger.info(f'mse: {mse:.3f}')
+    logger.info(f'r2:  {r2:.3f}')
+    return mae, mse, r2
 
 def save_figure(fp:Path, title:str=None):
   plt.tight_layout()

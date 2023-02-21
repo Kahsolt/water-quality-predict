@@ -6,7 +6,7 @@ from modules.typing import *
 TASK_TYPE: ModelTask = None
 
 
-def init(params:ModelParams) -> Model:
+def init(params:JobModel) -> Model:
   ''' init a model '''
   raise NotImplementedError
 
@@ -14,7 +14,7 @@ def train(model:Model, dataset:Datasets):
   ''' fit model with train dataset '''
   raise NotImplementedError
 
-def eval(model:Model, dataset:Datasets, log_dp:Path):
+def eval(model:Model, dataset:Datasets):
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 
