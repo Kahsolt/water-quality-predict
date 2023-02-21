@@ -29,7 +29,7 @@ dataset:
       thresh: 1.5
 
 model:
-  name: LSTM_rgr
+  name: LSTM_clf
   config:
     model: LSTM
     d_in: 1

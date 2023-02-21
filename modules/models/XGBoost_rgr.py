@@ -16,7 +16,9 @@ TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
 def init(config:Config) -> GridSearchCV:
-  model: XGBRegressor = globals()[config['model']](objective=config['objective']) 
+  model: XGBRegressor = globals()[config['model']](
+    objective=config['objective'],
+  )
   model_gs = GridSearchCV(model, **config['gs_params'])
   return model_gs
 

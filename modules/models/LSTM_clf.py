@@ -13,18 +13,9 @@ from modules.dataset import FrameDataset, DataLoader
 from modules.util import *
 from modules.preprocess import *
 from modules.typing import *
+from modules.models.LSTM_rgr import init, save, load     # just proxy by
 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
-
-
-def init(config:Config):
-  model = globals()[config['model']](
-    d_in=config['d_in'],
-    d_out=config['d_out'],
-    d_hidden=config['d_hidden'],
-    n_layers=config['n_layers'],
-  )
-  return model
 
 
 def train(model:LSTM, dataset:Datasets, config:Config):
@@ -47,11 +38,15 @@ def train(model:LSTM, dataset:Datasets, config:Config):
   model.train()
   for i in range(E):
     for X, Y in dataloader:
-        optimizer.zero_grad()
-        out = model(X)
-        loss = loss_fn(out, Y.squeeze(dim=-1))
-        loss.backward()
-        optimizer.step()
+      X = X.to(device)
+      Y = Y.squeeze().long().to(device)       # [B]
+      assert len(Y.shape) == 1
+
+      optimizer.zero_grad()
+      logits = model(X)            # [B=32, NC=4]
+      loss = loss_fn(logits, Y)
+      loss.backward()
+      optimizer.step()
     logger.info(f'[Epoch: {i}] loss:{loss.item():.7f}')
 
 
@@ -64,8 +59,13 @@ def eval(model:LSTM, dataset:Datasets, config:Config):
   preds = []
   model.eval()
   for X, _ in dataloader:
-    out = model(X)                          # [B=1, O=6]
-    preds.append(out.numpy())
+    X = X.to(device)
+    Y = Y.squeeze().long().to(device)       # [B]
+    assert len(Y.shape) == 1
+
+    logits = model(X)                          # [B=1, O=6]
+    pred = logits.argmax(dim=-1)
+    preds.append(pred.numpy())
   pred: Frames = np.stack(preds, axis=0)    # [N, O]
   pred = np.expand_dims(pred, axis=-1)      # [N, O, D=1]
 
@@ -78,14 +78,3 @@ def infer(model:LSTM, x:Frame) -> Frame:
   y = model(x)
   y = y.numpy()
   return y
-
-
-def save(model:LSTM, log_dp:Path):
-  state_dict = model.state_dict()
-  save_checkpoint(state_dict, log_dp / 'model.pth')
-
-
-def load(model:LSTM, log_dp:Path) -> LSTM:
-  state_dict = load_checkpoint(model, log_dp / 'model.pth')
-  model.load_state_dict(state_dict)
-  return model

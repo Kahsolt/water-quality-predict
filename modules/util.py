@@ -23,6 +23,8 @@ from modules.typing import *
 plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
 plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging
 
@@ -109,7 +111,7 @@ def save_figure(fp:Path, title:str=None):
   logger.info(f'  save figure to {fp}')
 
 
-def load_checkpoint(model:PyTorchModel, fp:Path, device='cpu'):
+def load_checkpoint(model:PyTorchModel, fp:Path, device=device):
   logger.info(f'load model from {fp}')
   state_dict = torch.load(fp, map_location=device)
   model.load_state_dict(state_dict)

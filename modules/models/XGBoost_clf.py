@@ -10,7 +10,7 @@ from sklearn.model_selection import GridSearchCV
 from modules.util import get_metrics, logger
 from modules.preprocess import *
 from modules.typing import *
-from modules.models.XGBoost_rgr import init, train, save, load     # just proxy by
+from modules.models.XGBoost_rgr import train, save, load     # just proxy by
 
 TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 

@@ -24,7 +24,7 @@ def init(config:Config):
     d_hidden=config['d_hidden'],
     n_layers=config['n_layers'],
   )
-  return model
+  return model.to(device)
 
 
 def train(model:LSTM, dataset:Datasets, config:Config):
@@ -47,11 +47,14 @@ def train(model:LSTM, dataset:Datasets, config:Config):
   model.train()
   for i in range(E):
     for X, Y in dataloader:
-        optimizer.zero_grad()
-        out = model(X)
-        loss = loss_fn(out, Y.squeeze(dim=-1))
-        loss.backward()
-        optimizer.step()
+      X = X.to(device)
+      Y = Y.to(device)
+
+      optimizer.zero_grad()
+      y_hat = model(X)                    # [B=1, O=6]
+      loss = loss_fn(y_hat, Y.squeeze(dim=-1))
+      loss.backward()
+      optimizer.step()
     logger.info(f'[Epoch: {i}] loss:{loss.item():.7f}')
 
 
@@ -64,8 +67,11 @@ def eval(model:LSTM, dataset:Datasets, config:Config):
   preds = []
   model.eval()
   for X, _ in dataloader:
-    out = model(X)                          # [B=1, O=6]
-    preds.append(out.numpy())
+    X = X.to(device)
+    Y = Y.to(device)
+
+    y_hat = model(X)                        # [B=1, O=6]
+    preds.append(y_hat.numpy())
   pred: Frames = np.stack(preds, axis=0)    # [N, O]
   pred = np.expand_dims(pred, axis=-1)      # [N, O, D=1]
 
