@@ -5,7 +5,8 @@
 import joblib
 from pathlib import Path
 
-from xgboost import XGBRegressor, XGBRFRegressor
+import xgboost
+from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
 from modules.util import get_metrics, get_logger
@@ -16,7 +17,7 @@ TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
 def init(config:Config) -> GridSearchCV:
-  model: XGBRegressor = globals()[config['model']](
+  model: XGBRegressor = getattr(xgboost, [config['model']])(
     objective=config['objective'],
   )
   model_gs = GridSearchCV(model, **config['gs_params'])

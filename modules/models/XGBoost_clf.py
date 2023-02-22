@@ -4,7 +4,8 @@
 
 from pathlib import Path
 
-from xgboost import XGBClassifier, XGBRFClassifier
+import xgboost
+from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 
 from modules.util import get_metrics
@@ -16,7 +17,7 @@ TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
 
 
 def init(config:Config) -> GridSearchCV:
-  model: XGBClassifier = globals()[config['model']](
+  model: XGBClassifier = getattr(xgboost, [config['model']])(
     objective=config['objective'], 
   )
   model_gs = GridSearchCV(model, **config['gs_params'])

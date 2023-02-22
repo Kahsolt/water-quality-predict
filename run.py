@@ -15,8 +15,8 @@ from importlib import import_module
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from modules import preprocess
 from modules.dataset import *
-from modules.preprocess import *
 from modules.util import *
 from modules.typing import *
 
@@ -118,7 +118,7 @@ def require_model(fn:Callable[..., Any]):
   return wrapper
 
 def defined_preprocessor(proc:str) -> bool:
-  found = proc in globals()
+  found = hasattr(preprocess, proc)
   if not found: logger.error(f'  preprocessor {proc!r} not found!')
   else:         logger.info (f'  apply {proc}...')
   return found
@@ -161,13 +161,13 @@ def process_seq():
   global job, env
 
   df: TimeSeq = env['df']
-  _, df_r = split_time_and_data(df)
+  _, df_r = preprocess.split_time_and_data(df)
 
   if 'filter T':
     for proc in job_get('preprocess/filter_T', []):
       if not defined_preprocessor(proc): continue
       try:
-        df: TimeSeq = globals()[proc](df)
+        df: TimeSeq = getattr(preprocess, proc)(df)
         save_figure(env['log_dp'] / f'filter_T_{proc}.png')
       except: logger.error(format_exc())
 
@@ -176,14 +176,14 @@ def process_seq():
     assert proc and len(proc) == 1
     proc = proc[0]
     assert defined_preprocessor(proc)
-    try:    T, df = globals()[proc](df)
+    try:    T, df = getattr(preprocess, proc)[proc](df)
     except: logger.error(format_exc())
 
   if 'filter V':
     for proc in job_get('preprocess/filter_V', []):
       if not defined_preprocessor(proc): continue
       try:
-        df: Data = globals()[proc](df)
+        df: Data = getattr(preprocess, proc)[proc](df)
         save_figure(env['log_dp'] / f'filter_V_{proc}.png')
       except: logger.error(format_exc())
 
@@ -261,7 +261,7 @@ def process_transform():
     for proc in job_get('preprocess/transform', []):
       if not defined_preprocessor(proc): continue
       try:
-        seq, st = globals()[proc](seq)
+        seq, st = getattr(preprocess, proc)[proc](seq)
         stats.append((proc, st))
       except:
         logger.error(format_exc())
@@ -293,7 +293,7 @@ def process_transform():
 
     for (proc, st) in env['stats']:
       logger.info(f'  reapply {proc}...')
-      proc_fn = globals()[f'{proc}_apply']
+      proc_fn = getattr(preprocess, proc)[f'{proc}_apply']
       X_train = proc_fn(X_train, *st)
       X_test  = proc_fn(X_test,  *st)
       if env['label'] is None:          # is_task_rgr

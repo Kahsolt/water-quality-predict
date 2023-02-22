@@ -6,7 +6,7 @@ from modules.typing import *
 TASK_TYPE: ModelTask = None
 
 
-def init(params:Config) -> Model:
+def init(config:Config) -> Model:
   ''' init a model '''
   raise NotImplementedError
 

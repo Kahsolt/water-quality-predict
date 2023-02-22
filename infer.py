@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from modules.preprocess import *
+from modules import preprocess
 from modules.util import *
 from modules.typing import *
 import run as RT
@@ -175,7 +175,7 @@ class App:
     if 'inv preprocess' and is_task_rgr:
       for (proc, st) in stats:
         logger.debug(f'  apply inv of {proc}')
-        invproc = globals().get(f'{proc}_inv')
+        invproc = getattr(preprocess, f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)
         if args.draw_rolling:
