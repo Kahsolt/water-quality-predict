@@ -230,10 +230,11 @@ def process_dataset():
 
   inlen   = job_get('dataset/in')    ; assert inlen   > 0
   outlen  = job_get('dataset/out')   ; assert outlen  > 0
+  overlap = job_get('dataset/overlap', 0)
   n_train = job_get('dataset/train') ; assert n_train > 0
   n_eval  = job_get('dataset/eval')  ; assert n_eval  > 0
-  trainset = resample_frame_dataset(seq, inlen, outlen, n_train, y=label)
-  evalset  = resample_frame_dataset(seq, inlen, outlen, n_eval,  y=label)
+  trainset = resample_frame_dataset(seq, inlen, outlen, overlap, n_train, y=label)
+  evalset  = resample_frame_dataset(seq, inlen, outlen, overlap, n_eval,  y=label)
 
   logger.info(f'  train set')
   logger.info(f'    input:  {trainset[0].shape}')
@@ -316,7 +317,7 @@ def target_train():
   global job, env
 
   manager, model = env['manager'], env['model']
-  data = env['seq'] if 'ARIMA' in job_get('model/name') else env['dataset']
+  data = env['dataset'] if job_get('dataset') else env['seq']
   manager.train(model, data, job_get('model/config'))
   manager.save(model, env['log_dp'])
 
@@ -328,7 +329,7 @@ def target_eval():
 
   manager, model = env['manager'], env['model']
   model = manager.load(model, env['log_dp'])
-  data = env['dataset'] if job_get('model/dataset') else env['seq']
+  data = env['dataset'] if job_get('dataset') else env['seq']
   manager.eval(model, data, job_get('model/config'))
 
 

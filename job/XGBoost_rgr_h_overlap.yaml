@@ -1,0 +1,42 @@
+misc:
+  name: XGBoost_rgr_h_overlap
+  seed: 114514
+  target:
+    - all
+
+data:
+  - data/w21003.csv
+
+preprocess:
+  filter_T:
+    - ltrim_vacant
+  project:
+    - to_hourly
+  filter_V:
+    - remove_outlier
+    - wavlet_transform
+  transform:
+    - minmax_norm
+
+dataset:
+  train: 9000
+  eval: 1000
+  in: 168
+  out: 24
+  overlap: 8
+
+# ref: https://xgboost.readthedocs.io/en/stable/parameter.html
+model:
+  name: XGBoost_rgr
+  config:
+    model: XGBRegressor
+    objective: 'reg:squarederror'
+    gs_params:
+      param_grid:
+        max_depth: [3, 5]
+        n_estimators: [20]
+        learning_rate: [0.1, 0.15]
+      cv: 5
+      verbose: 2
+      n_jobs: -1
+      scoring: neg_median_absolute_error

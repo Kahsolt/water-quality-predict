@@ -152,34 +152,35 @@ class App:
     manager      = RT.env['manager']
     model: Model = RT.env['model']
     inlen: int   = RT.job_get('dataset/in')
+    overlap: int = RT.job_get('dataset/overlap')
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
       loc = L
       while loc < R:
         if self.is_model_arima:
-          y: Frame = manager.infer(model, loc)    # [1]
+          y: Frame = manager.infer(model, loc)  # [1]
         else:
           x = seq[loc-inlen:loc, :]
           x = frame_left_pad(x, inlen)          # [I, D]
           y: Frame = manager.infer(model, x)    # [O, D]
         preds.append(y)
-        loc += len(y)
+        loc += len(y) - overlap
       preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
 
     if 'predict with prediction (rolling)' and args.draw_rolling:
       preds: List[Frame] = []
       loc = L
       x = seq[loc-inlen:loc, :]
-      x = frame_left_pad(x, inlen)            # [I, D]
+      x = frame_left_pad(x, inlen)              # [I, D]
       while loc < R:
         if self.is_model_arima:
-          y: Frame = manager.infer(model, loc)    # [1]
+          y: Frame = manager.infer(model, loc)  # [1]
         else:
           y: Frame = manager.infer(model, x)    # [O, D]
         preds.append(y)
         x = frame_shift(x, y)
-        loc += len(y)
+        loc += len(y) - overlap
       preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
 
     if 'inv preprocess' and self.is_task_rgr:

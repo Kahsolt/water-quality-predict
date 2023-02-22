@@ -72,13 +72,13 @@ def encode_seq(x:Seq, T:Time, encode:Encode) -> Seq:
   label_func_params = encode.get('params') or {}
   return label_func(x, T, **label_func_params)
 
-def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, count:int=1000, y:Seq=None) -> Dataset:
+def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, count:int=1000, y:Seq=None) -> Dataset:
   ''' 在时间序列上重采样切片，知 inlen 推 outlen '''
 
   # x.shape: [T, D]
   assert len(x.shape) == 2
 
-  seg_size = inlen + outlen
+  seg_size = inlen + outlen - overlap
   rlim = len(x) - seg_size
   if y is None: y = x
 
@@ -87,8 +87,8 @@ def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, count:int=1000, y:S
     r = np.random.randint(0, rlim)
     seg_x = x[r:r+seg_size, :]
     seg_y = y[r:r+seg_size, :]
-    X.append(seg_x[:inlen])   # [I, D], FrameIn
-    Y.append(seg_y[inlen:])   # [O, D], FrameOut
+    X.append(seg_x[:inlen])           # [I, D], FrameIn
+    Y.append(seg_y[inlen-overlap:])   # [O, D], FrameOut
   X: Frames = np.stack(X, axis=0)     # [N, I, D]
   Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
 
