@@ -22,7 +22,7 @@ preprocess:
     - minmax_norm
 
 dataset:
-  train: 10000
+  train: 9000
   eval: 1000
   in: 168
   out: 24
