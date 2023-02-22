@@ -1,0 +1,10 @@
+scikit-learn
+scikit-learn-intelex
+torch
+pmdarima
+xgboost
+scipy
+numpy
+pandas
+matplotlib
+pywt

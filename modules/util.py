@@ -52,6 +52,12 @@ def seed_everything(seed:int):
   torch.backends.cudnn.deterministic = True
   torch.backends.cudnn.benchmark = False
 
+  try:
+    from sklearnex import patch_sklearn
+    patch_sklearn()
+  except ImportError:
+    pass
+
 def timestr() -> str:
   return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-').split('.')[0]
 
