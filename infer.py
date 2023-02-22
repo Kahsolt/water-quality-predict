@@ -110,6 +110,7 @@ class App:
     assert name
     log_dp: Path = args.log_path / name
     assert log_dp.exists()
+    RT.env.clear()
     RT.env['log_dp'] = log_dp
     seed_everything(RT.job_get('misc/seed'))
 
@@ -119,6 +120,9 @@ class App:
     def load_model_and_data():
       RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
     load_model_and_data()
+
+    self.is_task_rgr = RT.env['manager'].TASK_TYPE == 'rgr'
+    logger.info(f'  is_task_rgr: {self.is_task_rgr}', )
 
     seq: Seq = RT.env['seq']
     inlen: int = RT.job_get('dataset/in')
@@ -147,7 +151,6 @@ class App:
     manager      = RT.env['manager']
     model: Model = RT.env['model']
     inlen: int   = RT.job_get('dataset/in')
-    is_task_rgr  = manager.TASK_TYPE == 'rgr'
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
@@ -172,9 +175,9 @@ class App:
         loc += len(y)
       preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
 
-    if 'inv preprocess' and is_task_rgr:
+    if 'inv preprocess' and self.is_task_rgr:
       for (proc, st) in stats:
-        logger.debug(f'  apply inv of {proc}')
+        logger.info(f'  apply inv of {proc}')
         invproc = getattr(preprocess, f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)
@@ -182,26 +185,26 @@ class App:
           preds_r = invproc(preds_r, *st)
 
     if 'select range & channel':
-      if is_task_rgr: truth = seq  [L:R, 0]
+      if self.is_task_rgr: truth = seq  [L:R, 0]
       else:           truth = label[L:R, 0]
       preds_o = preds_o[:R-L+1, 0]      # [T'=R-L+1]
       if args.draw_rolling:
         preds_r = preds_r[:R-L+1, 0]    # [T'=R-L+1]
 
     if 'show acc':
-      if is_task_rgr:
+      if self.is_task_rgr:
         mae = np.abs(truth - preds_o).mean()
-        logger.debug(f'>> mae: {mae:.3%}')
+        logger.info(f'>> mae: {mae}')
       else:
         acc = (truth == preds_o).sum() / len(truth)
-        logger.debug(f'>> acc: {acc:.3%}')
+        logger.info(f'>> acc: {acc:.3%}')
 
     self.ax.cla()
     self.ax.plot(truth,   'b', label='truth')
     self.ax.plot(preds_o, 'r', label='pred (oracle)')
     if args.draw_rolling:
       self.ax.plot(preds_r, 'g', label='pred (rolling)')
-    if not is_task_rgr:
+    if not self.is_task_rgr:
       self.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     self.fig.legend()
     self.fig.tight_layout()

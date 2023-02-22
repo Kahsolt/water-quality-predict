@@ -16,13 +16,13 @@ preprocess:
     - remove_outlier
     - wavlet_transform
   transform:
-    - log
+    - minmax_norm
 
 dataset:
   train: 10000
   eval: 1000
   in: 72
-  out: 1
+  out: 1            # must be 1 for clf
   encode:
     name: ex_thresh_24h
     params:

@@ -19,7 +19,7 @@ preprocess:
     - remove_outlier
     - wavlet_transform
   transform:
-    - log
+    - minmax_norm
 
 dataset:
   train: 10000
