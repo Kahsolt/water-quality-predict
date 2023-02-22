@@ -15,7 +15,30 @@ from modules.typing import *
 
 ''' filter_T: 数据选择 '''
 def ltrim_vacant(df:TimeSeq) -> TimeSeq:
-  # TODO: 沿时间线向前回溯，若遇到长度大于 168(一周) 的数据空白期，则丢弃之前的所有数据
+  logger = get_logger()
+
+  def count_consecutive_nan(x:Series) -> Series:
+    arr: List[float] = x.to_numpy()
+    mask = np.isnan(arr).astype(int)
+    for i in range(1, len(mask)):
+      if mask[i]:
+        mask[i] += mask[i-1]
+    return Series(mask)
+
+  tmstr = df.iloc[0][df.columns[0]]
+  if ' ' in tmstr:    # hourly, '2021/1/1 00:00:00'
+    limit = 168
+  else:               # daily, '2021/1/1'
+    limit = 7
+
+  lendf = len(df)
+  cnt = df[df.columns[1:]].apply(count_consecutive_nan)
+  for i in range(lendf-1, -1, -1):
+    if cnt.iloc[i].max() > limit:
+      break
+  df = df.iloc[i:]
+  logger.info(f'  ltrim_vacant: {lendf} => {len(df)}')
+
   return df
 
 

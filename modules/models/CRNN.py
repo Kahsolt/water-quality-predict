@@ -79,8 +79,8 @@ def prepare_for_train(model:PyTorchModel, dataset:Datasets, config:Config):
 
 
 def prepare_for_eval(model:PyTorchModel, dataset:Datasets, config:Config):
-  _, evalset = dataset
-  _, y_test = evalset
+  evalset = dataset[1]
+  y_test = evalset[1]
   dataloader = DataLoader(FrameDataset(evalset), batch_size=1, shuffle=False, pin_memory=False)
 
   return dataloader, y_test
