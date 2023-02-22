@@ -55,6 +55,7 @@ def seed_everything(seed:int):
   try:
     from sklearnex import patch_sklearn
     patch_sklearn()
+    print('>> extension "sklearn-intelex" enabled for speeding up, comment above line if you found it actually slows down or gets compatiblilty error')
   except ImportError:
     pass
 

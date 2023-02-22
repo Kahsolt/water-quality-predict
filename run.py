@@ -61,6 +61,14 @@ def job_set(path:str, value=None, overwrite=False) -> Any:
     r[key] = value
   return r[key]
 
+def timer(fn:Callable[..., Any]):
+  def wrapper(*args, **kwargs):
+    t = time()
+    r = fn(*args, **kwargs)
+    print(f'All things done in {time() - t:.3f}s')
+    return r
+  return wrapper
+
 def task(fn:Callable[..., Any]):
   def wrapper(*args, **kwargs):
     task = fn.__name__.split('_')[-1]
@@ -333,6 +341,7 @@ def target_eval():
   manager.eval(model, data, job_get('model/config'))
 
 
+@timer
 def run(args):
   global job, env, logger
 
