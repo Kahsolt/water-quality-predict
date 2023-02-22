@@ -10,11 +10,11 @@ def init(config:Config) -> Model:
   ''' init a model '''
   raise NotImplementedError
 
-def train(model:Model, dataset:Datasets, config:Config):
+def train(model:Model, data:Union[Datasets, Seq], config:Config):
   ''' fit model with train dataset '''
   raise NotImplementedError
 
-def eval(model:Model, dataset:Datasets, config:Config):
+def eval(model:Model, data:Union[Datasets, Seq], config:Config):
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 

@@ -121,13 +121,14 @@ class App:
       RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
     load_model_and_data()
 
+    self.is_model_arima = 'ARIMA' in name
     self.is_task_rgr = RT.env['manager'].TASK_TYPE == 'rgr'
-    logger.info(f'  is_task_rgr: {self.is_task_rgr}', )
+    logger.info(f'  is_task_rgr: {self.is_task_rgr}')
 
     seq: Seq = RT.env['seq']
-    inlen: int = RT.job_get('dataset/in')
     logger.info(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
+    inlen: int = RT.job_get('dataset/in', 72)
     res = max(seqlen // 100, inlen)
     tick = round(seqlen // 10 / 100) * 100
 
@@ -156,9 +157,12 @@ class App:
       preds: List[Frame] = []
       loc = L
       while loc < R:
-        x = seq[loc-inlen:loc, :]
-        x = frame_left_pad(x, inlen)          # [I, D]
-        y: Frame = manager.infer(model, x)    # [O, D]
+        if self.is_model_arima:
+          y: Frame = manager.infer(model, loc)    # [1]
+        else:
+          x = seq[loc-inlen:loc, :]
+          x = frame_left_pad(x, inlen)          # [I, D]
+          y: Frame = manager.infer(model, x)    # [O, D]
         preds.append(y)
         loc += len(y)
       preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
@@ -169,7 +173,10 @@ class App:
       x = seq[loc-inlen:loc, :]
       x = frame_left_pad(x, inlen)            # [I, D]
       while loc < R:
-        y: Frame = manager.infer(model, x)    # [O, D]
+        if self.is_model_arima:
+          y: Frame = manager.infer(model, loc)    # [1]
+        else:
+          y: Frame = manager.infer(model, x)    # [O, D]
         preds.append(y)
         x = frame_shift(x, y)
         loc += len(y)
@@ -177,7 +184,7 @@ class App:
 
     if 'inv preprocess' and self.is_task_rgr:
       for (proc, st) in stats:
-        logger.info(f'  apply inv of {proc}')
+        logger.debug(f'  apply inv of {proc}')
         invproc = getattr(preprocess, f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)

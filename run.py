@@ -76,22 +76,18 @@ def require_data(fn:Callable[..., Any]):
     global env
 
     if 'seq' not in env:
-      seq = load_pickle(env['log_dp'] / SEQ_FILE)
-      assert seq is not None
-      env['seq'] = seq
+      env['seq'] = load_pickle(env['log_dp'] / SEQ_FILE)
+      assert env['seq'] is not None
 
     if 'stats' not in env:
       stats = load_pickle(env['log_dp'] / STATS_FILE)
       env['stats'] = stats if stats is not None else []
 
     if 'dataset' not in env:
-      dataset = load_pickle(env['log_dp'] / DATASET_FILE)
-      assert dataset is not None
-      env['dataset'] = dataset
+      env['dataset'] = load_pickle(env['log_dp'] / DATASET_FILE)
 
     if 'label' not in env:
-      label = load_pickle(env['log_dp'] / LABEL_FILE)
-      env['label'] = label
+      env['label'] = load_pickle(env['log_dp'] / LABEL_FILE)
 
     return fn(*args, **kwargs)
   return wrapper
@@ -222,6 +218,8 @@ def process_dataset():
   T: Time  = env['T']
   seq: Seq = env['seq']
 
+  if not job_get('dataset'): return
+
   encode: Encode = job_get('dataset/encode')
   if encode is not None:    # clf
     label = encode_seq(seq, T, encode)
@@ -288,7 +286,7 @@ def process_transform():
     env['seq']   = seq
     env['stats'] = stats
 
-  if 'reapply stats on dataset':
+  if 'reapply stats on dataset' and env.get('dataset'):
     (X_train, y_train), (X_test, y_test) = env['dataset']
 
     for (proc, st) in env['stats']:
@@ -318,7 +316,8 @@ def target_train():
   global job, env
 
   manager, model = env['manager'], env['model']
-  manager.train(model, env['dataset'], job_get('model/config'))
+  data = env['seq'] if 'ARIMA' in job_get('model/name') else env['dataset']
+  manager.train(model, data, job_get('model/config'))
   manager.save(model, env['log_dp'])
 
 @require_data
@@ -329,9 +328,10 @@ def target_eval():
 
   manager, model = env['manager'], env['model']
   model = manager.load(model, env['log_dp'])
-  manager.eval(model, env['dataset'], job_get('model/config'))
+  data = env['dataset'] if job_get('model/dataset') else env['seq']
+  manager.eval(model, data, job_get('model/config'))
 
-  
+
 def run(args):
   global job, env, logger
 
