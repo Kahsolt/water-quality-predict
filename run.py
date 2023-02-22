@@ -176,14 +176,14 @@ def process_seq():
     assert proc and len(proc) == 1
     proc = proc[0]
     assert defined_preprocessor(proc)
-    try:    T, df = getattr(preprocess, proc)[proc](df)
+    try:    T, df = getattr(preprocess, proc)(df)
     except: logger.error(format_exc())
 
   if 'filter V':
     for proc in job_get('preprocess/filter_V', []):
       if not defined_preprocessor(proc): continue
       try:
-        df: Data = getattr(preprocess, proc)[proc](df)
+        df: Data = getattr(preprocess, proc)(df)
         save_figure(env['log_dp'] / f'filter_V_{proc}.png')
       except: logger.error(format_exc())
 
@@ -261,7 +261,7 @@ def process_transform():
     for proc in job_get('preprocess/transform', []):
       if not defined_preprocessor(proc): continue
       try:
-        seq, st = getattr(preprocess, proc)[proc](seq)
+        seq, st = getattr(preprocess, proc)(seq)
         stats.append((proc, st))
       except:
         logger.error(format_exc())
@@ -293,7 +293,7 @@ def process_transform():
 
     for (proc, st) in env['stats']:
       logger.info(f'  reapply {proc}...')
-      proc_fn = getattr(preprocess, proc)[f'{proc}_apply']
+      proc_fn = getattr(preprocess, f'{proc}_apply')
       X_train = proc_fn(X_train, *st)
       X_test  = proc_fn(X_test,  *st)
       if env['label'] is None:          # is_task_rgr
