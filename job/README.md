@@ -23,7 +23,7 @@ preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内�
   filter_T:
     - string
   project:
-    - string        # 第一项必须在 ['to_hourly', 'to_daily'] 里二选一
+    - string        # 必须在 ['to_hourly', 'to_daily'] 里二选一
   filter_V:
     - string
   transform:

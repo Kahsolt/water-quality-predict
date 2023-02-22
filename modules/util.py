@@ -105,6 +105,8 @@ def get_metrics(truth, pred, task:ModelTask='clf') -> Tuple[float, ...]:
     return mae, mse, r2
 
 def save_figure(fp:Path, title:str=None):
+  if not plt.gcf().axes: return
+
   plt.tight_layout()
   plt.suptitle(title)
   plt.savefig(fp, dpi=400)

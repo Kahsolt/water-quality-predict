@@ -70,14 +70,13 @@ def remove_outlier(df:Data) -> Data:
 
       tmp.append((arr, 'interp'))
 
-    if not 'show debug':
+    if 'draw plot':
       plt.clf()
       n_fig = len(tmp)
       for i, (arr, title) in enumerate(tmp):
         plt.subplot(n_fig, 1, i+1)
         plt.plot(arr)
         plt.title(title)
-      plt.show()
 
     return Series(arr)
 
@@ -101,14 +100,13 @@ def wavlet_transform(df:Data, wavelet:str='db8', threshold:float=0.04) -> Data:
 
       tmp.append((arr, 'wavlet'))
 
-    if not 'show debug':
+    if 'draw plot':
       plt.clf()
       n_fig = len(tmp)
       for i, (arr, title) in enumerate(tmp):
         plt.subplot(n_fig, 1, i+1)
         plt.plot(arr)
         plt.title(title)
-      plt.show()
 
     return Series(arr)
 
