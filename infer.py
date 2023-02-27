@@ -152,7 +152,7 @@ class App:
     manager      = RT.env['manager']
     model: Model = RT.env['model']
     inlen: int   = RT.job_get('dataset/in')
-    overlap: int = RT.job_get('dataset/overlap')
+    overlap: int = RT.job_get('dataset/overlap', 0)
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
