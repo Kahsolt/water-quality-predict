@@ -24,12 +24,12 @@ def train(model:AutoARIMA, seq:Seq, config:Config):
   get_logger().info(model.summary())
 
 
-def eval(model:AutoARIMA, seq:Seq, config:Config):
+def eval(model:AutoARIMA, seq:Seq, config:Config) -> EvalMetrics:
   seq = seq.squeeze()
   seqlen = len(seq)
   start = seqlen // 4
   pred = model.predict_in_sample(start=start, end=seqlen-1)
-  get_metrics(seq[:-start], pred, task=TASK_TYPE)
+  return get_metrics(seq[:-start], pred, task=TASK_TYPE)
 
 
 def infer(model:AutoARIMA, x:int) -> Frame:

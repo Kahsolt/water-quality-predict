@@ -14,7 +14,7 @@ def train(model:Model, data:Union[Datasets, Seq], config:Config):
   ''' fit model with train dataset '''
   raise NotImplementedError
 
-def eval(model:Model, data:Union[Datasets, Seq], config:Config):
+def eval(model:Model, data:Union[Datasets, Seq], config:Config) -> EvalMetrics:
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 

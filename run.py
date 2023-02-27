@@ -338,12 +338,37 @@ def target_eval():
   manager, model = env['manager'], env['model']
   model = manager.load(model, env['log_dp'])
   data = env['dataset'] if job_get('dataset') else env['seq']
-  manager.eval(model, data, job_get('model/config'))
+  stats = manager.eval(model, data, job_get('model/config'))
+
+  TASK_TYPE = job_get('model/name').split('_')[-1]
+  if   TASK_TYPE == 'clf':
+    prec, recall, f1 = stats
+    lines = [
+      f'prec: {prec}',
+      f'recall: {recall}',
+      f'f1: {f1}',
+    ]
+  elif TASK_TYPE == 'rgr':
+    mae, mse, r2 = stats
+    lines = [
+      f'mae: {mae}',
+      f'mse: {mse}',
+      f'r2: {r2}',
+    ]
+  else:
+    raise ValueError(f'unknown task {task!r}')
+
+  with open(env['log_dp'] / 'metric.txt', 'w', encoding='utf-8') as fh:
+    fh.write('\n'.join(lines))
 
 
 @timer
 def run(args):
   global job, env, logger
+
+  job = None
+  env = { }
+  logger = logger
 
   job = load_job(args.job_file)
 

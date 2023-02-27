@@ -55,3 +55,6 @@ ModelTask = Union[
   Literal['clf'],       # 分类
   Literal['rgr'],       # 回归
 ]
+
+# 评估结果
+EvalMetrics = Tuple[float, ...]

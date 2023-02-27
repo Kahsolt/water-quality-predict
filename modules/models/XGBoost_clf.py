@@ -32,10 +32,10 @@ def infer(model:GridSearchCV, x:Frame) -> Frame:
   return y
 
 
-def eval(model:GridSearchCV, dataset:Datasets, config:Config):
+def eval(model:GridSearchCV, dataset:Datasets, config:Config) -> EvalMetrics:
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]
   y_test = y_test.squeeze(axis=-1)  # [N, O]
   pred = model.predict(X_test)      # [N, I] => [N, O]
-  get_metrics(y_test, pred, task=TASK_TYPE)
+  return get_metrics(y_test, pred, task=TASK_TYPE)

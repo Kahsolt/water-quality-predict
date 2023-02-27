@@ -123,10 +123,10 @@ class App:
 
     self.is_model_arima = 'ARIMA' in name
     self.is_task_rgr = RT.env['manager'].TASK_TYPE == 'rgr'
-    logger.info(f'  is_task_rgr: {self.is_task_rgr}')
+    print(f'  is_task_rgr: {self.is_task_rgr}')
 
     seq: Seq = RT.env['seq']
-    logger.info(f'  seq.shape: {seq.shape}')
+    print(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
     inlen: int = RT.job_get('dataset/in', 72)
     res = max(seqlen // 100, inlen)
@@ -185,7 +185,7 @@ class App:
 
     if 'inv preprocess' and self.is_task_rgr:
       for (proc, st) in stats:
-        logger.debug(f'  apply inv of {proc}')
+        #print(f'  apply inv of {proc}')
         invproc = getattr(preprocess, f'{proc}_inv')
         seq     = invproc(seq,   *st)
         preds_o = invproc(preds_o, *st)
@@ -202,10 +202,10 @@ class App:
     if 'show acc':
       if self.is_task_rgr:
         mae = np.abs(truth - preds_o).mean()
-        logger.info(f'>> mae: {mae}')
+        print(f'>> mae: {mae}')
       else:
         acc = (truth == preds_o).sum() / len(truth)
-        logger.info(f'>> acc: {acc:.3%}')
+        print(f'>> acc: {acc:.3%}')
 
     self.ax.cla()
     self.ax.plot(truth,   'b', label='truth')

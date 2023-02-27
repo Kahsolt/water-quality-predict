@@ -58,7 +58,7 @@ def train(model:CRNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def eval(model:CRNN, dataset:Datasets, config:Config):
+def eval(model:CRNN, dataset:Datasets, config:Config) -> EvalMetrics:
   dataloader, y_test = prepare_for_eval(model, dataset, config)
 
   preds = []
@@ -69,7 +69,7 @@ def eval(model:CRNN, dataset:Datasets, config:Config):
     preds.append(y_hat.cpu().numpy())
 
   pred: Frames = np.concatenate(preds, axis=0)                  # [N, O=6]
-  get_metrics(y_test.squeeze(axis=-1), pred, task=TASK_TYPE)    # [N, O=6]
+  return get_metrics(y_test.squeeze(axis=-1), pred, task=TASK_TYPE)    # [N, O=6]
 
 
 @torch.inference_mode()

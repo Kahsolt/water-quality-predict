@@ -91,7 +91,7 @@ def save_job(job:Job, fp:Path) -> Job:
     yaml.safe_dump(job, fh, sort_keys=False)
 
 
-def get_metrics(truth, pred, task:ModelTask='clf') -> Tuple[float, ...]:
+def get_metrics(truth, pred, task:ModelTask='clf') -> EvalMetrics:
   global logger
 
   assert task in ['clf', 'rgr'], ValueError(f'unknown task {task!r}')
