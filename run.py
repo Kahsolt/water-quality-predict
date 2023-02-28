@@ -239,10 +239,17 @@ def process_dataset():
   inlen   = job_get('dataset/in')    ; assert inlen   > 0
   outlen  = job_get('dataset/out')   ; assert outlen  > 0
   overlap = job_get('dataset/overlap', 0)
-  n_train = job_get('dataset/train') ; assert n_train > 0
-  n_eval  = job_get('dataset/eval')  ; assert n_eval  > 0
-  trainset = resample_frame_dataset(seq, inlen, outlen, overlap, n_train, y=label)
-  evalset  = resample_frame_dataset(seq, inlen, outlen, overlap, n_eval,  y=label)
+  meth    = job_get('dataset/method', 'split')
+  if meth == 'split':
+    r = job_get('dataset/split_ratio', 0.2)
+    trainset, evalset = split_frame_dataset(seq, inlen, outlen, overlap, r, y=label)
+  elif meth == 'resample':
+    n_train  = job_get('dataset/train', 9000) ; assert n_train > 0
+    n_eval   = job_get('dataset/eval',  1000) ; assert n_eval  > 0
+    trainset = resample_frame_dataset(seq, inlen, outlen, overlap, n_train, y=label)
+    evalset  = resample_frame_dataset(seq, inlen, outlen, overlap, n_eval,  y=label)
+  else:
+    raise ValueError(f'unknown method: {meth}')
 
   logger.info(f'  train set')
   logger.info(f'    input:  {trainset[0].shape}')

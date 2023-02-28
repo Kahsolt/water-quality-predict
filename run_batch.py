@@ -16,6 +16,42 @@ def run_batch(args):
     args.job_file = job_file
     run(args)
 
+  clf_tasks, rgr_tasks = [], []
+  for log_folder in args.log_path.iterdir():
+    if log_folder.is_file(): continue
+    with open(log_folder / 'metric.txt', 'r', encoding='utf-8') as fh:
+      data = fh.read().strip()
+
+    expname = log_folder.name
+    if 'mse' in data:
+      mae, mse, r2 = [float(line.split(':')[-1].strip()) for line in data.split('\n')]
+      rgr_tasks.append((r2, expname))
+    elif 'f1' in data:
+      prec, recall, f1 = [float(line.split(':')[-1].strip()) for line in data.split('\n')]
+      clf_tasks.append((f1, expname))
+    else:
+      print(f'Error: cannot decide task_type for {expname}')
+
+  clf_tasks.sort(reverse=True)
+  rgr_tasks.sort(reverse=True)
+
+  with open(args.log_path / 'metric-ranklist.txt', 'w', encoding='utf-8') as fh:
+    def log(s=''):
+      fh.write(s + '\n')
+      print(s)
+    
+    if clf_tasks:
+      log('[clf] F1 score:')
+      for score, name in clf_tasks:
+        log(f'{name}: {score}')
+    log()
+
+    if rgr_tasks:
+      log('[rgr] R2 score:')
+      for score, name in rgr_tasks:
+        log(f'{name}: {score}')
+    log()
+
 
 if __name__ == '__main__':
   parser = ArgumentParser()

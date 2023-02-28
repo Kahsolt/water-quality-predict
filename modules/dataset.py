@@ -2,6 +2,8 @@
 # Author: Armit
 # Create Time: 2023/02/19 
 
+from random import shuffle
+
 import torch
 from torch.utils.data import DataLoader
 import numpy as np
@@ -93,6 +95,35 @@ def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, coun
   Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
 
   return X, Y
+
+def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split_ratio:float=0.2, y:Seq=None) -> Datasets:
+  ''' 在时间序列上非重采样切片，知 inlen 推 outlen '''
+
+  # x.shape: [T, D]
+  assert len(x.shape) == 2
+
+  seg_size = inlen + outlen - overlap
+  rlim = len(x) - seg_size
+  if y is None: y = x
+
+  XY = []
+  for r in range(rlim):
+    seg_x = x[r:r+seg_size, :]
+    seg_y = y[r:r+seg_size, :]
+    XY.append((seg_x[:inlen],           # [I, D], FrameIn
+               seg_y[inlen-overlap:]))  # [O, D], FrameOut
+  shuffle(XY)
+
+  X = [x for x, _ in XY]
+  Y = [y for _, y in XY]
+  X: Frames = np.stack(X, axis=0)     # [N, I, D]
+  Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
+
+  cp = int(len(X) * split_ratio)
+  X_eval, X_train = X[:cp, ...], X[cp:, ...]
+  Y_eval, Y_train = Y[:cp, ...], Y[cp:, ...]
+
+  return (X_train, Y_train), (X_eval, Y_eval)
 
 
 class FrameDataset(torch.utils.data.Dataset):

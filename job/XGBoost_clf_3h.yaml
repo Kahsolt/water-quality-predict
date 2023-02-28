@@ -19,8 +19,8 @@ preprocess:
     - minmax_norm
 
 dataset:
-  train: 9000
-  eval: 1000
+  method: split
+  split_ratio: 0.2
   in: 24
   out: 1            # must be 1 for clf
   encode:
