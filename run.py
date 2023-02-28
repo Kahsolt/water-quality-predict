@@ -375,7 +375,6 @@ def run(args):
 
   job = None
   env = { }
-  logger = logger
 
   job = load_job(args.job_file)
 
