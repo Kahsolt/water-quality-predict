@@ -9,3 +9,4 @@ pandas
 matplotlib
 pywt
 Flask
+requests
