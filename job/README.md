@@ -1,24 +1,17 @@
-# 任务描述文件
+# 工作描述文件
 
-    用于描述一个完整的任务过程
+    用于描述一个完整的预测器工作流程
 
 ----
 
 => 参考 [YMAL语法](https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html)
 
+⚠ 文件名 **必须** 以 `rgr_` 或者 `clf_` 开头，代表任务类型分别为 `回归` 和 `分类`
 
-⚪ 数据类型
 
-```yml
-misc:
-  name: string      # 唯一任务名，留空会默认分配
-  seed: int         # 全局随机数种子
-  target:
-    - string        # 任务目标列表，可选项为 modules/typing.py 文件内 RunTarget 各选项
+⚪ 数据模式
 
-data:
-  - string          # 数据源，csv文件路径
-
+```yaml
 preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内节的各函数名
   filter_T:
     - string
@@ -43,6 +36,8 @@ model:
   name: string      # 模型单元，可选项为 modules/models 目录下各文件名
   config:           # 依模型单元不同设置项也不同，详见各模板
     [key: value]
+  
+seed: int           # 全局随机数种子
 ```
 
 ----
