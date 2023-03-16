@@ -12,7 +12,7 @@ from modules.typing import *
 from modules.models.CRNN import *
 from modules.models.CRNN_rgr import init, save, load     # just proxy by
 
-TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
+TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
 def train(model:CRNN, dataset:Datasets, config:Config):

@@ -3,7 +3,7 @@
 from pathlib import Path
 from modules.typing import *
 
-TASK_TYPE: ModelTask = None
+TASK_TYPE: TaskType = None
 
 
 def init(config:Config) -> Model:

@@ -24,14 +24,15 @@ interface {
 
 ### Data 数据
 
-Time sequence data are store as a single *.csv file.
+Time sequence data are store as a **single** `data.csv` file for each task.  
+=> To pre-merge multiple *.csv files, see [POST /merge_csv](#post-merge_csv-合并多个csv文件)
 
 ⚪ Regression
 
 Can conatin **multiple** columns:
 
   - First column: datetime string in ISO format
-  - Rest columns: value reading from sensors, usually float numbers
+  - Rest columns: float values reading from sensors
 
 ```csv
 monitorTime,monitorAvgValue
@@ -53,17 +54,49 @@ monitorTime,monitorAvgValue,label
 
 ----
 
-### POST /task 创建新任务
+### Enums 枚举常量
 
-see also [Data](#data-数据)
+```cpp
+enum TaskType {
+  rgr,        // 分类
+  clf,        // 回归
+};
+enum TaskTarget {
+  data,       // 数据 := 数值预处理 + 打分类标签 + 划分数据集
+  train,      // 训练
+  eval,       // 评估
+  all,        // 全部
+};
+enum TaskStatus {
+  created,    // 创建任务
+  queuing,    // 执行队列中等待
+  running,    // 正在执行中
+  finished,   // 已完成
+};
+```
+
+----
+
+### POST /merge_csv 合并多个csv文件
 
 ```typescript
 // request
-// <= *.csv file, see `GET /template.csv`
+// <= multiple *.csv files
+
+// response
+// => data.csv
+```
+
+### POST /task 创建新任务并运行
+
+```typescript
+// request
+// <= single *.csv file
 interface {
-  type: str,          // task type, 'rgr' or 'clf'
+  type: str,          // task type, choose from `TaskType`
+  target?: str[],     // task target, choose from `TaskTarget`, default to 'all'
+  jobs?: str[],       // scheduled jobs, default to all applicable jobs
   name?: str,         // custom task name
-  jobs?: str[],       // target jobs, defaults to all available jobs
 }
 
 // response
@@ -72,12 +105,30 @@ interface {
 }
 ```
 
+### POST /task/\<name\> 更新任务并重新运行
+
+ℹ 主要用于数据更新，修改作业项，或者想从头制作数据集重新开始 :(
+
+```typescript
+// request
+// <= single *.csv file (optional), **replacing** the old one
+interface {
+  target?: str[],     // task target, choose from `TaskTarget`
+  jobs?: str[],       // scheduled jobs, default to all applicable jobs
+}
+```
+
 ### GET [/task](/task) 列出任务记录
 
 ```typescript
+// request
+interface {
+  status: str[],      // filter by task status, choose from `TaskStatus`
+}
+
 // response
 interface {
-  tasks: str[],        // name
+  tasks: str[],       // task name
 }
 ```
 
@@ -86,20 +137,18 @@ interface {
 ```typescript
 // response
 interface {
-  status: str,        // 'created', 'running', 'finsihed'
+  type: str,          // task type, choose from `TaskType`
+  status: str,        // task status, choose from `TaskStatus`
   best?: str,         // job name
   jobs?: {
-    "job_name": {
-      type: str,      // 'clf' or 'rgr'
-      metrcis: {      // for 'clf'
-        pres: float,
-        recall: float,
-        f1: float,
-      } | {           // for 'rgr'
-        mae: float,
-        mse: float,
-        r2: float,
-      },
+    "job_name": {     // metrics for 'clf' task
+      pres: float,
+      recall: float,
+      f1: float,
+    } | {             // metrics for 'rgr' task
+      mae: float,
+      mse: float,
+      r2: float,
     },
   },
   ts_create: int,     // task create time
@@ -107,7 +156,7 @@ interface {
 }
 ```
 
-### PUT /task/\<name\> 重新运行任务
+
 
 ### DELETE /task/\<name\> 删除任务记录
 
@@ -116,16 +165,16 @@ interface {
 
 ----
 
-### GET [/job](/job) 列出任务模板
+### GET [/job](/job) 列出作业模板
 
 ```typescript
 // response
 interface {
-  jobs: str[],        // name
+  jobs: str[],        // job name
 }
 ```
 
-### GET /job/\<name\> 查询任务模板
+### GET /job/\<name\> 下载/查询作业模板
 
 ```typescript
 // request
@@ -134,7 +183,7 @@ interface {
 }
 
 // response
-// => *.yaml file or 
+// => <job_name>.yaml file or 
 interface {
   job: {
     // config items converted from *.yaml
@@ -142,14 +191,14 @@ interface {
 }
 ```
 
-### POST /job/\<name\> 上传任务模板
+### POST /job/\<name\> 上传作业模板
 
 ```typescript
-// request
+// request:
+// NOTE: <name> in url must starts with 'rgr_' or 'clf_'
 // <= *.yaml file
 interface {
-  name?: str,         // job file name, must starts with 'rgr_' or 'clf_'
-  overwrite?: bool,   // overwrite if exists
+  overwrite?: bool,   // overwrite if exists, default to false
 }
 ```
 
@@ -165,7 +214,7 @@ interface {
 ```typescript
 // request
 interface {
-  job?: str,          // defaults to the best
+  job?: str,          // default to the best job
   data: str,          // base64 codec of input.flatten(): np.array
   shape: int[],       // shape of input: np.ndarray
 }
@@ -179,7 +228,35 @@ interface {
 
 ----
 
+### GET /log/\<task_name\> 打包下载任务文件夹
+
+```typescript
+// response
+// => <task_name>.zip
+```
+
+### GET /log/\<task_name\>/\<job_name\> 打包下载作业文件夹
+
+```typescript
+// response
+// => <task_name>-<job_name>.zip
+```
+
+### GET /log/\<task_name\>/\<job_name\>.log 查看作业日志
+
+```typescript
+// response
+// => plain html page
+```
+
+----
+
 ### GET [/debug](/debug) 系统运行时信息
+
+```typescript
+// response
+// => plain html page
+```
 
 ----
 

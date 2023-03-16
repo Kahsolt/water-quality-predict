@@ -33,10 +33,10 @@ Time = Series
 Data = DataFrame
 TimeAndData = Tuple[Time, Data]
 # 预处理后的数据帧序列
-Seq     = ndarray      # [T, D]
-Array   = ndarray      # [T]
-Frame   = ndarray      # [I/O, D]
-Frames  = ndarray      # [N, I/O, D]
+Seq    = ndarray      # [T, D]
+Array  = ndarray      # [T]
+Frame  = ndarray      # [I/O, D]
+Frames = ndarray      # [N, I/O, D]
 # 预处理过程中记录的一些统计量
 Stat  = Tuple[Any]
 Stats = List[Tuple[str, Stat]]
@@ -51,10 +51,18 @@ CachedData = Union[Seq, Stats, Datasets]
 Model = object()
 PyTorchModel = Module
 # 模型任务类型
-ModelTask = Union[
-  Literal['clf'],       # 分类
-  Literal['rgr'],       # 回归
+TaskType = Union[
+  Literal['clf'],   # 分类
+  Literal['rgr'],   # 回归
 ]
 
 # 评估结果
 EvalMetrics = Tuple[float, ...]
+
+# 任务进度状态
+TaskStatus = Union[
+  Literal['created'],     # 创建任务 (task.json, data.csv)
+  Literal['queuing'],     # 执行队列中等待
+  Literal['running'],     # 正在执行中
+  Literal['finished'],    # 已完成
+]

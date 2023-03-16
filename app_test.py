@@ -7,8 +7,9 @@ import numpy as np
 import requests as R
 
 API_BASE = 'http://localhost:5000'
-GET  = lambda api: R.get (API_BASE + api)
-POST = lambda api, json=None: R.post(API_BASE + api, json=json)
+GET    = lambda api: R.get (API_BASE + api)
+POST   = lambda api, json=None: R.post(API_BASE + api, json=json)
+DELETE = lambda api: R.delete(API_BASE + api)
 
 
 def test_index():

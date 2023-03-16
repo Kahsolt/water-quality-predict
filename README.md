@@ -14,20 +14,30 @@
 - point your browser to `http://127.0.0.1:5000/` to see API documentation
 - see client demo `python app_test.py`
 
+Main busisness:
+
+- `POST /merge_csv` to merge data all-in-one if you have multiple data source
+- `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
+- `POST /task` to create a task and put in processing queue
+- `GET /task/<name>` to get task status or results 
+- `POST /infer` to predict on new data
+- `GET /log/<task_name>/<job_name>.log` to see job log
+- `GET /log/<task_name>` to download the task workspace folder
+
 
 ### Local run
 
 ⚪ Data
 
-- put your `*.csv` files under `data` folder
+- prepare your `*.csv` files (suggested to put under `data` folder)
 - each file can contain several columns
   - the first columns is datetime in ISO 8601 format, e.g. `2022-09-27 18:00:00.000`
-  - the rest columns are float data from your sensor deivces
+  - the rest columns are float data from your sensor devices
 
 ⚪ Dataset & Train & Eval
 
 - write a job file, see guide => [job/README.md](job/README.md)
-- run `python run.py -J path/to/*.yaml`
+- run `python run.py -D path/to/*.csv -J path/to/*.yaml`
   - run all demo experiments: `run_experiments.cmd`
 
 ⚪ Infer

@@ -13,7 +13,7 @@ from modules.util import get_metrics, get_logger
 from modules.preprocess import *
 from modules.typing import *
 
-TASK_TYPE: ModelTask = Path(__file__).stem.split('_')[-1]
+TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
 def init(config:Config) -> GridSearchCV:
