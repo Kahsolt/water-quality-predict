@@ -9,7 +9,8 @@ from threading import Thread
 from traceback import format_exc
 
 import numpy as np
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Flask, request
+from flask import redirect, jsonify, render_template, send_file
 
 from modules.descriptor import Descriptor
 from modules.util import seed_everything
@@ -18,30 +19,19 @@ from modules.typing import *
 import run as RT
 
 BASE_PATH = Path(__file__).parent
+HTML_PATH = BASE_PATH / 'doc'
 JOB_PATH = BASE_PATH / 'job'
 LOG_PATH = BASE_PATH / 'log'
-SRC_PATH = BASE_PATH / 'modules'
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__, template_folder=HTML_PATH)
 envs: Dict[str, Env] = { }
 cur_job: Descriptor = None
 
 
-@app.route('/')
-def index():
-  return render_template('index.html')
+@app.route('/doc/<page>')
+def doc_(page:str):
+  return render_template(f'{page}.html')
 
-@app.route('/doc/job')
-def doc_job():
-  return render_template('job/README.html')
-
-@app.route('/model')
-def model():
-  return jsonify([job.stem for job in (SRC_PATH / 'models').iterdir() if job.suffix == '.py' and job.stem != '___init___'])
-
-@app.route('/job')
-def job():
-  return jsonify([job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml'])
 
 @app.route('/debug')
 def debug():
@@ -49,10 +39,22 @@ def debug():
 <div>
   <p>pwd: {os.getcwd()}</p>
   <p>BASE_PATH: {BASE_PATH}</p>
+  <p>HTML_PATH: {HTML_PATH}</p>
   <p>JOB_PATH: {JOB_PATH}</p>
   <p>LOG_PATH: {LOG_PATH}</p>
 </div>
 '''
+
+
+@app.route('/model')
+def model():
+  return jsonify([job.stem for job in (BASE_PATH / 'modules' / 'models').iterdir()
+                  if job.suffix == '.py' and job.stem != '___init___'])
+
+
+@app.route('/job')
+def job():
+  return jsonify([job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml'])
 
 
 @app.route('/task', methods=['GET', 'POST'])
@@ -164,38 +166,8 @@ def infer_(task:str):
 
 
 if __name__ == '__main__':
+  @app.route('/')
+  def index():
+    return redirect('/doc/api')
+
   app.run(host='0.0.0.0', debug=True)
-
-
-'''
-@app.route('/metric/list', methods=['GET'])
-def metric_list():
-  try:
-    with open(LOG_PATH / 'metric-ranklist.txt', 'r', encoding='utf-8') as fh:
-      data = fh.read().strip()
-    ret = { }
-    for sec in data.split('\n\n'):
-      lines = sec.split('\n')
-      title = lines[0][:-1]     # remove ':'
-      ret[title] = { }
-      for line in lines[1:]:
-        name, score = line.split(':')
-        ret[title][name] = float(score)
-    return jsonify(ret)
-  except:
-    return jsonify({'error': format_exc()})
-
-
-@app.route('/metric/<name>', methods=['GET'])
-def metric_(name):
-  try:
-    with open(LOG_PATH / name / 'metric.txt', 'r', encoding='utf-8') as fh:
-      data = fh.read().strip()
-    ret = {}
-    for line in data.split('\n'):
-      name, score = line.split(':')
-      ret[name] = float(score)
-    return jsonify(ret)
-  except:
-    return jsonify({'error': format_exc()})
-'''

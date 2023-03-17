@@ -64,6 +64,7 @@ preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内�
 ```
 
 - filter_T: 含时处理，挂载需要时间信息的预处理操作
+  - time_cont: 时间对齐到时间单位 (h) 
   - ltrim_vacant: 抛弃连续一周以上的缺值及之前
 - project: 时间刻度投影，并分离时间维度
   - to_hourly: 时间单位固定为小时
@@ -102,7 +103,7 @@ tgt = data[:, -1]
 # seq: [T, D], float        # T 个采样点, D 维特征输入
 # tgt: [T, 1], float        # T 个采样点, 1 维目标输出
 if task_type == 'clf':
-  lbl = encode(seq, encoder)   # [N, 1], int
+  lbl = encode(tgt, encoder)   # [N, 1], int
   freq = Counter(lbl)
   if freq < freq_min:       # 若异常值太少，则放弃建模 
     return

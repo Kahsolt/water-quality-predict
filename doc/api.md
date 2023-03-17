@@ -1,5 +1,7 @@
 # API documentation
 
+=> For proxy API doc, see [/doc/api_proxy](/doc/api_proxy)
+
 ### General 总论
 
 Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).  
@@ -17,8 +19,8 @@ interface {
 
 // response
 interface {
-  ok: bool,           // success
-  error?: str,
+  ok: bool            // success
+  error?: str 
 }
 ```
 
@@ -55,21 +57,21 @@ monitorTime,monitor1,monitor2       // column names are arbitary
 
 ```cpp
 enum TaskType {
-  rgr,        // 分类
-  clf,        // 回归
+  rgr         // 分类
+  clf         // 回归
 };
 enum TaskTarget {
-  data,       // 数据 := 数值预处理 + 打分类标签 + 划分数据集
-  train,      // 训练
-  eval,       // 评估
-  all,        // 全部
+  data        // 数据 := 数值预处理 + 打分类标签 + 划分数据集
+  train       // 训练
+  eval        // 评估
+  all         // 全部
 };
 enum TaskStatus {
-  created,    // 创建任务
-  queuing,    // 执行队列中等待
-  running,    // 正在执行中
-  finished,   // 已完成
-  failed,     // 出错
+  created     // 创建任务
+  queuing     // 执行队列中等待
+  running     // 正在执行中
+  finished    // 已完成
+  failed      // 出错
 };
 ```
 
@@ -84,7 +86,7 @@ enum TaskStatus {
 //   first column is datetime in isoformat
 //   rest columns are float value
 interface {
-  target: str,        // filename, specify which file is to predict on (as last column)
+  target: str         // filename, specify which file is to predict on (as last column)
                       // target file must contain only 1 value column
 }
 
@@ -99,15 +101,15 @@ interface {
 // request
 // <= single *.csv file
 interface {
-  type: str,          // task type, choose from `TaskType`
-  target?: str[],     // task target, choose from `TaskTarget`, default to 'all'
-  jobs?: str[],       // scheduled jobs, default to all applicable jobs
-  name?: str,         // custom task name
+  type: str           // task type, choose from `TaskType`
+  target?: str[]      // task target, choose from `TaskTarget`, default to 'all'
+  jobs?: str[]        // scheduled jobs, default to all applicable jobs
+  name?: str          // custom task name
 }
 
 // response
 interface {
-  name: str,          // real task name allocated
+  name: str           // real task name allocated
 }
 ```
 
@@ -119,8 +121,8 @@ interface {
 // request
 // <= single *.csv file (optional), **replacing** the old one
 interface {
-  target?: str[],     // task target, choose from `TaskTarget`
-  jobs?: str[],       // scheduled jobs, default to all applicable jobs
+  target?: str[]      // task target, choose from `TaskTarget`
+  jobs?: str[]        // scheduled jobs, default to all applicable jobs
 }
 ```
 
@@ -129,7 +131,7 @@ interface {
 ```typescript
 // response
 interface {
-  tasks: str[],       // task name
+  tasks: str[]        // task name
 }
 ```
 
@@ -138,22 +140,22 @@ interface {
 ```typescript
 // response
 interface {
-  type: str,          // task type, choose from `TaskType`
-  status: str,        // task status, choose from `TaskStatus`
-  best?: str,         // job name
+  type: str           // task type, choose from `TaskType`
+  status: str         // task status, choose from `TaskStatus`
+  best?: str          // job name
   jobs?: {
     "job_name": {     // metrics for 'clf' task
-      pres: float,
-      recall: float,
-      f1: float,
+      pres: float
+      recall: float
+      f1: float
     } | {             // metrics for 'rgr' task
-      mae: float,
-      mse: float,
-      r2: float,
+      mae: float
+      mse: float
+      r2: float
     },
   },
-  ts_create: int,     // task create time
-  ts_finish?: int,    // train finish time
+  ts_create: int      // task create time
+  ts_finish?: int     // train finish time
 }
 ```
 
@@ -169,7 +171,7 @@ interface {
 ```typescript
 // response
 interface {
-  models: str[],      // model name
+  models: str[]       // model name
 }
 ```
 
@@ -178,7 +180,7 @@ interface {
 ```typescript
 // response
 interface {
-  jobs: str[],        // job name
+  jobs: str[]         // job name
 }
 ```
 
@@ -203,7 +205,7 @@ interface {
 // NOTE: <name> in url must starts with 'rgr_' or 'clf_'
 // <= *.yaml file
 interface {
-  overwrite?: bool,   // overwrite if exists, default to false
+  overwrite?: bool    // overwrite if exists, default to false
 }
 ```
 
@@ -219,15 +221,15 @@ interface {
 ```typescript
 // request
 interface {
-  job?: str,          // default to the best job
-  data: str,          // base64 codec of input.flatten(): np.array
-  shape: int[],       // shape of input: np.ndarray
+  job?: str           // default to the best job
+  data: str           // base64 codec of input.flatten(): np.array
+  shape: int[]        // shape of input: np.ndarray
 }
 
 // response
 interface {
-  pred: str,          // base64 codec of pred.flatten(): np.array
-  shape: int[],       // shape of pred: np.ndarray
+  pred: str           // base64 codec of pred.flatten(): np.array
+  shape: int[]        // shape of pred: np.ndarray
 }
 ```
 

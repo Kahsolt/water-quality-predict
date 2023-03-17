@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head>
-      <title>index</title>
+      <title>api</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
@@ -263,6 +263,7 @@ pre[data-line] .line-highlight[data-end]:after {
       <div class="mume markdown-preview  ">
       <h1 class="mume-header" id="api-documentation">API documentation</h1>
 
+<p>=&gt; For proxy API doc, see <a href="api_proxy">/doc/api_proxy</a></p>
 <h3 class="mume-header" id="general-%E6%80%BB%E8%AE%BA">General &#x603B;&#x8BBA;</h3>
 
 <p>Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).<br>
@@ -277,8 +278,8 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  ok<span class="token operator">:</span> bool<span class="token punctuation">,</span>           <span class="token comment">// success</span>
-  error<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">,</span>
+  ok<span class="token operator">:</span> bool            <span class="token comment">// success</span>
+  error<span class="token operator">?</span><span class="token operator">:</span> str 
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="data-%E6%95%B0%E6%8D%AE">Data &#x6570;&#x636E;</h3>
 
@@ -308,25 +309,25 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token value">2021-01-01 09:00:00</span><span class="token punctuation">,</span><span class="token value">0.3</span><span class="token punctuation">,</span><span class="token value">1.0</span>
 </pre><h3 class="mume-header" id="job-descriptor-%E4%BD%9C%E4%B8%9A%E6%8F%8F%E8%BF%B0%E7%AC%A6">Job descriptor &#x4F5C;&#x4E1A;&#x63CF;&#x8FF0;&#x7B26;</h3>
 
-<p>=&gt; see <a href="doc\job">job.yaml documentation</a></p>
+<p>=&gt; see <a href="job">job.yaml documentation</a></p>
 <h3 class="mume-header" id="enums-%E6%9E%9A%E4%B8%BE%E5%B8%B8%E9%87%8F">Enums &#x679A;&#x4E3E;&#x5E38;&#x91CF;</h3>
 
 <pre data-role="codeBlock" data-info="cpp" class="language-cpp"><span class="token keyword keyword-enum">enum</span> <span class="token class-name">TaskType</span> <span class="token punctuation">{</span>
-  rgr<span class="token punctuation">,</span>        <span class="token comment">// &#x5206;&#x7C7B;</span>
-  clf<span class="token punctuation">,</span>        <span class="token comment">// &#x56DE;&#x5F52;</span>
+  rgr         <span class="token comment">// &#x5206;&#x7C7B;</span>
+  clf         <span class="token comment">// &#x56DE;&#x5F52;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword keyword-enum">enum</span> <span class="token class-name">TaskTarget</span> <span class="token punctuation">{</span>
-  data<span class="token punctuation">,</span>       <span class="token comment">// &#x6570;&#x636E; := &#x6570;&#x503C;&#x9884;&#x5904;&#x7406; + &#x6253;&#x5206;&#x7C7B;&#x6807;&#x7B7E; + &#x5212;&#x5206;&#x6570;&#x636E;&#x96C6;</span>
-  train<span class="token punctuation">,</span>      <span class="token comment">// &#x8BAD;&#x7EC3;</span>
-  eval<span class="token punctuation">,</span>       <span class="token comment">// &#x8BC4;&#x4F30;</span>
-  all<span class="token punctuation">,</span>        <span class="token comment">// &#x5168;&#x90E8;</span>
+  data        <span class="token comment">// &#x6570;&#x636E; := &#x6570;&#x503C;&#x9884;&#x5904;&#x7406; + &#x6253;&#x5206;&#x7C7B;&#x6807;&#x7B7E; + &#x5212;&#x5206;&#x6570;&#x636E;&#x96C6;</span>
+  train       <span class="token comment">// &#x8BAD;&#x7EC3;</span>
+  eval        <span class="token comment">// &#x8BC4;&#x4F30;</span>
+  all         <span class="token comment">// &#x5168;&#x90E8;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword keyword-enum">enum</span> <span class="token class-name">TaskStatus</span> <span class="token punctuation">{</span>
-  created<span class="token punctuation">,</span>    <span class="token comment">// &#x521B;&#x5EFA;&#x4EFB;&#x52A1;</span>
-  queuing<span class="token punctuation">,</span>    <span class="token comment">// &#x6267;&#x884C;&#x961F;&#x5217;&#x4E2D;&#x7B49;&#x5F85;</span>
-  running<span class="token punctuation">,</span>    <span class="token comment">// &#x6B63;&#x5728;&#x6267;&#x884C;&#x4E2D;</span>
-  finished<span class="token punctuation">,</span>   <span class="token comment">// &#x5DF2;&#x5B8C;&#x6210;</span>
-  failed<span class="token punctuation">,</span>     <span class="token comment">// &#x51FA;&#x9519;</span>
+  created     <span class="token comment">// &#x521B;&#x5EFA;&#x4EFB;&#x52A1;</span>
+  queuing     <span class="token comment">// &#x6267;&#x884C;&#x961F;&#x5217;&#x4E2D;&#x7B49;&#x5F85;</span>
+  running     <span class="token comment">// &#x6B63;&#x5728;&#x6267;&#x884C;&#x4E2D;</span>
+  finished    <span class="token comment">// &#x5DF2;&#x5B8C;&#x6210;</span>
+  failed      <span class="token comment">// &#x51FA;&#x9519;</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 </pre><hr>
 <h3 class="mume-header" id="post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv &#x5408;&#x5E76;&#x591A;&#x4E2A;csv&#x6587;&#x4EF6;</h3>
@@ -337,7 +338,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token comment">//   first column is datetime in isoformat</span>
 <span class="token comment">//   rest columns are float value</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  target<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// filename, specify which file is to predict on (as last column)</span>
+  target<span class="token operator">:</span> str         <span class="token comment">// filename, specify which file is to predict on (as last column)</span>
                       <span class="token comment">// target file must contain only 1 value column</span>
 <span class="token punctuation">}</span>
 
@@ -349,15 +350,15 @@ pre[data-line] .line-highlight[data-end]:after {
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token comment">// &lt;= single *.csv file</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  type<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task type, choose from `TaskType`</span>
-  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>     <span class="token comment">// task target, choose from `TaskTarget`, default to &apos;all&apos;</span>
-  jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>       <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
-  name<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">,</span>         <span class="token comment">// custom task name</span>
+  type<span class="token operator">:</span> str           <span class="token comment">// task type, choose from `TaskType`</span>
+  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>      <span class="token comment">// task target, choose from `TaskTarget`, default to &apos;all&apos;</span>
+  jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
+  name<span class="token operator">?</span><span class="token operator">:</span> str          <span class="token comment">// custom task name</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  name<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// real task name allocated</span>
+  name<span class="token operator">:</span> str           <span class="token comment">// real task name allocated</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="post-taskname-%E6%9B%B4%E6%96%B0%E4%BB%BB%E5%8A%A1%E5%B9%B6%E9%87%8D%E6%96%B0%E8%BF%90%E8%A1%8C">POST /task/&lt;name&gt; &#x66F4;&#x65B0;&#x4EFB;&#x52A1;&#x5E76;&#x91CD;&#x65B0;&#x8FD0;&#x884C;</h3>
 
@@ -365,50 +366,50 @@ pre[data-line] .line-highlight[data-end]:after {
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token comment">// &lt;= single *.csv file (optional), **replacing** the old one</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>     <span class="token comment">// task target, choose from `TaskTarget`</span>
-  jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>       <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
+  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>      <span class="token comment">// task target, choose from `TaskTarget`</span>
+  jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-tasktask-%E5%88%97%E5%87%BA%E4%BB%BB%E5%8A%A1">GET <a href="task">/task</a> &#x5217;&#x51FA;&#x4EFB;&#x52A1;</h3>
+</pre><h3 class="mume-header" id="get-tasktask-%E5%88%97%E5%87%BA%E4%BB%BB%E5%8A%A1">GET <a href="..\task">/task</a> &#x5217;&#x51FA;&#x4EFB;&#x52A1;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  tasks<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>       <span class="token comment">// task name</span>
+  tasks<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// task name</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="get-taskname-%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1">GET /task/&lt;name&gt; &#x67E5;&#x8BE2;&#x4EFB;&#x52A1;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  type<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task type, choose from `TaskType`</span>
-  status<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// task status, choose from `TaskStatus`</span>
-  best<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">,</span>         <span class="token comment">// job name</span>
+  type<span class="token operator">:</span> str           <span class="token comment">// task type, choose from `TaskType`</span>
+  status<span class="token operator">:</span> str         <span class="token comment">// task status, choose from `TaskStatus`</span>
+  best<span class="token operator">?</span><span class="token operator">:</span> str          <span class="token comment">// job name</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">{</span>
     <span class="token string">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>     <span class="token comment">// metrics for &apos;clf&apos; task</span>
-      pres<span class="token operator">:</span> float<span class="token punctuation">,</span>
-      recall<span class="token operator">:</span> float<span class="token punctuation">,</span>
-      f1<span class="token operator">:</span> float<span class="token punctuation">,</span>
+      pres<span class="token operator">:</span> float
+      recall<span class="token operator">:</span> float
+      f1<span class="token operator">:</span> float
     <span class="token punctuation">}</span> <span class="token operator">|</span> <span class="token punctuation">{</span>             <span class="token comment">// metrics for &apos;rgr&apos; task</span>
-      mae<span class="token operator">:</span> float<span class="token punctuation">,</span>
-      mse<span class="token operator">:</span> float<span class="token punctuation">,</span>
-      r2<span class="token operator">:</span> float<span class="token punctuation">,</span>
+      mae<span class="token operator">:</span> float
+      mse<span class="token operator">:</span> float
+      r2<span class="token operator">:</span> float
     <span class="token punctuation">}</span><span class="token punctuation">,</span>
   <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>     <span class="token comment">// task create time</span>
-  ts_finish<span class="token operator">?</span><span class="token operator">:</span> int<span class="token punctuation">,</span>    <span class="token comment">// train finish time</span>
+  ts_create<span class="token operator">:</span> int      <span class="token comment">// task create time</span>
+  ts_finish<span class="token operator">?</span><span class="token operator">:</span> int     <span class="token comment">// train finish time</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="delete-taskname-%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1%E8%AE%B0%E5%BD%95">DELETE /task/&lt;name&gt; &#x5220;&#x9664;&#x4EFB;&#x52A1;&#x8BB0;&#x5F55;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"></pre><hr>
-<h3 class="mume-header" id="get-modelmodel-%E5%88%97%E5%87%BA%E6%A8%A1%E5%9E%8B%E6%A8%A1%E6%9D%BF">GET <a href="model">/model</a> &#x5217;&#x51FA;&#x6A21;&#x578B;&#x6A21;&#x677F;</h3>
+<h3 class="mume-header" id="get-modelmodel-%E5%88%97%E5%87%BA%E6%A8%A1%E5%9E%8B%E6%A8%A1%E6%9D%BF">GET <a href="..\model">/model</a> &#x5217;&#x51FA;&#x6A21;&#x578B;&#x6A21;&#x677F;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  models<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>      <span class="token comment">// model name</span>
+  models<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>       <span class="token comment">// model name</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-jobjob-%E5%88%97%E5%87%BA%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">GET <a href="job">/job</a> &#x5217;&#x51FA;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
+</pre><h3 class="mume-header" id="get-jobjob-%E5%88%97%E5%87%BA%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">GET <a href="..\job">/job</a> &#x5217;&#x51FA;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  jobs<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>        <span class="token comment">// job name</span>
+  jobs<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>         <span class="token comment">// job name</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="get-jobname-%E4%B8%8B%E8%BD%BD%E6%9F%A5%E8%AF%A2%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">GET /job/&lt;name&gt; &#x4E0B;&#x8F7D;/&#x67E5;&#x8BE2;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
 
@@ -427,7 +428,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token comment">// NOTE: &lt;name&gt; in url must starts with &apos;rgr_&apos; or &apos;clf_&apos;</span>
 <span class="token comment">// &lt;= *.yaml file</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  overwrite<span class="token operator">?</span><span class="token operator">:</span> bool<span class="token punctuation">,</span>   <span class="token comment">// overwrite if exists, default to false</span>
+  overwrite<span class="token operator">?</span><span class="token operator">:</span> bool    <span class="token comment">// overwrite if exists, default to false</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="delete-jobname-%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1%E6%A8%A1%E6%9D%BF">DELETE /job/&lt;name&gt; &#x5220;&#x9664;&#x4EFB;&#x52A1;&#x6A21;&#x677F;</h3>
 
@@ -436,15 +437,15 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  job<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// default to the best job</span>
-  data<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// base64 codec of input.flatten(): np.array</span>
-  shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>       <span class="token comment">// shape of input: np.ndarray</span>
+  job<span class="token operator">?</span><span class="token operator">:</span> str           <span class="token comment">// default to the best job</span>
+  data<span class="token operator">:</span> str           <span class="token comment">// base64 codec of input.flatten(): np.array</span>
+  shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// shape of input: np.ndarray</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  pred<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// base64 codec of pred.flatten(): np.array</span>
-  shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>       <span class="token comment">// shape of pred: np.ndarray</span>
+  pred<span class="token operator">:</span> str           <span class="token comment">// base64 codec of pred.flatten(): np.array</span>
+  shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// shape of pred: np.ndarray</span>
 <span class="token punctuation">}</span>
 </pre><hr>
 <h3 class="mume-header" id="get-logtask_name-%E6%89%93%E5%8C%85%E4%B8%8B%E8%BD%BD%E4%BB%BB%E5%8A%A1%E6%96%87%E4%BB%B6%E5%A4%B9">GET /log/&lt;task_name&gt; &#x6253;&#x5305;&#x4E0B;&#x8F7D;&#x4EFB;&#x52A1;&#x6587;&#x4EF6;&#x5939;</h3>
@@ -459,7 +460,7 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page</span>
-</pre><h3 class="mume-header" id="get-runtimeruntime-%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8A%B6%E6%80%81">GET <a href="runtime">/runtime</a> &#x67E5;&#x770B;&#x7CFB;&#x7EDF;&#x8FD0;&#x884C;&#x65F6;&#x72B6;&#x6001;</h3>
+</pre><h3 class="mume-header" id="get-runtimeruntime-%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8A%B6%E6%80%81">GET <a href="..\runtime">/runtime</a> &#x67E5;&#x770B;&#x7CFB;&#x7EDF;&#x8FD0;&#x884C;&#x65F6;&#x72B6;&#x6001;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token comment">// url params: ?status=</span>
@@ -467,7 +468,7 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page (auto refresh per 5s)</span>
-</pre><h3 class="mume-header" id="get-debugdebug-%E7%B3%BB%E7%BB%9F%E8%B0%83%E8%AF%95%E4%BF%A1%E6%81%AF">GET <a href="debug">/debug</a> &#x7CFB;&#x7EDF;&#x8C03;&#x8BD5;&#x4FE1;&#x606F;</h3>
+</pre><h3 class="mume-header" id="get-debugdebug-%E7%B3%BB%E7%BB%9F%E8%B0%83%E8%AF%95%E4%BF%A1%E6%81%AF">GET <a href="..\debug">/debug</a> &#x7CFB;&#x7EDF;&#x8C03;&#x8BD5;&#x4FE1;&#x606F;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page</span>

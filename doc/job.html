@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head>
-      <title>README</title>
+      <title>job</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
@@ -318,6 +318,7 @@ pre[data-line] .line-highlight[data-end]:after {
 </pre><ul>
 <li>filter_T: &#x542B;&#x65F6;&#x5904;&#x7406;&#xFF0C;&#x6302;&#x8F7D;&#x9700;&#x8981;&#x65F6;&#x95F4;&#x4FE1;&#x606F;&#x7684;&#x9884;&#x5904;&#x7406;&#x64CD;&#x4F5C;
 <ul>
+<li>time_cont: &#x65F6;&#x95F4;&#x5BF9;&#x9F50;&#x5230;&#x65F6;&#x95F4;&#x5355;&#x4F4D; (h)</li>
 <li>ltrim_vacant: &#x629B;&#x5F03;&#x8FDE;&#x7EED;&#x4E00;&#x5468;&#x4EE5;&#x4E0A;&#x7684;&#x7F3A;&#x503C;&#x53CA;&#x4E4B;&#x524D;</li>
 </ul>
 </li>
@@ -364,7 +365,7 @@ tgt <span class="token operator">=</span> data<span class="token punctuation">[<
 <span class="token comment"># seq: [T, D], float        # T &#x4E2A;&#x91C7;&#x6837;&#x70B9;, D &#x7EF4;&#x7279;&#x5F81;&#x8F93;&#x5165;</span>
 <span class="token comment"># tgt: [T, 1], float        # T &#x4E2A;&#x91C7;&#x6837;&#x70B9;, 1 &#x7EF4;&#x76EE;&#x6807;&#x8F93;&#x51FA;</span>
 <span class="token keyword keyword-if">if</span> task_type <span class="token operator">==</span> <span class="token string">&apos;clf&apos;</span><span class="token punctuation">:</span>
-  lbl <span class="token operator">=</span> encode<span class="token punctuation">(</span>seq<span class="token punctuation">,</span> encoder<span class="token punctuation">)</span>   <span class="token comment"># [N, 1], int</span>
+  lbl <span class="token operator">=</span> encode<span class="token punctuation">(</span>tgt<span class="token punctuation">,</span> encoder<span class="token punctuation">)</span>   <span class="token comment"># [N, 1], int</span>
   freq <span class="token operator">=</span> Counter<span class="token punctuation">(</span>lbl<span class="token punctuation">)</span>
   <span class="token keyword keyword-if">if</span> freq <span class="token operator">&lt;</span> freq_min<span class="token punctuation">:</span>       <span class="token comment"># &#x82E5;&#x5F02;&#x5E38;&#x503C;&#x592A;&#x5C11;&#xFF0C;&#x5219;&#x653E;&#x5F03;&#x5EFA;&#x6A21; </span>
     <span class="token keyword keyword-return">return</span>
