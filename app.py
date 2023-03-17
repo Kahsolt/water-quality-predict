@@ -98,9 +98,8 @@ def task():
       if len(request.files) != 1:
         return jsonify({'ok': False, 'error': f'only need 1 file, but got {len(request.files)}'})
       file = request.files[0]
-
-      file = request.files[0]
-      fn = file.filename
+      data = file.stream.read()
+      fn = Path(file.filename).stem
       print('fn:', fn)
 
       data: Dict = request.json

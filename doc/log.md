@@ -1,6 +1,6 @@
-# 任务日志目录结构
+# 工作目录结构
 
-    存储完整的任务结果，以及系统元数据
+    存储完整的任务结果、系统元数据、临时转储
 
 ----
 
@@ -29,12 +29,26 @@ LOG_PATH
 │   │   └── job.log         // job runner logs
 │   └── ...
 └── ...
-```
 
+TMP_PATH
+├── tip-*.pkl               // task init pack
+└── ...
+```
 
 ### 系统元数据
 
-see `modules/descriptor.py`
+=> see `modules/descriptor.py`
+
+⚪ /tmp/\<task_init_pack\>.pkl 任务请求临时转储
+
+```python
+task_init_pack = {            # => see `POST /task`
+  'name': str,                # task name
+  'data': bytes,              # files[0].stream().read()
+  'target': [str]|str|None,   # target
+  'jobs': [str]|None,         # scheduled jobs
+}
+```
 
 ⚪ /log/runtime.json
 
@@ -45,9 +59,9 @@ see `modules/descriptor.py`
     status: str,          // task status
     info: str,            // cur job
     progress: str,        // f'{n_job_finished} / {n_job_total}'
-    ts_create: int,       // task create time
+    ts_accept: int,       // task accept time
     ts_update: int,       // last meta info update time
-    tmp_data_file: str,   // path to tmp stored data.csv file
+    task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task created successfully)
   },
 ]
 ```
@@ -74,8 +88,8 @@ see `modules/descriptor.py`
         },
       },
     },
-    ts_create: int,
-    ts_finish: int,
+    ts_create: int,       // task create time
+    ts_update: int,
   },
 ]
 ```

@@ -10,7 +10,15 @@ from copy import deepcopy
 from modules.util import ts_now
 
 
-# => see 'log/README.txt'
+# => see 'doc/log.md'
+def new_task_init_pack():
+  return {
+    'name': None,         # task name
+    'data': None,         # *.csv file
+    'target': None,       # target
+    'jobs': None,         # scheduled jobs
+  }
+
 def new_runtime_entry():
   return {
     'name': None,         # task name
@@ -18,7 +26,8 @@ def new_runtime_entry():
     'info': None,
     'progress': None,     # f'{n_job_finished} / {n_job_total}'
     'ts_create': ts_now(),
-    'ts_update': None,
+    'ts_accept': None,
+    'task_init_pack': None,
   }
 
 def new_task_entry():
