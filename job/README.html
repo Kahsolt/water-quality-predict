@@ -1,0 +1,415 @@
+<!DOCTYPE html><html><head>
+      <title>README</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      /**
+ * prism.js Github theme based on GitHub's theme.
+ * @author Sam Clarke
+ */
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333;
+  background: none;
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.4;
+
+  -moz-tab-size: 8;
+  -o-tab-size: 8;
+  tab-size: 8;
+
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: .8em;
+  overflow: auto;
+  /* border: 1px solid #ddd; */
+  border-radius: 3px;
+  /* background: #fff; */
+  background: #f5f5f5;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: .1em;
+  border-radius: .3em;
+  white-space: normal;
+  background: #f5f5f5;
+}
+
+.token.comment,
+.token.blockquote {
+  color: #969896;
+}
+
+.token.cdata {
+  color: #183691;
+}
+
+.token.doctype,
+.token.punctuation,
+.token.variable,
+.token.macro.property {
+  color: #333;
+}
+
+.token.operator,
+.token.important,
+.token.keyword,
+.token.rule,
+.token.builtin {
+  color: #a71d5d;
+}
+
+.token.string,
+.token.url,
+.token.regex,
+.token.attr-value {
+  color: #183691;
+}
+
+.token.property,
+.token.number,
+.token.boolean,
+.token.entity,
+.token.atrule,
+.token.constant,
+.token.symbol,
+.token.command,
+.token.code {
+  color: #0086b3;
+}
+
+.token.tag,
+.token.selector,
+.token.prolog {
+  color: #63a35c;
+}
+
+.token.function,
+.token.namespace,
+.token.pseudo-element,
+.token.class,
+.token.class-name,
+.token.pseudo-class,
+.token.id,
+.token.url-reference .token.variable,
+.token.attr-name {
+  color: #795da3;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+.token.title,
+.token.title .token.punctuation {
+  font-weight: bold;
+  color: #1d3e81;
+}
+
+.token.list {
+  color: #ed6a43;
+}
+
+.token.inserted {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.token.deleted {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+
+/* JSON */
+.language-json .token.property {
+  color: #183691;
+}
+
+.language-markup .token.tag .token.punctuation {
+  color: #333;
+}
+
+/* CSS */
+code.language-css,
+.language-css .token.function {
+  color: #0086b3;
+}
+
+/* YAML */
+.language-yaml .token.atrule {
+  color: #63a35c;
+}
+
+code.language-yaml {
+  color: #183691;
+}
+
+/* Ruby */
+.language-ruby .token.function {
+  color: #333;
+}
+
+/* Markdown */
+.language-markdown .token.url {
+  color: #795da3;
+}
+
+/* Makefile */
+.language-makefile .token.symbol {
+  color: #795da3;
+}
+
+.language-makefile .token.variable {
+  color: #183691;
+}
+
+.language-makefile .token.builtin {
+  color: #0086b3;
+}
+
+/* Bash */
+.language-bash .token.keyword {
+  color: #0086b3;
+}
+
+/* highlight */
+pre[data-line] {
+  position: relative;
+  padding: 1em 0 1em 3em;
+}
+pre[data-line] .line-highlight-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: transparent;
+  display: block;
+  width: 100%;
+}
+
+pre[data-line] .line-highlight {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: inherit 0;
+  margin-top: 1em;
+  background: hsla(24, 20%, 50%,.08);
+  background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 70%, hsla(24, 20%, 50%,0));
+  pointer-events: none;
+  line-height: inherit;
+  white-space: pre;
+}
+
+pre[data-line] .line-highlight:before, 
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-start);
+  position: absolute;
+  top: .4em;
+  left: .6em;
+  min-width: 1em;
+  padding: 0 .5em;
+  background-color: hsla(24, 20%, 50%,.4);
+  color: hsl(24, 20%, 95%);
+  font: bold 65%/1.5 sans-serif;
+  text-align: center;
+  vertical-align: .3em;
+  border-radius: 999px;
+  text-shadow: none;
+  box-shadow: 0 1px white;
+}
+
+pre[data-line] .line-highlight[data-end]:after {
+  content: attr(data-end);
+  top: auto;
+  bottom: .4em;
+}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p,html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  300px/2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+    </head>
+    <body for="html-export">
+      <div class="mume markdown-preview  ">
+      <h1 class="mume-header" id="%E4%BD%9C%E4%B8%9A%E6%8F%8F%E8%BF%B0%E6%96%87%E4%BB%B6">&#x4F5C;&#x4E1A;&#x63CF;&#x8FF0;&#x6587;&#x4EF6;</h1>
+
+<pre class="language-text">&#x7528;&#x4E8E;&#x63CF;&#x8FF0;&#x4E00;&#x4E2A;&#x5B8C;&#x6574;&#x7684;&#x4F5C;&#x4E1A;&#x6D41;&#x7A0B;
+</pre>
+<hr>
+<p>&#x26A0; &#x6587;&#x4EF6;&#x540D; <strong>&#x5FC5;&#x987B;</strong> &#x4EE5; <code>rgr_</code> &#x6216;&#x8005; <code>clf_</code> &#x5F00;&#x5934;&#xFF0C;&#x4EE3;&#x8868;&#x4EFB;&#x52A1;&#x7C7B;&#x578B;&#x5206;&#x522B;&#x4E3A; <code>&#x56DE;&#x5F52;</code> &#x548C; <code>&#x5206;&#x7C7B;</code></p>
+<p>=&gt; &#x53C2;&#x8003; <a href="https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html">YMAL&#x8BED;&#x6CD5;</a></p>
+<h3 class="mume-header" id="%E4%BD%9C%E4%B8%9A%E6%8F%8F%E8%BF%B0%E9%85%8D%E7%BD%AE">&#x4F5C;&#x4E1A;&#x63CF;&#x8FF0;&#x914D;&#x7F6E;</h3>
+
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">preprocess</span><span class="token punctuation">:</span>         <span class="token comment"># &#x9884;&#x5904;&#x7406;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/preprocess.py &#x6587;&#x4EF6;&#x5185;&#x8282;&#x7684;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
+  <span class="token key atrule">filter_T</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> string
+  <span class="token key atrule">project</span><span class="token punctuation">:</span> string   <span class="token comment"># &#x5FC5;&#x987B;&#x5728; [&apos;to_hourly&apos;, &apos;to_daily&apos;] &#x91CC;&#x4E8C;&#x9009;&#x4E00;</span>
+  <span class="token key atrule">filter_V</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> string
+
+<span class="token key atrule">dataset</span><span class="token punctuation">:</span>            <span class="token comment"># &#x6570;&#x636E;&#x5236;&#x4F5C;</span>
+  <span class="token key atrule">exclusive</span><span class="token punctuation">:</span> bool   <span class="token comment"># &#x591A;&#x7279;&#x5F81;&#x53D8;&#x91CF;&#x5EFA;&#x6A21;&#x662F;&#x5426;&#x9664;&#x5916;&#x81EA;&#x8EAB; (default: False, ie. auto-gressive)</span>
+  <span class="token key atrule">inlen</span><span class="token punctuation">:</span> int        <span class="token comment"># &#x6761;&#x4EF6;&#x5E8F;&#x5217;&#x7A97;&#x957F;&#xFF0C;&#x77E5; in &#x63A8; out (default: 3)</span>
+  <span class="token key atrule">outlen</span><span class="token punctuation">:</span> int       <span class="token comment"># &#x9884;&#x6D4B;&#x5E8F;&#x5217;&#x7A97;&#x957F;&#xFF0C;&#x77E5; in &#x63A8; out (default: 1)</span>
+  <span class="token key atrule">overlap</span><span class="token punctuation">:</span> int      <span class="token comment"># in/out &#x7A97;&#x91CD;&#x53E0;&#x957F;&#x5EA6; (default: 0)</span>
+  <span class="token key atrule">split</span><span class="token punctuation">:</span> float      <span class="token comment"># &#x6570;&#x636E;&#x96C6;&#x5212;&#x5206;&#xFF0C;&#x6D4B;&#x8BD5;&#x96C6;&#x5360;&#x6BD4; (default: 0.2)</span>
+  <span class="token key atrule">encoder</span><span class="token punctuation">:</span>          <span class="token comment"># &#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#x7684;&#x76EE;&#x6807;&#x7F16;&#x7801; (default: None)</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> string    <span class="token comment"># &#x7F16;&#x7801;&#x51FD;&#x6570;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/dataset.py &#x6587;&#x4EF6;&#x5185;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
+    <span class="token key atrule">params</span><span class="token punctuation">:</span>         <span class="token comment"># &#x7F16;&#x7801;&#x51FD;&#x6570;&#x7684;&#x989D;&#x5916;&#x53C2;&#x6570;&#x5217;&#x8868;</span>
+      <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
+  <span class="token key atrule">freq_min</span><span class="token punctuation">:</span> float   <span class="token comment"># &#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#x7684;&#x975E;0&#x7C7B;&#x5360;&#x6BD4;&#x9608;&#x503C;&#xFF0C;&#x5C0F;&#x4E8E;&#x6B64;&#x9608;&#x503C;&#x5C06;&#x5FFD;&#x7565;&#x5EFA;&#x6A21; (default: 0.0)</span>
+
+<span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;</span>
+  <span class="token punctuation">-</span> string
+
+<span class="token key atrule">model</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> string      <span class="token comment"># &#x6A21;&#x578B;&#x6A21;&#x677F;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/models &#x76EE;&#x5F55;&#x4E0B;&#x5404;&#x6587;&#x4EF6;&#x540D;</span>
+  <span class="token key atrule">config</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
+    <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
+
+<span class="token key atrule">seed</span><span class="token punctuation">:</span> int           <span class="token comment"># &#x5168;&#x5C40;&#x968F;&#x673A;&#x6570;&#x79CD;&#x5B50;, (default: -1, ie. randomized)</span>
+</pre><h3 class="mume-header" id="%E6%95%B0%E6%8D%AE%E5%88%B6%E4%BD%9C%E6%B5%81%E7%A8%8B">&#x6570;&#x636E;&#x5236;&#x4F5C;&#x6D41;&#x7A0B;</h3>
+
+<h5 class="mume-header" id="merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%BA%90">merge_csv &#x5408;&#x5E76;&#x591A;&#x4E2A;csv&#x6E90;</h5>
+
+<p>=&gt; &#x53C2;&#x8003; <a href="..\#post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv</a></p>
+<ul>
+<li>&#x4EE5;&#x65F6;&#x95F4;&#x8F74;&#x4E3A;&#x57FA;&#x51C6;&#x5BF9;&#x6240;&#x6709;&#x8868;&#x505A; merge</li>
+<li>&#x5217;&#x987A;&#x5E8F;&#x6574;&#x7406;&#x4E3A;: &#x65F6;&#x95F4;&#x8F74; - &#x7279;&#x5F81;&#x53D8;&#x91CF;xN - &#x76EE;&#x6807;&#x53D8;&#x91CF;</li>
+</ul>
+<h5 class="mume-header" id="preprocess-%E6%95%B0%E5%80%BC%E9%A2%84%E5%A4%84%E7%90%86">preprocess &#x6570;&#x503C;&#x9884;&#x5904;&#x7406;</h5>
+
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">preprocess</span><span class="token punctuation">:</span>         <span class="token comment"># &#x9884;&#x5904;&#x7406;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/preprocess.py &#x6587;&#x4EF6;&#x5185;&#x8282;&#x7684;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
+  <span class="token key atrule">filter_T</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> string
+  <span class="token key atrule">project</span><span class="token punctuation">:</span> string   <span class="token comment"># &#x5FC5;&#x987B;&#x5728; [&apos;to_hourly&apos;, &apos;to_daily&apos;] &#x91CC;&#x4E8C;&#x9009;&#x4E00;</span>
+  <span class="token key atrule">filter_V</span><span class="token punctuation">:</span>
+    <span class="token punctuation">-</span> string
+</pre><ul>
+<li>filter_T: &#x542B;&#x65F6;&#x5904;&#x7406;&#xFF0C;&#x6302;&#x8F7D;&#x9700;&#x8981;&#x65F6;&#x95F4;&#x4FE1;&#x606F;&#x7684;&#x9884;&#x5904;&#x7406;&#x64CD;&#x4F5C;
+<ul>
+<li>ltrim_vacant: &#x629B;&#x5F03;&#x8FDE;&#x7EED;&#x4E00;&#x5468;&#x4EE5;&#x4E0A;&#x7684;&#x7F3A;&#x503C;&#x53CA;&#x4E4B;&#x524D;</li>
+</ul>
+</li>
+<li>project: &#x65F6;&#x95F4;&#x523B;&#x5EA6;&#x6295;&#x5F71;&#xFF0C;&#x5E76;&#x5206;&#x79BB;&#x65F6;&#x95F4;&#x7EF4;&#x5EA6;
+<ul>
+<li>to_hourly: &#x65F6;&#x95F4;&#x5355;&#x4F4D;&#x56FA;&#x5B9A;&#x4E3A;&#x5C0F;&#x65F6;</li>
+<li>to_daily: &#x65F6;&#x95F4;&#x5355;&#x4F4D;&#x56FA;&#x5B9A;&#x4E3A;&#x65E5;
+<ul>
+<li>&#x805A;&#x5408;&#x7B56;&#x7565;: &#x5F53;&#x65E5;&#x6709;&#x6548;&#x6570;&#x636E; &gt;12h &#x5219;&#x53D6;&#x5747;&#x503C;&#xFF0C;&#x5426;&#x5219;&#x7F6E;&#x4E3A; NaN</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>filter_V: &#x4E0D;&#x542B;&#x65F6;&#x5904;&#x7406;&#xFF0C;&#x6302;&#x8F7D;&#x4E0D;&#x9700;&#x8981;&#x65F6;&#x95F4;&#x4FE1;&#x606F;&#x7684;&#x9884;&#x5904;&#x7406;&#x64CD;&#x4F5C;
+<ul>
+<li>remove_outlier: &#x7EBF;&#x6027;&#x63D2;&#x503C;&#x91CD;&#x5B9A; 3&#x3C3; &#x754C;&#x5916;&#x503C;</li>
+<li>wavlet_transform: &#x5C0F;&#x6CE2;&#x53D8;&#x6362;&#x53BB;&#x566A;</li>
+</ul>
+</li>
+</ul>
+<h5 class="mume-header" id="dataset-%E6%95%B0%E6%8D%AE%E9%9B%86%E5%88%87%E7%89%87">dataset &#x6570;&#x636E;&#x96C6;&#x5207;&#x7247;</h5>
+
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">dataset</span><span class="token punctuation">:</span>
+  <span class="token key atrule">exclusive</span><span class="token punctuation">:</span> bool   <span class="token comment"># &#x591A;&#x7279;&#x5F81;&#x53D8;&#x91CF;&#x5EFA;&#x6A21;&#x662F;&#x5426;&#x9664;&#x5916;&#x81EA;&#x8EAB; (default: False, ie. auto-gressive)</span>
+  <span class="token key atrule">inlen</span><span class="token punctuation">:</span> int        <span class="token comment"># &#x6761;&#x4EF6;&#x5E8F;&#x5217;&#x7A97;&#x957F;&#xFF0C;&#x77E5; in &#x63A8; out (default: 3)</span>
+  <span class="token key atrule">outlen</span><span class="token punctuation">:</span> int       <span class="token comment"># &#x9884;&#x6D4B;&#x5E8F;&#x5217;&#x7A97;&#x957F;&#xFF0C;&#x77E5; in &#x63A8; out (default: 1)</span>
+  <span class="token key atrule">overlap</span><span class="token punctuation">:</span> int      <span class="token comment"># in/out &#x7A97;&#x91CD;&#x53E0;&#x957F;&#x5EA6; (default: 0)</span>
+  <span class="token key atrule">split</span><span class="token punctuation">:</span> float      <span class="token comment"># &#x6570;&#x636E;&#x96C6;&#x5212;&#x5206;&#xFF0C;&#x6D4B;&#x8BD5;&#x96C6;&#x5360;&#x6BD4; (default: 0.2)</span>
+  <span class="token key atrule">encoder</span><span class="token punctuation">:</span>          <span class="token comment"># &#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#x7684;&#x76EE;&#x6807;&#x7F16;&#x7801; (default: None)</span>
+    <span class="token key atrule">name</span><span class="token punctuation">:</span> string    <span class="token comment"># &#x7F16;&#x7801;&#x51FD;&#x6570;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/dataset.py &#x6587;&#x4EF6;&#x5185;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
+    <span class="token key atrule">params</span><span class="token punctuation">:</span>         <span class="token comment"># &#x7F16;&#x7801;&#x51FD;&#x6570;&#x7684;&#x989D;&#x5916;&#x53C2;&#x6570;&#x5217;&#x8868;</span>
+      <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
+  <span class="token key atrule">freq_min</span><span class="token punctuation">:</span> float   <span class="token comment"># &#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#x7684;&#x975E;0&#x7C7B;&#x5360;&#x6BD4;&#x9608;&#x503C;&#xFF0C;&#x5C0F;&#x4E8E;&#x6B64;&#x9608;&#x503C;&#x5C06;&#x5FFD;&#x7565;&#x5EFA;&#x6A21; (default: 0.0)</span>
+</pre><ul>
+<li>&#x5BF9; &#x9884;&#x5904;&#x7406;&#x6570;&#x636E;data&#xFF0C;&#x5206;&#x79BB; &#x7279;&#x5F81;&#x53D8;&#x91CF;&#x5E8F;&#x5217;seq &#x548C; &#x76EE;&#x6807;&#x53D8;&#x91CF;&#x5E8F;&#x5217;tgt</li>
+<li>&#x5BF9;&#x4E8E;&#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#xFF0C;&#x5BF9; seq &#x6253;&#x6807;&#x7B7E;&#x5F97;&#x5230; lbl&#xFF1B;&#x68C0;&#x67E5;&#x5F02;&#x5E38;&#x503C;&#x662F;&#x5426;&#x8D85;&#x51FA;&#x6700;&#x5C0F;&#x5EFA;&#x6A21;&#x9608;&#x503C;</li>
+<li>&#x77E5; in &#x63A8; out&#xFF0C;&#x5728; seq &#x4E0A;&#x6EDA;&#x52A8;&#x5207;&#x7247;&#x4F5C;&#x4E3A; X&#xFF0C;&#x5BF9;&#x5E94;&#x7684; tgt/lbl &#x4F5C;&#x4E3A; Y</li>
+<li>&#x5BF9;&#x6570;&#x636E;&#x96C6; (X, Y) &#x505A;&#x8BAD;&#x7EC3;-&#x6D4B;&#x8BD5;&#x5212;&#x5206;</li>
+</ul>
+<pre data-role="codeBlock" data-info="python" class="language-python"><span class="token comment"># data: [T, D&apos;], float      # &#x9884;&#x5904;&#x7406;&#x540E;&#x7684;csv&#x6570;&#x636E;&#x8868;</span>
+seq <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token punctuation">:</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token keyword keyword-if">if</span> exclusive <span class="token keyword keyword-else">else</span> data
+tgt <span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token punctuation">:</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+<span class="token comment"># seq: [T, D], float        # T &#x4E2A;&#x91C7;&#x6837;&#x70B9;, D &#x7EF4;&#x7279;&#x5F81;&#x8F93;&#x5165;</span>
+<span class="token comment"># tgt: [T, 1], float        # T &#x4E2A;&#x91C7;&#x6837;&#x70B9;, 1 &#x7EF4;&#x76EE;&#x6807;&#x8F93;&#x51FA;</span>
+<span class="token keyword keyword-if">if</span> task_type <span class="token operator">==</span> <span class="token string">&apos;clf&apos;</span><span class="token punctuation">:</span>
+  lbl <span class="token operator">=</span> encode<span class="token punctuation">(</span>seq<span class="token punctuation">,</span> encoder<span class="token punctuation">)</span>   <span class="token comment"># [N, 1], int</span>
+  freq <span class="token operator">=</span> Counter<span class="token punctuation">(</span>lbl<span class="token punctuation">)</span>
+  <span class="token keyword keyword-if">if</span> freq <span class="token operator">&lt;</span> freq_min<span class="token punctuation">:</span>       <span class="token comment"># &#x82E5;&#x5F02;&#x5E38;&#x503C;&#x592A;&#x5C11;&#xFF0C;&#x5219;&#x653E;&#x5F03;&#x5EFA;&#x6A21; </span>
+    <span class="token keyword keyword-return">return</span>
+
+<span class="token comment"># X: [N, I, D], float       # N &#x5E27;, &#x5E27;&#x957F; I&#xFF0C;&#x7EF4;&#x6570; D</span>
+<span class="token comment"># Y: [N, O, 1], float/int   # N &#x5E27;, &#x5E27;&#x957F; O&#xFF0C;&#x7EF4;&#x6570; 1</span>
+X<span class="token punctuation">,</span> Y <span class="token operator">=</span> slice_frames<span class="token punctuation">(</span>seq<span class="token punctuation">,</span> tgt<span class="token operator">/</span>lbl<span class="token punctuation">,</span> inlen<span class="token punctuation">,</span> outlen<span class="token punctuation">,</span> overlap<span class="token punctuation">)</span>
+
+<span class="token comment"># trainset: (X_train, Y_train)</span>
+<span class="token comment"># testset: (X_test, Y_test)</span>
+trainset<span class="token punctuation">,</span> testset <span class="token operator">=</span> split_dataset<span class="token punctuation">(</span>X<span class="token punctuation">,</span> Y<span class="token punctuation">,</span> split<span class="token punctuation">)</span>
+</pre><h5 class="mume-header" id="transform-%E6%95%B0%E5%80%BC%E8%BD%AC%E6%8D%A2">transform &#x6570;&#x503C;&#x8F6C;&#x6362;</h5>
+
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;</span>
+  <span class="token punctuation">-</span> string
+</pre><ul>
+<li>&#x6570;&#x503C;&#x8F6C;&#x6362;&#x4EC5;&#x9762;&#x5411;&#x6A21;&#x578B;&#x7684;&#x8F93;&#x5165;&#x8F93;&#x51FA;&#x754C;&#x9762;&#xFF0C;&#x5FC5;&#x987B;&#x662F;&#x53EF;&#x9006;&#x8BA1;&#x7B97;
+<ul>
+<li>log: &#x5BF9;&#x6570;&#x5316;</li>
+<li>std_norm: &#x5747;&#x503C;&#x65B9;&#x5DEE;&#x5F52;&#x4E00;&#x5316;</li>
+<li>minmax_norm: &#x6700;&#x5927;&#x6700;&#x5C0F;&#x503C;&#x5F52;&#x4E00;&#x5316;</li>
+</ul>
+</li>
+</ul>
+<h3 class="mume-header" id="%E6%A8%A1%E5%9E%8B%E8%AE%AD%E7%BB%83-%E6%8E%A8%E6%96%AD%E6%B5%81%E7%A8%8B">&#x6A21;&#x578B;&#x8BAD;&#x7EC3;-&#x63A8;&#x65AD;&#x6D41;&#x7A0B;</h3>
+
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">model</span><span class="token punctuation">:</span>
+  <span class="token key atrule">name</span><span class="token punctuation">:</span> string      <span class="token comment"># &#x6A21;&#x578B;&#x6A21;&#x677F;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/models &#x76EE;&#x5F55;&#x4E0B;&#x5404;&#x6587;&#x4EF6;&#x540D;</span>
+  <span class="token key atrule">config</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
+    <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
+</pre><p>&#x26A0; Just read the fucking code!! &#x26A0;</p>
+<hr>
+<p>by Armit<br>
+2023&#x5E74;2&#x6708;19&#x65E5;</p>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+    
+    
+  
+    </body></html>

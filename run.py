@@ -70,14 +70,14 @@ def require_data_and_model(fn:Callable[..., Any]):
       model_name = job.get('model/name') ; assert model_name
       manager = import_module(f'modules.models.{model_name}')
       env['manager'] = manager
-      logger.info('model unit:')
+      logger.info('manager:')
       logger.info(manager)
 
     if 'model' not in env:
       manager = env['manager']
       model = manager.init(job.get('model/config', {}))
       env['model'] = model
-      logger.info('model arch:')
+      logger.info('model:')
       logger.info(model)
 
     return fn(*args, **kwargs)

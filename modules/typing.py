@@ -6,27 +6,29 @@ from torch.optim import Optimizer
 from logging import Logger
 from typing import *
 
-# 任务运行目标
-TaskTarget = Union[
-  Literal['data'],      # 仅制作数据
-  Literal['train'],     # 仅训练
-  Literal['eval'],      # 仅评估
-  Literal['all'],       # 全部 = 数据 + 训练 + 评估 (糖！)
-]
-# 任务类型
+# 任务/作业类型
 TaskType = Union[
   Literal['clf'],       # 分类
   Literal['rgr'],       # 回归
 ]
-# 任务进度状态
+# 任务/作业运行目标
+TaskTarget = Union[
+  Literal['data'],      # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
+  Literal['train'],     # 训练
+  Literal['eval'],      # 评估
+  Literal['all'],       # 全部 := 制作数据 + 训练 + 评估 (糖！)
+]
+# 任务/作业进度状态
 TaskStatus = Union[
-  Literal['created'],   # 创建任务 (task.json, data.csv)
+  Literal['created'],   # 创建任务
   Literal['queuing'],   # 执行队列中等待
   Literal['running'],   # 正在执行中
   Literal['finished'],  # 已完成
+  Literal['ignored'],   # 忽略
+  Literal['failed'],    # 出错
 ]
 
-# 任务运行时环境
+# 作业运行时环境
 Env = Dict[str, Any]
 
 # 模型

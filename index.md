@@ -24,35 +24,32 @@ interface {
 
 ### Data 数据
 
-Time sequence data are store as a **single** `data.csv` file for each task.  
+Time sequence data are stored as a **single** `data.csv` file for each task created.  
 => To pre-merge multiple *.csv files, see [POST /merge_csv](#post-merge_csv-合并多个csv文件)
 
-⚪ Regression
 
 Can conatin **multiple** columns:
 
   - First column: datetime string in ISO format
+    - ⚠ datetime might be temporal discontinuous
   - Rest columns: float values reading from sensors
+    - ⚠ values might contain NaNs
+    - ℹ **the last column is to predict on**
 
 ```csv
-monitorTime,monitorAvgValue
-2021-01-01 00:00:00,0.17
-2021-01-01 01:00:00,0.15
-2021-01-01 02:00:00,0.19
-2021-01-01 03:00:00,0.23
+monitorTime,monitor1,monitor2       // column names are arbitary
+2021-01-01 00:00:00,0.15,1.25
+2021-01-01 01:00:00,0.16,           // value NaN
+2021-01-01 02:00:00,,1.3
+2021-01-01 04:00:00,0.23,1.2        // time leap
+2021-01-01 06:00:00,,
+2021-01-01 07:00:00,0.2,0.9
+2021-01-01 09:00:00,0.3,1.0
 ```
 
-⚪ Classification
+### Job descriptor 作业描述符
 
-```csv
-monitorTime,monitorAvgValue,label
-2021-01-01 00:00:00,0.17,0
-2021-01-01 01:00:00,0.15,3
-2021-01-01 02:00:00,0.19,0
-2021-01-01 03:00:00,0.23,1
-```
-
-----
+=> see [job.yaml documentation](/doc/job)
 
 ### Enums 枚举常量
 
@@ -72,6 +69,7 @@ enum TaskStatus {
   queuing,    // 执行队列中等待
   running,    // 正在执行中
   finished,   // 已完成
+  failed,     // 出错
 };
 ```
 
@@ -82,9 +80,17 @@ enum TaskStatus {
 ```typescript
 // request
 // <= multiple *.csv files
+// for each file:
+//   first column is datetime in isoformat
+//   rest columns are float value
+interface {
+  target: str,        // filename, specify which file is to predict on (as last column)
+                      // target file must contain only 1 value column
+}
 
 // response
 // => data.csv
+// multi-dim time-aligned seq as described in '###Data' section
 ```
 
 ### POST /task 创建新任务并运行
@@ -118,21 +124,16 @@ interface {
 }
 ```
 
-### GET [/task](/task) 列出任务记录
+### GET [/task](/task) 列出任务
 
 ```typescript
-// request
-interface {
-  status: str[],      // filter by task status, choose from `TaskStatus`
-}
-
 // response
 interface {
   tasks: str[],       // task name
 }
 ```
 
-### GET /task/\<name\> 查询任务记录
+### GET /task/\<name\> 查询任务
 
 ```typescript
 // response
@@ -156,14 +157,21 @@ interface {
 }
 ```
 
-
-
 ### DELETE /task/\<name\> 删除任务记录
 
 ```typescript
 ```
 
 ----
+
+### GET [/model](/model) 列出模型模板
+
+```typescript
+// response
+interface {
+  models: str[],      // model name
+}
+```
 
 ### GET [/job](/job) 列出作业模板
 
@@ -174,10 +182,11 @@ interface {
 }
 ```
 
-### GET /job/\<name\>?format= 下载/查询作业模板
+### GET /job/\<name\> 下载/查询作业模板
 
 ```typescript
-// request url param
+// request
+// url params: ?format=
 //   format: 'yaml' or 'json', default: 'yaml'
 
 // response
@@ -245,18 +254,16 @@ interface {
 // => plain html page
 ```
 
-
-### GET /runtime?filter= 查看系统运行时状态
+### GET [/runtime](/runtime) 查看系统运行时状态
 
 ```typescript
-// request url param
-//   filter: comma seprated string, default is 'queuing,running', select from `TaskStatus`
+// request
+// url params: ?status=
+//   status: comma seperated string select from `TaskStatus` (default: "queuing,running")
 
 // response
 // => plain html page (auto refresh per 5s)
 ```
-
-----
 
 ### GET [/debug](/debug) 系统调试信息
 

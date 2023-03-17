@@ -2,8 +2,8 @@
 # Author: Armit
 # Create Time: 2023/03/17
 
-import yaml
 import json
+import yaml
 from pathlib import Path
 from copy import deepcopy
 
@@ -14,6 +14,7 @@ def new_runtime_entry():
   return {
     'name': None,         # task name
     'status': 'created',
+    'info': None,
     'progress': None,     # f'{n_job_finished} / {n_job_total}'
     'ts_create': ts_now(),
     'ts_update': None,
