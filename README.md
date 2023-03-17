@@ -10,9 +10,10 @@
 
 ### Web API
 
+⚪ Native API
+
 - start server `python app.py`
 - point your browser to `http://127.0.0.1:5000/` to see API documentation
-- see client demo `python app_test.py`
 
 Main busisness:
 
@@ -23,7 +24,19 @@ Main busisness:
 - `GET /task/<name>` to get task status or results 
 - `POST /infer` to predict on new data
 - `GET /log/<task_name>/<job_name>.log` to see job log
-- `GET /log/<task_name>` to download the task workspace folder
+- `GET /log/<task_name>` to download the task log folder
+
+⚪ Proxy API
+
+- start server `python app_proxy.py`
+- point your browser to `http://127.0.0.1:5000/` to see API documentation
+
+Main busisness:
+
+- `POST /page2/getFittingCurve`
+- `POST /page2/get6hPredictionResult`
+- `POST /page2/getModelPerformance`
+- `POST /page2/getExceedingPredictionResult`
 
 
 ### Local run
@@ -34,10 +47,11 @@ Main busisness:
 - each file can contain several columns
   - the first columns is datetime in ISO 8601 format, e.g. `2022-09-27 18:00:00.000`
   - the rest columns are float data from your sensor devices
+    - the last column is to predict on
 
 ⚪ Dataset & Train & Eval
 
-- write a job file, see guide => [job/README.md](job/README.md)
+- write a job file, see guide => [doc/job.md](doc/job.md)
 - run `python run.py -D path/to/*.csv -J path/to/*.yaml`
   - run all demo experiments: `run_experiments.cmd`
 

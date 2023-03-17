@@ -14,7 +14,7 @@ preprocess:
 # ref: http://alkaline-ml.com/pmdarima/modules/generated/pmdarima.arima.AutoARIMA.html
 model:
   name: ARIMA_rgr
-  config:
+  params:
     start_p: 2
     max_p: 5
     start_q: 2

@@ -22,7 +22,7 @@ dataset:
 
 model:
   name: CRNN_clf
-  config:
+  params:
     rnn_type: LSTM
     rnn_in: 1
     rnn_out: 4        # := num_class

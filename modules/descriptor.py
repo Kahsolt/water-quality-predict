@@ -9,6 +9,7 @@ from copy import deepcopy
 
 from modules.util import ts_now
 
+
 # => see 'log/README.txt'
 def new_runtime_entry():
   return {
@@ -23,12 +24,10 @@ def new_runtime_entry():
 def new_task_entry():
   return {
     'status': 'created',
-    'type': None,
     'target': None,
-    'best': None,
     'jobs': { },
     'ts_create': ts_now(),
-    'ts_finish': None,
+    'ts_update': None,
   }
 
 

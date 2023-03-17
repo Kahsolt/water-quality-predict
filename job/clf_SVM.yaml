@@ -22,7 +22,7 @@ dataset:
 
 model:
   name: SVM_clf
-  config:
+  params:
     model: SVC
     gs_params:
       param_grid:

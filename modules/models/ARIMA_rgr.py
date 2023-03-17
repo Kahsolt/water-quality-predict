@@ -14,17 +14,17 @@ from modules.models.XGBoost_rgr import save, load
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:Config) -> AutoARIMA:
-  return AutoARIMA(**config)
+def init(params:Params) -> AutoARIMA:
+  return AutoARIMA(**params)
 
 
-def train(model:AutoARIMA, seq:Seq, config:Config):
+def train(model:AutoARIMA, seq:Seq, params:Params):
   seq = seq.squeeze()
   model.fit(seq)
   get_logger().info(model.summary())
 
 
-def eval(model:AutoARIMA, seq:Seq, config:Config) -> EvalMetrics:
+def eval(model:AutoARIMA, seq:Seq, params:Params) -> EvalMetrics:
   seq = seq.squeeze()
   seqlen = len(seq)
   start = seqlen // 4

@@ -20,7 +20,7 @@ dataset:
 # ref: https://xgboost.readthedocs.io/en/stable/parameter.html
 model:
   name: XGBoost_rgr
-  config:
+  params:
     model: XGBRegressor
     objective: 'reg:squarederror'
     gs_params:

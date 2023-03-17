@@ -16,15 +16,15 @@ from modules.typing import *
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:Config) -> GridSearchCV:
-  model: XGBRegressor = getattr(xgboost, config['model'])(
-    objective=config['objective'],
+def init(params:Params) -> GridSearchCV:
+  model: XGBRegressor = getattr(xgboost, params['model'])(
+    objective=params['objective'],
   )
-  model_gs = GridSearchCV(model, **config['gs_params'])
+  model_gs = GridSearchCV(model, **params['gs_params'])
   return model_gs
 
 
-def train(model:GridSearchCV, dataset:Datasets, config:Config):
+def train(model:GridSearchCV, dataset:Datasets, params:Params):
   (X_train, y_train), _ = dataset
   assert X_train.shape[-1] == 1
   X_train = X_train.squeeze(axis=-1)  # [N, I]
@@ -33,7 +33,7 @@ def train(model:GridSearchCV, dataset:Datasets, config:Config):
   get_logger().info('best: %f using %s' % (model.best_score_, model.best_params_))
 
 
-def eval(model:GridSearchCV, dataset:Datasets, config:Config) -> EvalMetrics:
+def eval(model:GridSearchCV, dataset:Datasets, params:Params) -> EvalMetrics:
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]
@@ -51,8 +51,12 @@ def infer(model:GridSearchCV, x:Frame) -> Frame:
 
 
 def save(model:GridSearchCV, log_dp:Path):
-  joblib.dump(model, log_dp / 'model.pkl')
+  fp = log_dp / 'model.pkl'
+  logger.info(f'save model to {fp}')
+  joblib.dump(model, fp)
 
 
 def load(model:GridSearchCV, log_dp:Path) -> GridSearchCV:
-  return joblib.load(log_dp / 'model.pkl')
+  fp = log_dp / 'model.pkl'
+  logger.info(f'load model from {fp}')
+  return joblib.load(fp)

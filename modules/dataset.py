@@ -4,11 +4,12 @@
 
 from random import shuffle
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
-import numpy as np
 
 from modules.typing import *
+
 
 def ex_thresh(seq:Seq, T:Time, **kwargs) -> Seq:
   '''
@@ -20,7 +21,6 @@ def ex_thresh(seq:Seq, T:Time, **kwargs) -> Seq:
   thresh = kwargs['thresh']
 
   return (seq > thresh).astype(np.int32)    # [T, D=1]
-
 
 def ex_thresh_3h(seq:Seq, T:Time, **kwargs) -> Seq:
   '''
@@ -34,7 +34,6 @@ def ex_thresh_3h(seq:Seq, T:Time, **kwargs) -> Seq:
   y = np.asarray(y, dtype=np.int32)   # [T]
   y = np.expand_dims(y, axis=-1)      # [T, D=1]
   return y
-
 
 def ex_thresh_24h(seq:Seq, T:Time, **kwargs) -> Seq:
   '''
@@ -66,15 +65,15 @@ def ex_thresh_24h(seq:Seq, T:Time, **kwargs) -> Seq:
   y = np.expand_dims(y, axis=-1)      # [T, D=1]
   return y
 
-
 # ↑↑↑ above are valid encoders ↑↑↑
 
-def encode_seq(x:Seq, T:Time, encode:Encode) -> Seq:
+
+def encode_seq(x:Seq, T:Time, encode:Encoder) -> Seq:
   label_func = globals()[encode['name']]
   label_func_params = encode.get('params') or {}
   return label_func(x, T, **label_func_params)
 
-def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split:float=0.2, y:Seq=None) -> Datasets:
+def slice_frames(x:Seq, y:Seq, inlen:int=3, outlen:int=1, overlap:int=0) -> Dataset:
   ''' 在时间序列上滚动切片产生数据集样本，知 inlen 推 outlen 时间步 '''
 
   # x.shape: [T, D]
@@ -97,6 +96,9 @@ def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split:f
   X: Frames = np.stack(X, axis=0)     # [N, I, D]
   Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
 
+  return X, Y
+
+def split_dataset(X:Frames, Y:Frames, split:float=0.2) -> Dataset:
   cp = int(len(X) * split)
   X_eval, X_train = X[:cp, ...], X[cp:, ...]
   Y_eval, Y_train = Y[:cp, ...], Y[cp:, ...]

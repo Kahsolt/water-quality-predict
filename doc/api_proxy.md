@@ -1,6 +1,6 @@
 # Proxy API documentation
 
-=> For native API doc, see [/doc/api](/doc/api)
+=> see native API doc: [/doc/api](/doc/api)
 
 ### General 总论
 

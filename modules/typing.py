@@ -6,20 +6,16 @@ from torch.optim import Optimizer
 from logging import Logger
 from typing import *
 
-# 任务/作业类型
-TaskType = Union[
-  Literal['clf'],       # 分类
-  Literal['rgr'],       # 回归
-]
+
 # 任务/作业运行目标
-TaskTarget = Union[
+Target = Union[
   Literal['data'],      # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
   Literal['train'],     # 训练
   Literal['eval'],      # 评估
   Literal['all'],       # 全部 := 制作数据 + 训练 + 评估 (糖！)
 ]
 # 任务/作业进度状态
-TaskStatus = Union[
+Status = Union[
   Literal['created'],   # 创建任务
   Literal['queuing'],   # 执行队列中等待
   Literal['running'],   # 正在执行中
@@ -33,34 +29,39 @@ Env = Dict[str, Any]
 
 # 模型
 Model = object()
-PyTorchModel = Module
 # 模型参数
-Config = Dict[str, Any]
+Params = Dict[str, Any]
 # 分类标签编码
-Encode = {
+Encoder = {
   'name': str,
-  'params': Dict[str, Any],
+  'params': Params,
 }
 
 # 含时间轴的原始数据
 TimeSeq = DataFrame
-Time = Series
-Data = DataFrame
-TimeAndData = Tuple[Time, Data]
+Time    = Series
+Values  = DataFrame
+TimeAndValues = Tuple[Time, Values]
 # 预处理后的数据帧序列
 Seq    = ndarray      # [T, D]
 Array  = ndarray      # [T]
 Frame  = ndarray      # [I/O, D]
 Frames = ndarray      # [N, I/O, D]
 # 预处理过程中记录的一些统计量
-Stat  = Tuple[Any]
+Stat  = Tuple[Any, ...]
 Stats = List[Tuple[str, Stat]]
+SeqAndStat = Tuple[Seq, Stat]
 # 数据集：(输入X, 输出Y)
 Dataset = Tuple[Frames, Frames]
 # 数据集组：(训练集, 测试集)
 Datasets = Tuple[Dataset, Dataset]
-# 所有缓存的数据
+# 所有磁盘缓存的数据
 CachedData = Union[Seq, Stats, Datasets]
 
+# 作业类型
+TaskType = Union[
+  Literal['clf'],       # 分类
+  Literal['rgr'],       # 回归
+]
 # 评估结果
 EvalMetrics = Tuple[float, ...]

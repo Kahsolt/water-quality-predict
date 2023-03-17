@@ -91,34 +91,13 @@ def get_job_type(job_name:str):
 
 @process
 def process_df(env:Env):
-  job: Descriptor = env['job']
   logger: Logger = env['logger']
+  log_dp: Path = env['log_dp']
 
-  df: TimeSeq = None          # 总原始数据
-  T = None                    # 唯一时间轴
-  for fp in job.get('data'):
-    try:
-      df_new = read_csv(fp)
-      cols = list(df_new.columns)
-      T_new, data_new = df_new[cols[0]], df_new[cols[1:]]
-      if T is None:
-        T = T_new
-      else:
-        if len(T) != len(T_new):
-          logger.info(f'>> ignore file {fp!r} due to length mismatch with former ones')
-          continue
-        if not (T == T_new).all():
-          logger.info(f'>> ignore file {fp!r} due to timeline mismatch with former ones')
-          continue
-      if df is None:
-        df = df_new
-      else:
-        df = pd.concat([df_new, data_new], axis='column', ignore_index=True, copy=False)
-    except:
-      logger.error(format_exc())
+  df: TimeSeq = read_csv(log_dp / DATA_FILE)  # 总原始数据
 
   logger.info(f'  found {len(df)} records')
-  logger.info(f'  column names: {list(df.columns)}')
+  logger.info(f'  column names({len(df.columns)}): {list(df.columns)}')
 
   env['df'] = df              # 第一列为时间戳，其余列为数值特征
 
@@ -129,7 +108,7 @@ def process_seq(env:Env):
   log_dp: Path = env['log_dp']
 
   df: TimeSeq = env['df']
-  _, df_r = preprocess.split_time_and_data(df)
+  _, df_r = preprocess.split_time_and_values(df)
 
   if 'filter T':
     for proc in job.get('preprocess/filter_T', []):
@@ -159,7 +138,7 @@ def process_seq(env:Env):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
       try:
-        df: Data = getattr(preprocess, proc)(df)
+        df: Values = getattr(preprocess, proc)(df)
         save_figure(log_dp / f'filter_V_{proc}.png')
       except: logger.error(format_exc())
 
@@ -202,28 +181,50 @@ def process_dataset(env:Env):
 
   if not job.get('dataset'): return
 
-  encode: Encode = job.get('dataset/encode')
-  if encode is not None:    # clf
-    label = encode_seq(seq, T, encode)
+  # split
+  exclusive: bool = job.get('dataset/exclusive', False)
+  inputs = seq[:, :-1] if exclusive else seq
+  target = seq[:, -1:]
+
+  # encode tgt
+  label = None
+  encoder: Encoder = job.get('dataset/encoder')
+  if encoder is not None:    # clf
+    label = encode_seq(target, T, encoder)
     freq = Counter(label.flatten())
     logger.info(f'  label freq: {freq}')
-  else:
-    label = None
 
-  split   = job.get('dataset/split', 0.2) ; assert 0 < split < 1.0
+    # test bad ratio
+    tot, bad = 0, 0
+    for k, v in freq.items():
+      tot += v
+      if k > 0: bad += v      # all abnormal cases
+    bad_ratio = bad / tot
+    freq_min: float = job.get('dataset/freq_min', 0.0) ; assert 0.0 <= freq_min <= 1.0
+    if bad_ratio < freq_min:
+      logger.info(f'  bad_ratio({bad_ratio}) < freq_min({freq_min}), ignore modeling')
+      env['status'] = 'ignored'
+      return
+
+  # make slices
   inlen   = job.get('dataset/in')         ; assert inlen   > 0
   outlen  = job.get('dataset/out')        ; assert outlen  > 0
   overlap = job.get('dataset/overlap', 0) ; assert overlap >= 0
-  trainset, evalset = split_frame_dataset(seq, inlen, outlen, overlap, split, y=label)
+  X, Y = slice_frames(inputs, (label or target), inlen, outlen, overlap)
+  logger.info(f'  dataset')
+  logger.info(f'    X: {X.shape}')
+  logger.info(f'    Y: {Y.shape}')
 
-  logger.info(f'  train set')
-  logger.info(f'    input:  {trainset[0].shape}')
-  logger.info(f'    target: {trainset[1].shape}')
-  logger.info(f'  eval set')
-  logger.info(f'    input:  {evalset[0].shape}')
-  logger.info(f'    target: {evalset[1].shape}')
+  # split dataset
+  split   = job.get('dataset/split', 0.2) ; assert 0.0 < split < 1.0
+  dataset = ((X_train, Y_train), (X_test, Y_test)) = split_dataset(X, Y)
+  logger.info(f'  train split')
+  logger.info(f'    input:  {X_train[0].shape}')
+  logger.info(f'    target: {Y_train[1].shape}')
+  logger.info(f'  test split')
+  logger.info(f'    input:  {X_test[0].shape}')
+  logger.info(f'    target: {Y_test[1].shape}')
 
-  dataset = (trainset, evalset)
   save_pickle(dataset, log_dp / DATASET_FILE)
   if label is not None: save_pickle(label, log_dp / LABEL_FILE)
   
@@ -306,7 +307,7 @@ def target_train(env:Env):
 
   manager, model = env['manager'], env['model']
   data = env['dataset'] if job.get('dataset') else env['seq']
-  manager.train(model, data, job.get('model/config'))
+  manager.train(model, data, job.get('model/params'))
   manager.save(model, log_dp)
 
 @require_data_and_model
@@ -338,7 +339,7 @@ def target_eval(env:Env):
   else:
     raise ValueError(f'unknown task type {task_type!r}')
 
-  with open(log_dp / 'metric.txt', 'w', encoding='utf-8') as fh:
+  with open(log_dp / 'scores.txt', 'w', encoding='utf-8') as fh:
     fh.write('\n'.join(lines))
 
 
@@ -367,7 +368,7 @@ def setup_env(args):
   env: Env = {
     'job': job,         # 'job.yaml'
     'logger': logger,   # logger
-    'log_dp': log_dp,   # workspace folder
+    'log_dp': log_dp,   # log folder
   }
   return env
 
@@ -376,13 +377,18 @@ def setup_env(args):
 def run(args):
   env = setup_env(args)
   job: Descriptor = env['job']
+  logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  targets: List[TaskTarget] = job.get('misc/target', ['all'])
+  targets: List[Target] = job.get('misc/target', ['all'])
   if 'all' in targets:
     targets = ['data', 'train', 'eval']
   for tgt in targets:
-    globals()[f'target_{tgt}'](env)
+    try:
+      globals()[f'target_{tgt}'](env)
+    except:
+      env['status'] = 'failed'
+      logger.error(format_exc())
 
   job.save(log_dp / JOB_FILE)
 
@@ -399,7 +405,7 @@ def run_batch(args):
   clf_tasks, rgr_tasks = [], []
   for log_folder in args.log_path.iterdir():
     if log_folder.is_file(): continue
-    with open(log_folder / 'metric.txt', 'r', encoding='utf-8') as fh:
+    with open(log_folder / 'scores.txt', 'r', encoding='utf-8') as fh:
       data = fh.read().strip()
 
     expname = log_folder.name
@@ -415,7 +421,7 @@ def run_batch(args):
   clf_tasks.sort(reverse=True)
   rgr_tasks.sort(reverse=True)
 
-  with open(args.log_path / 'metric-ranklist.txt', 'w', encoding='utf-8') as fh:
+  with open(args.log_path / 'scores-ranklist.txt', 'w', encoding='utf-8') as fh:
     def log(s=''):
       fh.write(s + '\n')
       print(s)
@@ -438,9 +444,10 @@ if __name__ == '__main__':
   parser.add_argument('-D', '--csv_file',   required=True,       type=Path, help='path to a *.csv data file')
   parser.add_argument('-J', '--job_file',                        type=Path, help='path to a *.yaml job file')
   parser.add_argument('-X', '--job_folder',                      type=Path, help='path to a folder of *.yaml job file')
-  parser.add_argument('-L', '--log_path',   default=Path('log'), type=Path, help='path to log root folder')
-  parser.add_argument('--name',                                             help='custom task name')
-  parser.add_argument('--no_overwrite',     action='store_true',            help='no overwrite if log folder exists')
+  parser.add_argument(      '--log_path',   default=Path('log'), type=Path, help='path to log root folder')
+  parser.add_argument(      '--tmp_path',   default=Path('tmp'), type=Path, help='path to tmp folder')
+  parser.add_argument(      '--name',                                       help='custom task name')
+  parser.add_argument(      '--no_overwrite', action='store_true',          help='no overwrite if log folder exists')
   args = parser.parse_args()
 
   assert (args.job_file is None) ^ (args.job_folder is None), 'must specify either --job_file xor --job_folder'

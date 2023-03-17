@@ -1,6 +1,8 @@
 # API documentation
 
-=> For proxy API doc, see [/doc/api_proxy](/doc/api_proxy)
+=> see proxy API doc: [/doc/api_proxy](/doc/api_proxy)  
+=> see job.yaml doc: [/doc/job](/doc/job)  
+=> see log folder doc: [/doc/log](/doc/log)  
 
 ### General 总论
 
@@ -49,51 +51,28 @@ monitorTime,monitor1,monitor2       // column names are arbitary
 2021-01-01 09:00:00,0.3,1.0
 ```
 
-### Job descriptor 作业描述符
 
-=> see [job.yaml documentation](/doc/job)
 
 ### Enums 枚举常量
 
 ```cpp
-enum TaskType {
-  rgr         // 分类
-  clf         // 回归
-};
-enum TaskTarget {
+enum Target {
   data        // 数据 := 数值预处理 + 打分类标签 + 划分数据集
   train       // 训练
   eval        // 评估
   all         // 全部
 };
-enum TaskStatus {
+enum Status {
   created     // 创建任务
   queuing     // 执行队列中等待
   running     // 正在执行中
   finished    // 已完成
+  ignored     // 忽略
   failed      // 出错
 };
 ```
 
 ----
-
-### POST /merge_csv 合并多个csv文件
-
-```typescript
-// request
-// <= multiple *.csv files
-// for each file:
-//   first column is datetime in isoformat
-//   rest columns are float value
-interface {
-  target: str         // filename, specify which file is to predict on (as last column)
-                      // target file must contain only 1 value column
-}
-
-// response
-// => data.csv
-// multi-dim time-aligned seq as described in '###Data' section
-```
 
 ### POST /task 创建新任务并运行
 
@@ -101,8 +80,7 @@ interface {
 // request
 // <= single *.csv file
 interface {
-  type: str           // task type, choose from `TaskType`
-  target?: str[]      // task target, choose from `TaskTarget`, default to 'all'
+  target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
   name?: str          // custom task name
 }
@@ -121,7 +99,7 @@ interface {
 // request
 // <= single *.csv file (optional), **replacing** the old one
 interface {
-  target?: str[]      // task target, choose from `TaskTarget`
+  target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
 }
 ```
@@ -140,22 +118,24 @@ interface {
 ```typescript
 // response
 interface {
-  type: str           // task type, choose from `TaskType`
-  status: str         // task status, choose from `TaskStatus`
-  best?: str          // job name
-  jobs?: {
-    "job_name": {     // metrics for 'clf' task
-      pres: float
-      recall: float
-      f1: float
-    } | {             // metrics for 'rgr' task
-      mae: float
-      mse: float
-      r2: float
-    },
-  },
-  ts_create: int      // task create time
-  ts_finish?: int     // train finish time
+  status: str         // task status, choose from `Status`
+  jobs: {
+    "job_name": {
+      type: str
+      statue: str
+      scores: {       // for 'clf' task
+        pres: float
+        recall: float
+        f1: float
+      } | {           // for 'rgr' task
+        mae: float
+        mse: float
+        r2: float
+      }
+    }
+  }
+  ts_create: int
+  ts_update: int
 }
 ```
 
@@ -194,7 +174,9 @@ interface {
 // response
 // => <job_name>.yaml file or 
 interface {
-  // config items converted from *.yaml
+  job: {
+    // config items converted from *.yaml
+  }
 }
 ```
 
@@ -216,12 +198,11 @@ interface {
 
 ----
 
-### POST /infer/\<task_name\> 推断
+### POST /infer/\<task_name\>/\<job_name\> 推断
 
 ```typescript
 // request
 interface {
-  job?: str           // default to the best job
   data: str           // base64 codec of input.flatten(): np.array
   shape: int[]        // shape of input: np.ndarray
 }
@@ -261,10 +242,30 @@ interface {
 ```typescript
 // request
 // url params: ?status=
-//   status: comma seperated string select from `TaskStatus` (default: "queuing,running")
+//   status: comma seperated string select from `Status` (default: "queuing,running")
 
 // response
 // => plain html page (auto refresh per 5s)
+```
+
+----
+
+### POST /merge_csv 合并多个csv文件
+
+```typescript
+// request
+// <= multiple *.csv files
+// for each file:
+//   first column is datetime in isoformat
+//   rest columns are float value
+interface {
+  target: str         // filename, specify which file is to predict on (as last column)
+                      // target file must contain only 1 value column
+}
+
+// response
+// => data.csv
+// multi-dim time-aligned seq as described in '###Data' section
 ```
 
 ### GET [/debug](/debug) 系统调试信息

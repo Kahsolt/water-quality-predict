@@ -18,7 +18,7 @@ dataset:
 
 model:
   name: CRNN_rgr
-  config:
+  params:
     rnn_type: GRU
     rnn_in: 1
     rnn_out: 6        # := dataset.out

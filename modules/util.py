@@ -23,7 +23,6 @@ from modules.typing import *
 plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
 plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -36,6 +35,9 @@ def get_logger(name, log_dp=Path('.')) -> Logger:
   h.setFormatter(formatter)
   logger.addHandler(h)
   return logger
+
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def seed_everything(seed:int):
   random.seed(seed)
@@ -59,6 +61,14 @@ def timestr() -> str:
 def ts_now() -> int:
   return int(time())
 
+def timer(fn:Callable[..., Any]):
+  def wrapper(*args, **kwargs):
+    t = time()
+    r = fn(*args, **kwargs)
+    print(f'All things done in {time() - t:.3f}s')
+    return r
+  return wrapper
+
 
 def read_csv(fp:str) -> DataFrame:
   return pd.read_csv(fp, encoding='utf-8')
@@ -79,10 +89,8 @@ def save_pickle(data:CachedData, fp:Path):
     pkl.dump(data, fh)
 
 
-def get_metrics(truth, pred, task:TaskType='clf') -> EvalMetrics:
+def get_metrics(truth, pred, task:TaskType) -> EvalMetrics:
   global logger
-
-  assert task in ['clf', 'rgr'], ValueError(f'unknown task {task!r}')
 
   if   task == 'clf':
     prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
@@ -106,23 +114,3 @@ def save_figure(fp:Path, title:str=None):
   plt.suptitle(title)
   plt.savefig(fp, dpi=400)
   logger.info(f'  save figure to {fp}')
-
-
-def load_checkpoint(model:PyTorchModel, fp:Path, device=device):
-  logger.info(f'load model from {fp}')
-  state_dict = torch.load(fp, map_location=device)
-  model.load_state_dict(state_dict)
-  return model
-
-def save_checkpoint(model:PyTorchModel, fp:Path):
-  logger.info(f'save model to {fp}')
-  torch.save(model.state_dict(), fp)
-
-
-def timer(fn:Callable[..., Any]):
-  def wrapper(*args, **kwargs):
-    t = time()
-    r = fn(*args, **kwargs)
-    print(f'All things done in {time() - t:.3f}s')
-    return r
-  return wrapper

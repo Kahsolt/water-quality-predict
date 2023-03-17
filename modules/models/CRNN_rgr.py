@@ -14,23 +14,23 @@ from modules.models.CRNN import *
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:Config) -> CRNN:
+def init(params:Params) -> CRNN:
   logger = get_logger()
 
   model = CRNN(
-    r_type    = config['rnn_type'],
-    r_in      = config.get('rnn_in',      1),
-    r_out     = config.get('rnn_out',     1),
-    r_hidden  = config.get('rnn_hidden',  32),
-    r_layers  = config.get('rnn_layers',  1),
-    r_dropout = config.get('rnn_dropout', 0.0),
-    c_layers  = config.get('cnn_layers',  0),
-    c_k       = config.get('cnn_k',       3),
-    c_stride  = config.get('cnn_stride',  2),
-    c_in      = config.get('cnn_in',      32),
-    c_out     = config.get('cnn_out',     32),
-    c_hidden  = config.get('cnn_hidden',  32),
-    c_act     = config.get('cnn_act',     'leaky_relu'),
+    r_type    = params['rnn_type'],
+    r_in      = params.get('rnn_in',      1),
+    r_out     = params.get('rnn_out',     1),
+    r_hidden  = params.get('rnn_hidden',  32),
+    r_layers  = params.get('rnn_layers',  1),
+    r_dropout = params.get('rnn_dropout', 0.0),
+    c_layers  = params.get('cnn_layers',  0),
+    c_k       = params.get('cnn_k',       3),
+    c_stride  = params.get('cnn_stride',  2),
+    c_in      = params.get('cnn_in',      32),
+    c_out     = params.get('cnn_out',     32),
+    c_hidden  = params.get('cnn_hidden',  32),
+    c_act     = params.get('cnn_act',     'leaky_relu'),
   )
   param_cnt = sum([p.numel() for p in model.parameters() if p.requires_grad])
   logger.info(f'  param_cnt: {param_cnt}')
@@ -38,10 +38,10 @@ def init(config:Config) -> CRNN:
   return model.to(device)
 
 
-def train(model:CRNN, dataset:Datasets, config:Config):
+def train(model:CRNN, dataset:Datasets, params:Params):
   logger = get_logger()
 
-  dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, config)
+  dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, params)
 
   model.train()
   for i in range(epochs):
@@ -58,8 +58,8 @@ def train(model:CRNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def eval(model:CRNN, dataset:Datasets, config:Config) -> EvalMetrics:
-  dataloader, y_test = prepare_for_eval(model, dataset, config)
+def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
+  dataloader, y_test = prepare_for_eval(model, dataset, params)
 
   preds = []
   model.eval()
@@ -83,8 +83,14 @@ def infer(model:CRNN, x:Frame) -> Frame:
 
 
 def save(model:CRNN, log_dp:Path):
-  save_checkpoint(model, log_dp / 'model.pth')
+  fp = log_dp / 'model.pth'
+  logger.info(f'save model to {fp}')
+  torch.save(model.state_dict(), fp)
 
 
 def load(model:CRNN, log_dp:Path) -> CRNN:
-  return load_checkpoint(model, log_dp / 'model.pth')
+  fp = log_dp / 'model.pth'
+  logger.info(f'load model from {fp}')
+  state_dict = torch.load(fp, map_location=device)
+  model.load_state_dict(state_dict)
+  return model

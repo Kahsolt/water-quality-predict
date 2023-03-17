@@ -31,12 +31,12 @@ dataset:            # 数据制作
       [key: value]
   freq_min: float   # 分类任务的非0类占比阈值，小于此阈值将忽略建模 (default: 0.0)
 
-transform:          # 数值变换
+transform:          # 数值变换，可选项为 modules/transform.py 文件内各函数名
   - string
 
 model:
   name: string      # 模型模板，可选项为 modules/models 目录下各文件名
-  config:           # 依模型模板不同设置项也不同，详见各模板
+  params:           # 依模型模板不同设置项也不同，详见各模板
     [key: value]
 
 seed: int           # 全局随机数种子, (default: -1, ie. randomized)
@@ -64,14 +64,14 @@ preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内�
 ```
 
 - filter_T: 含时处理，挂载需要时间信息的预处理操作
-  - time_cont: 时间对齐到时间单位 (h) 
+  - ticker_timer: 时间补全并对齐到时间单位 (h) 
   - ltrim_vacant: 抛弃连续一周以上的缺值及之前
 - project: 时间刻度投影，并分离时间维度
   - to_hourly: 时间单位固定为小时
   - to_daily: 时间单位固定为日
     - 聚合策略: 当日有效数据 >12h 则取均值，否则置为 NaN
 - filter_V: 不含时处理，挂载不需要时间信息的预处理操作
-  - remove_outlier: 线性插值重定 3σ 界外值
+  - remove_outlier: 区间端点线性插值以重定 3σ 界外值
   - wavlet_transform: 小波变换去噪
 
 ##### dataset 数据集切片
@@ -91,7 +91,7 @@ dataset:
 ```
 
 - 对 预处理数据data，分离 特征变量序列seq 和 目标变量序列tgt
-- 对于分类任务，对 seq 打标签得到 lbl；检查异常值是否超出最小建模阈值
+- 对于分类任务，对 tgt 打标签得到 lbl；检查异常值是否超出最小建模阈值
 - 知 in 推 out，在 seq 上滚动切片作为 X，对应的 tgt/lbl 作为 Y
 - 对数据集 (X, Y) 做训练-测试划分
 
@@ -120,7 +120,7 @@ trainset, testset = split_dataset(X, Y, split)
 ##### transform 数值转换
 
 ```yaml
-transform:          # 数值变换
+transform:          # 数值变换，可选项为 modules/transform.py 文件内各函数名
   - string
 ```
 
@@ -135,7 +135,7 @@ transform:          # 数值变换
 ```yaml
 model:
   name: string      # 模型模板，可选项为 modules/models 目录下各文件名
-  config:           # 依模型模板不同设置项也不同，详见各模板
+  params:           # 依模型模板不同设置项也不同，详见各模板
     [key: value]
 ```
 

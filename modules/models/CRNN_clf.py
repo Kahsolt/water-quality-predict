@@ -15,10 +15,10 @@ from modules.models.CRNN_rgr import init, save, load     # just proxy by
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def train(model:CRNN, dataset:Datasets, config:Config):
+def train(model:CRNN, dataset:Datasets, params:Params):
   logger = get_logger()
 
-  dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, config)
+  dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, params)
 
   model.train()
   for i in range(epochs):
@@ -43,8 +43,8 @@ def train(model:CRNN, dataset:Datasets, config:Config):
 
 
 @torch.inference_mode()
-def eval(model:CRNN, dataset:Datasets, config:Config) -> EvalMetrics:
-  dataloader, y_test = prepare_for_eval(model, dataset, config)
+def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
+  dataloader, y_test = prepare_for_eval(model, dataset, params)
   
   preds = []
   model.eval()

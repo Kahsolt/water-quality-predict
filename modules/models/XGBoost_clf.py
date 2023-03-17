@@ -16,11 +16,11 @@ from modules.models.XGBoost_rgr import train, save, load     # just proxy by
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(config:Config) -> GridSearchCV:
-  model: XGBClassifier = getattr(xgboost, config['model'])(
-    objective=config['objective'], 
+def init(params:Params) -> GridSearchCV:
+  model: XGBClassifier = getattr(xgboost, params['model'])(
+    objective=params['objective'], 
   )
-  model_gs = GridSearchCV(model, **config['gs_params'])
+  model_gs = GridSearchCV(model, **params['gs_params'])
   return model_gs
 
 
@@ -32,7 +32,7 @@ def infer(model:GridSearchCV, x:Frame) -> Frame:
   return y
 
 
-def eval(model:GridSearchCV, dataset:Datasets, config:Config) -> EvalMetrics:
+def eval(model:GridSearchCV, dataset:Datasets, params:Params) -> EvalMetrics:
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
   X_test = X_test.squeeze(axis=-1)  # [N, I]

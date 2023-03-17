@@ -18,7 +18,7 @@ dataset:
 
 model:
   name: XGBoost_rgr
-  config:
+  params:
     model: XGBRegressor
     objective: 'reg:squarederror'
     gs_params:

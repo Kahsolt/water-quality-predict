@@ -57,13 +57,13 @@ class CRNN(nn.Module):
     return x
 
 
-def prepare_for_train(model:PyTorchModel, dataset:Datasets, config:Config):
-  E  = config.get('epochs', 10)
-  B  = config.get('batch_size', 32)
-  O  = config.get('optimizer', 'Adam')
-  lr = config.get('lr', 1e-3)
-  wd = config.get('weight_decay', 1e-5)
-  L  = config.get('loss', 'mse_loss')
+def prepare_for_train(model:Module, dataset:Datasets, params:Params):
+  E  = params.get('epochs', 10)
+  B  = params.get('batch_size', 32)
+  O  = params.get('optimizer', 'Adam')
+  lr = params.get('lr', 1e-3)
+  wd = params.get('weight_decay', 1e-5)
+  L  = params.get('loss', 'mse_loss')
 
   lr = float(lr)
   wd = float(wd)
@@ -78,7 +78,7 @@ def prepare_for_train(model:PyTorchModel, dataset:Datasets, config:Config):
   return dataloader, optimizer, loss_fn, E
 
 
-def prepare_for_eval(model:PyTorchModel, dataset:Datasets, config:Config):
+def prepare_for_eval(model:Module, dataset:Datasets, params:Params):
   evalset = dataset[1]
   y_test = evalset[1]
   dataloader = DataLoader(FrameDataset(evalset), batch_size=1, shuffle=False, pin_memory=False)

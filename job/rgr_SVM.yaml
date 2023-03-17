@@ -18,7 +18,7 @@ dataset:
 
 model:
   name: SVM_rgr
-  config:
+  params:
     model: SVR
     gs_params:
       param_grid:

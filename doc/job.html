@@ -289,12 +289,12 @@ pre[data-line] .line-highlight[data-end]:after {
       <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
   <span class="token key atrule">freq_min</span><span class="token punctuation">:</span> float   <span class="token comment"># &#x5206;&#x7C7B;&#x4EFB;&#x52A1;&#x7684;&#x975E;0&#x7C7B;&#x5360;&#x6BD4;&#x9608;&#x503C;&#xFF0C;&#x5C0F;&#x4E8E;&#x6B64;&#x9608;&#x503C;&#x5C06;&#x5FFD;&#x7565;&#x5EFA;&#x6A21; (default: 0.0)</span>
 
-<span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;</span>
+<span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/transform.py &#x6587;&#x4EF6;&#x5185;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
   <span class="token punctuation">-</span> string
 
 <span class="token key atrule">model</span><span class="token punctuation">:</span>
   <span class="token key atrule">name</span><span class="token punctuation">:</span> string      <span class="token comment"># &#x6A21;&#x578B;&#x6A21;&#x677F;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/models &#x76EE;&#x5F55;&#x4E0B;&#x5404;&#x6587;&#x4EF6;&#x540D;</span>
-  <span class="token key atrule">config</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
+  <span class="token key atrule">params</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
     <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
 
 <span class="token key atrule">seed</span><span class="token punctuation">:</span> int           <span class="token comment"># &#x5168;&#x5C40;&#x968F;&#x673A;&#x6570;&#x79CD;&#x5B50;, (default: -1, ie. randomized)</span>
@@ -318,7 +318,7 @@ pre[data-line] .line-highlight[data-end]:after {
 </pre><ul>
 <li>filter_T: &#x542B;&#x65F6;&#x5904;&#x7406;&#xFF0C;&#x6302;&#x8F7D;&#x9700;&#x8981;&#x65F6;&#x95F4;&#x4FE1;&#x606F;&#x7684;&#x9884;&#x5904;&#x7406;&#x64CD;&#x4F5C;
 <ul>
-<li>time_cont: &#x65F6;&#x95F4;&#x5BF9;&#x9F50;&#x5230;&#x65F6;&#x95F4;&#x5355;&#x4F4D; (h)</li>
+<li>ticker_timer: &#x65F6;&#x95F4;&#x8865;&#x5168;&#x5E76;&#x5BF9;&#x9F50;&#x5230;&#x65F6;&#x95F4;&#x5355;&#x4F4D; (h)</li>
 <li>ltrim_vacant: &#x629B;&#x5F03;&#x8FDE;&#x7EED;&#x4E00;&#x5468;&#x4EE5;&#x4E0A;&#x7684;&#x7F3A;&#x503C;&#x53CA;&#x4E4B;&#x524D;</li>
 </ul>
 </li>
@@ -334,7 +334,7 @@ pre[data-line] .line-highlight[data-end]:after {
 </li>
 <li>filter_V: &#x4E0D;&#x542B;&#x65F6;&#x5904;&#x7406;&#xFF0C;&#x6302;&#x8F7D;&#x4E0D;&#x9700;&#x8981;&#x65F6;&#x95F4;&#x4FE1;&#x606F;&#x7684;&#x9884;&#x5904;&#x7406;&#x64CD;&#x4F5C;
 <ul>
-<li>remove_outlier: &#x7EBF;&#x6027;&#x63D2;&#x503C;&#x91CD;&#x5B9A; 3&#x3C3; &#x754C;&#x5916;&#x503C;</li>
+<li>remove_outlier: &#x533A;&#x95F4;&#x7AEF;&#x70B9;&#x7EBF;&#x6027;&#x63D2;&#x503C;&#x4EE5;&#x91CD;&#x5B9A; 3&#x3C3; &#x754C;&#x5916;&#x503C;</li>
 <li>wavlet_transform: &#x5C0F;&#x6CE2;&#x53D8;&#x6362;&#x53BB;&#x566A;</li>
 </ul>
 </li>
@@ -379,7 +379,7 @@ X<span class="token punctuation">,</span> Y <span class="token operator">=</span
 trainset<span class="token punctuation">,</span> testset <span class="token operator">=</span> split_dataset<span class="token punctuation">(</span>X<span class="token punctuation">,</span> Y<span class="token punctuation">,</span> split<span class="token punctuation">)</span>
 </pre><h5 class="mume-header" id="transform-%E6%95%B0%E5%80%BC%E8%BD%AC%E6%8D%A2">transform &#x6570;&#x503C;&#x8F6C;&#x6362;</h5>
 
-<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;</span>
+<pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">transform</span><span class="token punctuation">:</span>          <span class="token comment"># &#x6570;&#x503C;&#x53D8;&#x6362;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/transform.py &#x6587;&#x4EF6;&#x5185;&#x5404;&#x51FD;&#x6570;&#x540D;</span>
   <span class="token punctuation">-</span> string
 </pre><ul>
 <li>&#x6570;&#x503C;&#x8F6C;&#x6362;&#x4EC5;&#x9762;&#x5411;&#x6A21;&#x578B;&#x7684;&#x8F93;&#x5165;&#x8F93;&#x51FA;&#x754C;&#x9762;&#xFF0C;&#x5FC5;&#x987B;&#x662F;&#x53EF;&#x9006;&#x8BA1;&#x7B97;
@@ -394,7 +394,7 @@ trainset<span class="token punctuation">,</span> testset <span class="token oper
 
 <pre data-role="codeBlock" data-info="yaml" class="language-yaml"><span class="token key atrule">model</span><span class="token punctuation">:</span>
   <span class="token key atrule">name</span><span class="token punctuation">:</span> string      <span class="token comment"># &#x6A21;&#x578B;&#x6A21;&#x677F;&#xFF0C;&#x53EF;&#x9009;&#x9879;&#x4E3A; modules/models &#x76EE;&#x5F55;&#x4E0B;&#x5404;&#x6587;&#x4EF6;&#x540D;</span>
-  <span class="token key atrule">config</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
+  <span class="token key atrule">params</span><span class="token punctuation">:</span>           <span class="token comment"># &#x4F9D;&#x6A21;&#x578B;&#x6A21;&#x677F;&#x4E0D;&#x540C;&#x8BBE;&#x7F6E;&#x9879;&#x4E5F;&#x4E0D;&#x540C;&#xFF0C;&#x8BE6;&#x89C1;&#x5404;&#x6A21;&#x677F;</span>
     <span class="token punctuation">[</span><span class="token key atrule">key</span><span class="token punctuation">:</span> value<span class="token punctuation">]</span>
 </pre><p>&#x26A0; Just read the fucking code!! &#x26A0;</p>
 <hr>

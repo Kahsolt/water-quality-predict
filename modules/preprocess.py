@@ -2,18 +2,21 @@
 # Author: Armit
 # Create Time: 2022/09/15 
 
-from typing import Tuple
-
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pywt
 
 from modules.util import get_logger
+from modules.transform import *
 from modules.typing import *
 
 
-''' filter_T: 数据选择 '''
+''' filter_T: 含时处理，数据选择 '''
+def ticker_timer(df:TimeSeq) -> TimeSeq:
+  df
+  return df
+
 def ltrim_vacant(df:TimeSeq) -> TimeSeq:
   logger = get_logger()
 
@@ -42,19 +45,19 @@ def ltrim_vacant(df:TimeSeq) -> TimeSeq:
   return df
 
 
-''' project: 分离时间轴和数据 '''
-def to_hourly(df:TimeSeq) -> TimeAndData:
-  return split_time_and_data(df)
+''' project: 时间刻度投影，分离时轴与数值 '''
+def to_hourly(df:TimeSeq) -> TimeAndValues:
+  return split_time_and_values(df)
 
-def to_daily(df:TimeSeq) -> TimeAndData:
+def to_daily(df:TimeSeq) -> TimeAndValues:
   T = df.columns[0]
   df[T] = df[T].map(lambda x: x.split(' ')[0])    # get date part from timestr
   df = df.groupby(T).mean().reset_index()
-  return split_time_and_data(df)
+  return split_time_and_values(df)
 
 
-''' filter_V: 数值修正 '''
-def remove_outlier(df:Data) -> Data:
+''' filter_V: 不含时处理，数值修正 '''
+def remove_outlier(df:Values) -> Values:
   logger = get_logger()
 
   def process(x:Series) -> Series:
@@ -105,7 +108,7 @@ def remove_outlier(df:Data) -> Data:
 
   return df.apply(process)
 
-def wavlet_transform(df:Data, wavelet:str='db8', threshold:float=0.04) -> Data:
+def wavlet_transform(df:Values, wavelet:str='db8', threshold:float=0.04) -> Values:
   def process(x:Series) -> Series:
     arr: Array = np.asarray(x)
     tmp = [(arr, 'original')]
@@ -138,48 +141,6 @@ def wavlet_transform(df:Data, wavelet:str='db8', threshold:float=0.04) -> Data:
 # ↑↑↑ above are valid preprocessors ↑↑↑
 
 
-''' transform: 数值变换，用于训练 (必须是可逆的) '''
-def log(seq:Seq) -> Tuple[Seq, Stat]:
-  return log_apply(seq), tuple()
-
-def std_norm(seq:Seq) -> Tuple[Seq, Stat]:
-  avg = seq.mean(axis=0, keepdims=True)
-  std = seq.std (axis=0, keepdims=True)
-  seq_n = std_norm_apply(seq, avg, std)
-  return seq_n, (avg, std)
-
-def minmax_norm(seq:Seq) -> Tuple[Seq, Stat]:
-  vmin = seq.min(axis=0, keepdims=True)
-  vmax = seq.max(axis=0, keepdims=True)
-  seq_n = minmax_norm_apply(seq, vmin, vmax)
-  return seq_n, (vmin, vmax)
-
-# ↑↑↑ above are valid transforms ↑↑↑
-
-
-# ↓↓↓ below are innerly auto-called, SHOULD NOT USE in job.yaml ↓↓↓
-
-def split_time_and_data(df:TimeSeq) -> TimeAndData:
+def split_time_and_values(df:TimeSeq) -> TimeAndValues:
   cols = df.columns
   return df[cols[0]], df[cols[1:]]
-
-
-''' transform (apply): 数值变换 '''
-def log_apply(seq:Seq) -> Seq:
-  return np.log(seq + 1e-8)
-
-def std_norm_apply(seq:Seq, avg:ndarray, std:ndarray) -> Seq:
-  return (seq - avg) / std
-
-def minmax_norm_apply(seq:Seq, vmin:ndarray, vmax:ndarray) -> Seq:
-  return (seq - vmin) / (vmax - vmin)
-
-''' transform (inverse): 数值逆变换 '''
-def log_inv(seq:Seq) -> Seq:
-  return np.exp(seq)
-
-def std_norm_inv(seq:Seq, avg:ndarray, std:ndarray) -> Seq:
-  return seq * std + avg
-
-def minmax_norm_inv(seq:Seq, vmin:ndarray, vmax:ndarray) -> Seq:
-  return seq * (vmax - vmin) + vmin

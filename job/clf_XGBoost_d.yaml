@@ -22,7 +22,7 @@ dataset:
 
 model:
   name: XGBoost_clf
-  config:
+  params:
     model: XGBClassifier
     objective: 'binary:logistic'
     gs_params:

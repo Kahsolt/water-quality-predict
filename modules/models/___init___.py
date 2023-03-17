@@ -6,15 +6,15 @@ from modules.typing import *
 TASK_TYPE: TaskType = None
 
 
-def init(config:Config) -> Model:
+def init(params:Params) -> Model:
   ''' init a model '''
   raise NotImplementedError
 
-def train(model:Model, data:Union[Datasets, Seq], config:Config):
+def train(model:Model, data:Union[Datasets, Seq], params:Params):
   ''' fit model with train dataset '''
   raise NotImplementedError
 
-def eval(model:Model, data:Union[Datasets, Seq], config:Config) -> EvalMetrics:
+def eval(model:Model, data:Union[Datasets, Seq], params:Params) -> EvalMetrics:
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 

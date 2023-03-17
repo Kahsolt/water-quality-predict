@@ -57,6 +57,37 @@ def job():
   return jsonify([job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml'])
 
 
+@app.route('/job/<name>', methods=['GET', 'POST', 'DELETE'])
+def job_(name:str):
+  job_file = JOB_PATH / f'{name}.yaml'
+
+  if request.method == 'GET':
+    if not job_file.exists(): return jsonify({'ok': False, 'error': 'job file not found'})
+
+    format = request.args.get('format', 'yaml')
+    if format == 'yaml':
+      return send_file(job_file, mimetype='text/yaml')
+    elif format == 'json':
+      with open(job_file, 'r', encoding='utf-8') as fh:
+        config = yaml.safe_load(fh)
+      return jsonify({'ok': True, 'job': config})
+    else:
+      return jsonify({'ok': False, 'error': f'unknown format: {format}'})
+
+  elif request.method == 'POST':
+    if len(request.files) != 1:
+      return jsonify({'ok': False, 'error': f'only need 1 file, but got {len(request.files)}'})
+    file = request.files[0]
+
+  elif request.method == 'DELETE':
+    if not job_file.exists(): return jsonify({'ok': False, 'error': 'file not fould'})
+
+    job_file.unlink()
+    return jsonify({'ok': True})
+
+  else: return jsonify({'ok': False, 'error': f'unspported method {request.method}'})
+
+
 @app.route('/task', methods=['GET', 'POST'])
 def task():
   if request.method == 'GET':
@@ -64,14 +95,15 @@ def task():
 
   elif request.method == 'POST':
     try:
-      if len(request.files): return jsonify({'ok': False, 'error': f'file count should be exactly 1, but got {len(request.files)}'}) 
+      if len(request.files) != 1:
+        return jsonify({'ok': False, 'error': f'only need 1 file, but got {len(request.files)}'})
+      file = request.files[0]
 
       file = request.files[0]
       fn = file.filename
       print('fn:', fn)
 
       data: Dict = request.json
-      ttype = data['type']
       name = data.get('name', fn)
       jobs = data.get('jobs')
 
@@ -99,44 +131,14 @@ def task_(name:str):
   else: return jsonify({'ok': False, 'error': f'unspported method {request.method}'})
 
 
-@app.route('/job/<name>', methods=['GET', 'POST', 'DELETE'])
-def job_(name:str):
-  job_file = JOB_PATH / f'{name}.yaml'
-
-  if request.method == 'GET':
-    if not job_file.exists(): return jsonify({'ok': False, 'error': 'job file not found'})
-
-    ftype = 'yaml'
-    try: ftype = request.json.get('type', ftype)
-    except: pass
-
-    if ftype == 'yaml':
-      return send_file(job_file, mimetype='text/yaml')
-    elif ftype == 'json':
-      with open(job_file, 'r', encoding='utf-8') as fh:
-        config = yaml.safe_load(fh)
-      return jsonify({'ok': True, 'job': config})
-    else:
-      return jsonify({'ok': False, 'error': f'unknown file type {ftype}'})
-
-  elif request.method == 'POST':
-    pass
-
-  elif request.method == 'DELETE':
-    if not job_file.exists(): return jsonify({'ok': False, 'error': 'file not fould'})
-
-    job_file.unlink()
-    return jsonify({'ok': True})
-
-  else: return jsonify({'ok': False, 'error': f'unspported method {request.method}'})
-
-
-@app.route('/infer/<task>', methods=['POST'])
-def infer_(task:str):
+@app.route('/infer/<task>/<job>', methods=['POST'])
+def infer_(task:str, job:str):
   global cur_job
 
+  job_folder = LOG_PATH / task / job
+  if not job_folder.is_dir(): return jsonify({'ok': False, 'error': 'job folder not found'})
+
   req = request.get_json()
-  job = req['job']
   x = np.asarray(req['x'], dtype=np.float32)
   print(f'>> task: {task}')
   print(f'>> job: {job}')

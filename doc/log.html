@@ -1,5 +1,5 @@
 <!DOCTYPE html><html><head>
-      <title>api_proxy</title>
+      <title>log</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
@@ -261,66 +261,74 @@ pre[data-line] .line-highlight[data-end]:after {
     </head>
     <body for="html-export">
       <div class="mume markdown-preview  ">
-      <h1 class="mume-header" id="proxy-api-documentation">Proxy API documentation</h1>
+      <h1 class="mume-header" id="%E4%BB%BB%E5%8A%A1%E6%97%A5%E5%BF%97%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84">&#x4EFB;&#x52A1;&#x65E5;&#x5FD7;&#x76EE;&#x5F55;&#x7ED3;&#x6784;</h1>
 
-<p>=&gt; see native API doc: <a href="api">/doc/api</a></p>
-<h3 class="mume-header" id="general-%E6%80%BB%E8%AE%BA">General &#x603B;&#x8BBA;</h3>
-
-<p>&#x7528;&#x4E8E;&#x5BF9;&#x63A5;&#x5E73;&#x53F0;&#x65B9;&#x8981;&#x6C42;&#x7684;&#x524D;&#x7AEF; API &#x548C;&#x672C;&#x9879;&#x76EE;&#x7684; API</p>
+<pre class="language-text">&#x5B58;&#x50A8;&#x5B8C;&#x6574;&#x7684;&#x4EFB;&#x52A1;&#x7ED3;&#x679C;&#xFF0C;&#x4EE5;&#x53CA;&#x7CFB;&#x7EDF;&#x5143;&#x6570;&#x636E;
+</pre>
 <hr>
-<h3 class="mume-header" id="getpost-page2getfittingcurve-%E6%9F%A5%E8%AF%A2%E5%9B%9E%E5%BD%92%E9%A2%84%E6%B5%8B%E5%9B%9E%E5%BD%92%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E6%9B%B2%E7%BA%BF">GET|POST /page2/getFittingCurve &#x67E5;&#x8BE2;&#x3010;&#x56DE;&#x5F52;&#x9884;&#x6D4B;&#x3011;&#x56DE;&#x5F52;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x66F2;&#x7EBF;</h3>
+<h3 class="mume-header" id="%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%B8%83%E5%B1%80">&#x6587;&#x4EF6;&#x7CFB;&#x7EDF;&#x5E03;&#x5C40;</h3>
 
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  dischargeCode<span class="token operator">:</span> str    <span class="token comment">// &#x6392;&#x53E3;&#x7F16;&#x7801;</span>
-  monitorFactor<span class="token operator">:</span> str    <span class="token comment">// &#x56E0;&#x5B50;&#x7F16;&#x7801;</span>
-  start<span class="token operator">:</span> str            <span class="token comment">// &#x67E5;&#x8BE2;&#x5468;&#x671F;&#x5F00;&#x59CB;&#x65F6;&#x95F4; &quot;2023-03-14 10:00:00&quot;</span>
-  end<span class="token operator">:</span> str              <span class="token comment">// &#x67E5;&#x8BE2;&#x5468;&#x671F;&#x7ED3;&#x675F;&#x65F6;&#x95F4;</span>
-<span class="token punctuation">}</span>
+<pre data-role="codeBlock" data-info="c" class="language-c">LOG_PATH
+&#x251C;&#x2500;&#x2500; README<span class="token punctuation">.</span>md
+&#x251C;&#x2500;&#x2500; runtime<span class="token punctuation">.</span>json            <span class="token comment">// system runtime &amp; history</span>
+&#x251C;&#x2500;&#x2500; <span class="token operator">&lt;</span>task_name<span class="token operator">&gt;</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; task<span class="token punctuation">.</span>json           <span class="token comment">// task descriptor</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; data<span class="token punctuation">.</span>csv            <span class="token comment">// raw data</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; data_hist<span class="token punctuation">.</span>zip       <span class="token comment">// history archive of raw data</span>
+&#x2502;   &#x251C;&#x2500;&#x2500; <span class="token operator">&lt;</span>job_name<span class="token operator">&gt;</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; job<span class="token punctuation">.</span>yaml        <span class="token comment">// job config</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; seq<span class="token operator">-</span>raw<span class="token punctuation">.</span>pkl     <span class="token comment">// original timeseq</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; stats<span class="token punctuation">.</span>pkl       <span class="token comment">// saved stats of preprocessing</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; seq<span class="token punctuation">.</span>pkl         <span class="token comment">// preprocessed timeseq</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; label<span class="token punctuation">.</span>pkl       <span class="token comment">// label</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; dataset<span class="token punctuation">.</span>pkl     <span class="token comment">// preprocessed (+ label) =&gt; train/eval datasets</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; timeline<span class="token operator">*</span><span class="token punctuation">.</span>png   <span class="token comment">// show timeseq</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; hist<span class="token operator">*</span><span class="token punctuation">.</span>png       <span class="token comment">// show value histogram</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; filter_<span class="token operator">*</span><span class="token punctuation">.</span>png    <span class="token comment">// debug preprocessing intermediates</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; model<span class="token punctuation">.</span><span class="token operator">*</span>         <span class="token comment">// model dump / weights</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; scores<span class="token punctuation">.</span>txt      <span class="token comment">// evaluated scores</span>
+&#x2502;   &#x2502;   &#x2514;&#x2500;&#x2500; job<span class="token punctuation">.</span>log         <span class="token comment">// job runner logs</span>
+&#x2502;   &#x2514;&#x2500;&#x2500; <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+&#x2514;&#x2500;&#x2500; <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+</pre><h3 class="mume-header" id="%E7%B3%BB%E7%BB%9F%E5%85%83%E6%95%B0%E6%8D%AE">&#x7CFB;&#x7EDF;&#x5143;&#x6570;&#x636E;</h3>
 
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-
-<span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="getpost-page2get6hpredictionresult-%E6%9F%A5%E8%AF%A2%E5%9B%9E%E5%BD%92%E9%A2%84%E6%B5%8B%E6%9C%AA%E6%9D%A56h%E9%A2%84%E6%B5%8B%E7%BB%93%E6%9E%9C">GET|POST /page2/get6hPredictionResult &#x67E5;&#x8BE2;&#x3010;&#x56DE;&#x5F52;&#x9884;&#x6D4B;&#x3011;&#x672A;&#x6765;6h&#x9884;&#x6D4B;&#x7ED3;&#x679C;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  dischargeCode<span class="token operator">:</span> str    <span class="token comment">// &#x6392;&#x53E3;&#x7F16;&#x7801;</span>
-  monitorFactor<span class="token operator">:</span> str    <span class="token comment">// &#x56E0;&#x5B50;&#x7F16;&#x7801;</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-
-<span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="getpost-page2getmodelperformance-%E6%9F%A5%E8%AF%A2%E5%88%86%E7%B1%BB%E9%A2%84%E6%B5%8B%E5%88%86%E7%B1%BB%E9%A2%84%E8%AD%A6%E6%A8%A1%E5%9E%8B%E6%80%A7%E8%83%BD">GET|POST /page2/getModelPerformance &#x67E5;&#x8BE2;&#x3010;&#x5206;&#x7C7B;&#x9884;&#x6D4B;&#x3011;&#x5206;&#x7C7B;&#x9884;&#x8B66;&#x6A21;&#x578B;&#x6027;&#x80FD;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  dischargeCode<span class="token operator">:</span> str    <span class="token comment">// &#x6392;&#x53E3;&#x7F16;&#x7801;</span>
-  monitorFactor<span class="token operator">:</span> str    <span class="token comment">// &#x56E0;&#x5B50;&#x7F16;&#x7801;</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-
-<span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="getpost-page2getexceedingpredictionresult-%E6%9F%A5%E8%AF%A2%E5%88%86%E7%B1%BB%E9%A2%84%E6%B5%8B%E8%B6%85%E6%A0%87%E7%B1%BB%E5%88%AB%E9%A2%84%E6%B5%8B%E7%BB%93%E6%9E%9C">GET|POST /page2/getExceedingPredictionResult &#x67E5;&#x8BE2;&#x3010;&#x5206;&#x7C7B;&#x9884;&#x6D4B;&#x3011;&#x8D85;&#x6807;&#x7C7B;&#x522B;&#x9884;&#x6D4B;&#x7ED3;&#x679C;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  dischargeCode<span class="token operator">:</span> str    <span class="token comment">// &#x6392;&#x53E3;&#x7F16;&#x7801;</span>
-  monitorFactor<span class="token operator">:</span> str    <span class="token comment">// &#x56E0;&#x5B50;&#x7F16;&#x7801;</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-
-<span class="token punctuation">}</span>
-</pre><hr>
-<p> by Armit <time> 2023/3/17 </time> </p>
-
+<p>&#x26AA; /log/runtime.json</p>
+<pre data-role="codeBlock" data-info="json" class="language-json"><span class="token punctuation">[</span>
+  <span class="token property">&quot;task_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    name<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    status<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    info<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    progress<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>
+    ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+</pre><p>&#x26AA; /log/&lt;task_name&gt;/task.json</p>
+<pre data-role="codeBlock" data-info="json" class="language-json"><span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>                       <span class="token comment">// =&gt; `GET /task/&lt;name&gt;`</span>
+    status<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    target<span class="token operator">:</span> str | str<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    best<span class="token operator">:</span> str<span class="token punctuation">,</span>
+    jobs<span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        type<span class="token operator">:</span> str<span class="token punctuation">,</span>
+        status<span class="token operator">:</span> str<span class="token punctuation">,</span>
+        scores<span class="token operator">:</span> <span class="token punctuation">{</span>
+          pres<span class="token operator">:</span> float<span class="token punctuation">,</span>
+          recall<span class="token operator">:</span> float<span class="token punctuation">,</span>
+          f1<span class="token operator">:</span> float<span class="token punctuation">,</span>
+        <span class="token punctuation">}</span> | <span class="token punctuation">{</span>
+          mae<span class="token operator">:</span> float<span class="token punctuation">,</span>
+          mse<span class="token operator">:</span> float<span class="token punctuation">,</span>
+          r2<span class="token operator">:</span> float<span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>
+    ts_finish<span class="token operator">:</span> int<span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+</pre>
       </div>
       
       
