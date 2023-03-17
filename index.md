@@ -174,20 +174,16 @@ interface {
 }
 ```
 
-### GET /job/\<name\> 下载/查询作业模板
+### GET /job/\<name\>?format= 下载/查询作业模板
 
 ```typescript
-// request
-interface {
-  type: str,          // 'yaml' or 'json', default: 'yaml'
-}
+// request url param
+//   format: 'yaml' or 'json', default: 'yaml'
 
 // response
 // => <job_name>.yaml file or 
 interface {
-  job: {
-    // config items converted from *.yaml
-  },
+  // config items converted from *.yaml
 }
 ```
 
@@ -249,9 +245,20 @@ interface {
 // => plain html page
 ```
 
+
+### GET /runtime?filter= 查看系统运行时状态
+
+```typescript
+// request url param
+//   filter: comma seprated string, default is 'queuing,running', select from `TaskStatus`
+
+// response
+// => plain html page (auto refresh per 5s)
+```
+
 ----
 
-### GET [/debug](/debug) 系统运行时信息
+### GET [/debug](/debug) 系统调试信息
 
 ```typescript
 // response

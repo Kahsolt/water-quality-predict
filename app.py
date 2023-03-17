@@ -5,12 +5,14 @@
 import os
 import yaml
 from pathlib import Path
+from threading import Thread
 from typing import Dict
 from traceback import format_exc
 
 import numpy as np
 from flask import Flask, request, jsonify, render_template, send_file
 
+from modules.descriptor import Descriptor
 from modules.util import seed_everything
 import run as RT
 
@@ -20,7 +22,7 @@ JOB_PATH = BASE_PATH / 'job'
 LOG_PATH = BASE_PATH / 'log'
 
 app = Flask(__name__, template_folder='.')
-cur_job: str = None
+cur_job: Descriptor = None
 
 
 @app.route('/', methods=['GET'])
@@ -53,7 +55,7 @@ def task():
   except: return jsonify({'ok': False, 'error': format_exc()})
 
 
-@app.route('/task/<name>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/task/<name>', methods=['GET', 'POST', 'DELETE'])
 def task_(name:str):
   task_folder = LOG_PATH / name
   if not task_folder.is_dir(): return jsonify({'ok': False, 'error': 'task folder not found'})
@@ -65,7 +67,7 @@ def task_(name:str):
     if request.method == 'GET':
       pass
 
-    elif request.method == 'PUT':
+    elif request.method == 'POST':
       pass
 
     elif request.method == 'DELETE':
@@ -119,23 +121,24 @@ def job_(name:str):
   except: return jsonify({'ok': False, 'error': format_exc()})
 
 
-@app.route('/infer', methods=['POST'])
-def infer():
+@app.route('/infer/<task>', methods=['POST'])
+def infer_(task:str):
   global cur_job
 
   try:
     req = request.get_json()
     job = req['job']
     x = np.asarray(req['x'], dtype=np.float32)
+    print(f'>> task: {task}')
     print(f'>> job: {job}')
     print(f'>> x.shape: {x.shape}')
 
     if job != cur_job:
       # init job
-      RT.job = RT.load_job(LOG_PATH / job / 'job.yaml')
+      RT.job = Descriptor.load(LOG_PATH / task / job / 'job.yaml')
       RT.env.clear()
-      RT.env['log_dp'] = LOG_PATH / job
-      seed_everything(RT.job_get('misc/seed'))
+      RT.env['log_dp'] = LOG_PATH / task / job
+      seed_everything(RT.job.get('seed'))
 
       # load job states
       @RT.require_model

@@ -6,13 +6,32 @@ from torch.optim import Optimizer
 from logging import Logger
 from typing import *
 
-# 运行目标
-Target = Union[
+# 任务运行目标
+TaskTarget = Union[
   Literal['data'],      # 仅制作数据
   Literal['train'],     # 仅训练
   Literal['eval'],      # 仅评估
   Literal['all'],       # 全部 = 数据 + 训练 + 评估 (糖！)
 ]
+# 任务类型
+TaskType = Union[
+  Literal['clf'],       # 分类
+  Literal['rgr'],       # 回归
+]
+# 任务进度状态
+TaskStatus = Union[
+  Literal['created'],   # 创建任务 (task.json, data.csv)
+  Literal['queuing'],   # 执行队列中等待
+  Literal['running'],   # 正在执行中
+  Literal['finished'],  # 已完成
+]
+
+# 任务运行时环境
+Env = Dict[str, Any]
+
+# 模型
+Model = object()
+PyTorchModel = Module
 # 模型参数
 Config = Dict[str, Any]
 # 分类标签编码
@@ -20,12 +39,6 @@ Encode = {
   'name': str,
   'params': Dict[str, Any],
 }
-
-
-# 任务描述文件
-Job = Dict[str, Any]
-# 任务运行时环境
-Env = Dict[str, Any]
 
 # 含时间轴的原始数据
 TimeSeq = DataFrame
@@ -47,22 +60,5 @@ Datasets = Tuple[Dataset, Dataset]
 # 所有缓存的数据
 CachedData = Union[Seq, Stats, Datasets]
 
-# 模型
-Model = object()
-PyTorchModel = Module
-# 模型任务类型
-TaskType = Union[
-  Literal['clf'],   # 分类
-  Literal['rgr'],   # 回归
-]
-
 # 评估结果
 EvalMetrics = Tuple[float, ...]
-
-# 任务进度状态
-TaskStatus = Union[
-  Literal['created'],     # 创建任务 (task.json, data.csv)
-  Literal['queuing'],     # 执行队列中等待
-  Literal['running'],     # 正在执行中
-  Literal['finished'],    # 已完成
-]

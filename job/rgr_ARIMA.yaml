@@ -1,11 +1,4 @@
-misc:
-  name: ARIMA_rgr
-  seed: 114514
-  target:
-    - all
-
-data:
-  - data/w21003.csv
+seed: -1
 
 preprocess:
   filter_T:

@@ -19,6 +19,7 @@ Main busisness:
 - `POST /merge_csv` to merge data all-in-one if you have multiple data source
 - `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
 - `POST /task` to create a task and put in processing queue
+- `GET /runtime` to see running status
 - `GET /task/<name>` to get task status or results 
 - `POST /infer` to predict on new data
 - `GET /log/<task_name>/<job_name>.log` to see job log

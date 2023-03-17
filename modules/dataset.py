@@ -74,30 +74,8 @@ def encode_seq(x:Seq, T:Time, encode:Encode) -> Seq:
   label_func_params = encode.get('params') or {}
   return label_func(x, T, **label_func_params)
 
-def resample_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, count:int=1000, y:Seq=None) -> Dataset:
-  ''' 在时间序列上重采样切片，知 inlen 推 outlen '''
-
-  # x.shape: [T, D]
-  assert len(x.shape) == 2
-
-  seg_size = inlen + outlen - overlap
-  rlim = len(x) - seg_size
-  if y is None: y = x
-
-  X, Y = [], []
-  for _ in range(count):
-    r = np.random.randint(0, rlim)
-    seg_x = x[r:r+seg_size, :]
-    seg_y = y[r:r+seg_size, :]
-    X.append(seg_x[:inlen])           # [I, D], FrameIn
-    Y.append(seg_y[inlen-overlap:])   # [O, D], FrameOut
-  X: Frames = np.stack(X, axis=0)     # [N, I, D]
-  Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
-
-  return X, Y
-
-def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split_ratio:float=0.2, y:Seq=None) -> Datasets:
-  ''' 在时间序列上非重采样切片，知 inlen 推 outlen '''
+def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split:float=0.2, y:Seq=None) -> Datasets:
+  ''' 在时间序列上滚动切片产生数据集样本，知 inlen 推 outlen 时间步 '''
 
   # x.shape: [T, D]
   assert len(x.shape) == 2
@@ -119,7 +97,7 @@ def split_frame_dataset(x:Seq, inlen:int=3, outlen:int=1, overlap:int=0, split_r
   X: Frames = np.stack(X, axis=0)     # [N, I, D]
   Y: Frames = np.stack(Y, axis=0)     # [N, O, D]
 
-  cp = int(len(X) * split_ratio)
+  cp = int(len(X) * split)
   X_eval, X_train = X[:cp, ...], X[cp:, ...]
   Y_eval, Y_train = Y[:cp, ...], Y[cp:, ...]
 

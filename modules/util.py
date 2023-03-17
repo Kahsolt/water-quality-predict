@@ -5,7 +5,7 @@
 import os
 import sys
 import random
-import yaml
+from time import time
 from pathlib import Path
 from datetime import datetime
 import pickle as pkl
@@ -26,21 +26,15 @@ plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
-logger = logging
 
-def get_logger(name=None, log_dp=Path('.')) -> Logger:
-  global logger
-
-  if logger is logging:
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
-
-    formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
-    h = logging.FileHandler(log_dp / 'job.log')
-    h.setLevel(logging.DEBUG)
-    h.setFormatter(formatter)
-    logger.addHandler(h)
-
+def get_logger(name, log_dp=Path('.')) -> Logger:
+  logger = logging.getLogger(name)
+  logger.setLevel(logging.DEBUG)
+  formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
+  h = logging.FileHandler(log_dp / 'job.log')
+  h.setLevel(logging.DEBUG)
+  h.setFormatter(formatter)
+  logger.addHandler(h)
   return logger
 
 def seed_everything(seed:int):
@@ -62,11 +56,14 @@ def seed_everything(seed:int):
 def timestr() -> str:
   return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-').split('.')[0]
 
+def ts_now() -> int:
+  return int(time())
+
 
 def read_csv(fp:str) -> DataFrame:
   return pd.read_csv(fp, encoding='utf-8')
 
-def save_csv(df:DataFrame, fp:str) -> None:
+def save_csv(df:DataFrame, fp:str):
   df.to_csv(fp, encoding='utf-8')
 
 
@@ -80,15 +77,6 @@ def save_pickle(data:CachedData, fp:Path):
   logger.info(f'  save pickle to {fp}')
   with open(fp, 'wb') as fh:
     pkl.dump(data, fh)
-
-
-def load_job(fp:Path) -> Job:
-  with open(fp, 'r', encoding='utf-8') as fh:
-    return yaml.safe_load(fh)
-
-def save_job(job:Job, fp:Path) -> Job:
-  with open(fp, 'w', encoding='utf-8') as fh:
-    yaml.safe_dump(job, fh, sort_keys=False)
 
 
 def get_metrics(truth, pred, task:TaskType='clf') -> EvalMetrics:
@@ -129,3 +117,12 @@ def load_checkpoint(model:PyTorchModel, fp:Path, device=device):
 def save_checkpoint(model:PyTorchModel, fp:Path):
   logger.info(f'save model to {fp}')
   torch.save(model.state_dict(), fp)
+
+
+def timer(fn:Callable[..., Any]):
+  def wrapper(*args, **kwargs):
+    t = time()
+    r = fn(*args, **kwargs)
+    print(f'All things done in {time() - t:.3f}s')
+    return r
+  return wrapper

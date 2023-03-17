@@ -115,11 +115,10 @@ class App:
     seed_everything(RT.job_get('misc/seed'))
 
     # load job states
-    @RT.require_model
-    @RT.require_data
-    def load_model_and_data():
+    @RT.require_data_and_model
+    def load_data_and_model():
       RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
-    load_model_and_data()
+    load_data_and_model()
 
     self.is_model_arima = 'ARIMA' in name
     self.is_task_rgr = RT.env['manager'].TASK_TYPE == 'rgr'

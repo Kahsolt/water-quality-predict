@@ -1,11 +1,4 @@
-misc:
-  name: LSTM_rgr
-  seed: 114514
-  target:
-    - all
-
-data:
-  - data/w21003.csv
+seed: -1
 
 preprocess:
   filter_T:
@@ -19,8 +12,7 @@ preprocess:
     - minmax_norm
 
 dataset:
-  method: split
-  split_ratio: 0.2
+  split: 0.2
   in: 96
   out: 6
 

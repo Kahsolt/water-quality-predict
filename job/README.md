@@ -23,8 +23,7 @@ preprocess:         # 预处理，可选项为 modules/preprocess.py 文件内�
     - string
 
 dataset:
-  train: int        # 采样出的训练集大小
-  eval: int         # 采样出的测试集大小
+  split: float      # 测试集划分比例
   in: int           # 已知序列窗长，知 in 推 out
   out: int          # 预测序列窗长，知 in 推 out
   encode:           # 分类任务的目标编码
