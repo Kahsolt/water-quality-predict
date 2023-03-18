@@ -14,7 +14,7 @@ from modules.typing import *
 from modules.models.SVM_rgr import train, save, load      # just proxy by
 from modules.models.XGBoost_clf import infer              # just proxy by
 
-TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
+TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> GridSearchCV:

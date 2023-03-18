@@ -13,7 +13,7 @@ from modules.preprocess import *
 from modules.typing import *
 from modules.models.XGBoost_rgr import save, load
 
-TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
+TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> GridSearchCV:

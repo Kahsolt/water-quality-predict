@@ -11,7 +11,7 @@ from modules.preprocess import *
 from modules.typing import *
 from modules.models.CRNN import *
 
-TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
+TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> CRNN:

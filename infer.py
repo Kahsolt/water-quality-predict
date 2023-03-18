@@ -121,7 +121,7 @@ class App:
     load_data_and_model()
 
     self.is_model_arima = 'ARIMA' in name
-    self.is_task_rgr = RT.env['manager'].TASK_TYPE == 'rgr'
+    self.is_task_rgr = RT.env['manager'].TASK_TYPE == TaskType.RGR
     print(f'  is_task_rgr: {self.is_task_rgr}')
 
     seq: Seq = RT.env['seq']

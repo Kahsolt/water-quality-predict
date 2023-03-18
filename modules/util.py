@@ -95,14 +95,14 @@ def save_pickle(data:CachedData, fp:Path, logger:Logger=None):
 
 
 def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
-  if   task == 'clf':
+  if   task == TaskType.CLF:
     prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
     if logger:
       logger.info(f'prec:   {prec:.3%}')
       logger.info(f'recall: {recall:.3%}')
       logger.info(f'f1:     {f1:.3%}')
     return prec, recall, f1
-  elif task == 'rgr':
+  elif task == TaskType.RGR:
     mae = mean_absolute_error(truth, pred)
     mse = mean_squared_error (truth, pred)
     r2  = r2_score           (truth, pred)

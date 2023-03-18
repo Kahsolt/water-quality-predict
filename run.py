@@ -76,9 +76,9 @@ def require_data_and_model(fn:Callable[..., Any]):
     return fn(*args, **kwargs)
   return wrapper
 
-def get_job_type(job_name:str):
-  if job_name.startswith('rgr_'): return 'rgr'
-  if job_name.startswith('clf_'): return 'clf'
+def get_job_type(job_name:str) -> TaskType:
+  if job_name.startswith('rgr_'): return TaskType.RGR
+  if job_name.startswith('clf_'): return TaskType.CLF
   raise ValueError(f'invalid job_name: {job_name!r}, should suffix with "rgr_" or "clf_"')
 
 
@@ -321,15 +321,15 @@ def target_eval(env:Env):
   data = env['dataset'] if job.get('dataset') else env['seq']
   stats = manager.eval(model, data, job.get('model/params'), logger)
 
-  task_type = job.get('model/name').split('_')[-1]
-  if   task_type == 'clf':
+  task_type = TaskType(job.get('model/name').split('_')[-1])
+  if   task_type == TaskType.CLF:
     prec, recall, f1 = stats
     lines = [
       f'prec: {prec}',
       f'recall: {recall}',
       f'f1: {f1}',
     ]
-  elif task_type == 'rgr':
+  elif task_type == TaskType.RGR:
     mae, mse, r2 = stats
     lines = [
       f'mae: {mae}',
