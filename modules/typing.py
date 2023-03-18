@@ -9,8 +9,6 @@ from torch import Tensor
 from torch.nn import Module
 from torch.optim import Optimizer
 
-from modules.descriptor import Descriptor
-
 
 # 任务/作业运行目标
 class Target(Enum):
@@ -71,7 +69,7 @@ EvalMetrics = Tuple[float, ...]
 # 作业运行时环境
 Env = {
   'fullname': str, 
-  'job': Descriptor,
+  'job': 'Descriptor',
   'logger': Logger,
   'log_dp': Path,
   'status': Status,
@@ -81,6 +79,6 @@ Env = {
   'label': Seq,
   'dataset': Datasets,
   'stats': Stats,
-  'manager': object,    # 'module'
+  'manager': 'module',
   'model': Model,
 }

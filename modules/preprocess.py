@@ -2,7 +2,10 @@
 # Author: Armit
 # Create Time: 2022/09/15 
 
+from datetime import datetime, timedelta
+
 import numpy as np
+import pandas as pd
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pywt
@@ -13,9 +16,44 @@ from modules.typing import *
 
 ''' filter_T: 含时处理，数据选择 '''
 def ticker_timer(df:TimeSeq) -> TimeSeq:
-  T = df.columns[0]
+  T, vals = split_time_and_values(df)
+  frms = vals.to_numpy()
 
-  return df
+  def get_leap_hours(now:str, before:str) -> int:
+    s = datetime.fromisoformat(before)
+    t = datetime.fromisoformat(now)
+    return (t - s).seconds // 3600
+
+  def back_n_hours(now:str, hours:int) -> str:
+    s = datetime.fromisoformat(now)
+    b = s - timedelta(hours=hours)
+    return str(b)
+
+  has_leap = False
+  new_ts   = [T[0]]
+  new_frms = [frms[0]]
+  for i in range(1, len(T)):
+    now = T[i]
+    frm = frms[i]
+
+    leap = get_leap_hours(now, new_ts[-1])
+    while leap >= 2:
+      has_leap = True
+      tt = back_n_hours(now, leap-1)
+      ff = np.ones_like(frm) * np.nan
+      new_ts  .append(tt)
+      new_frms.append(ff)
+      leap -= 1
+    new_ts  .append(now)
+    new_frms.append(frm)
+
+  if has_leap:
+    newT = pd.Series   (np.stack(new_ts  , axis=0))
+    newV = pd.DataFrame(np.stack(new_frms, axis=0), columns=vals.columns)
+    return combine_time_and_values(newT, newV)
+  else:
+    return df
+
 
 def ltrim_vacant(df:TimeSeq) -> TimeSeq:
   def count_consecutive_nan(x:Series) -> Series:
@@ -28,7 +66,7 @@ def ltrim_vacant(df:TimeSeq) -> TimeSeq:
 
   tmstr = df.iloc[0][df.columns[0]]
   if ' ' in tmstr:    # hourly, '2021/1/1 00:00:00'
-    limit = 168
+    limit = 168       # FIXME: hard-coded magic number
   else:               # daily, '2021/1/1'
     limit = 7
 
@@ -51,8 +89,8 @@ def to_daily(df:TimeSeq) -> TimeAndValues:
   df[T] = df[T].map(lambda x: x.split(' ')[0])    # get date part from timestr
   grps = df.groupby(T)
   df = grps.mean()                  # avg daily
-  mask = grps.count() > 12          # filter by thresh
-  mask = mask.apply(lambda s: s.map(lambda e: e if e else np.nan))
+  mask = grps.count() > 12          # filter by thresh, FIXME: hard-coded magic number
+  mask = mask.apply(lambda s: s.map(lambda e: e or np.nan))
   df = df * mask                    # map masked to NaN
   df.reset_index(inplace=True)
   return split_time_and_values(df)
@@ -146,3 +184,8 @@ def wavlet_transform(df:Values, wavelet:str='db8', threshold:float=0.04) -> Valu
 def split_time_and_values(df:TimeSeq) -> TimeAndValues:
   cols = df.columns
   return df[cols[0]], df[cols[1:]]
+
+def combine_time_and_values(T:Time, df:Values) -> TimeSeq:
+  val_cols = list(df.columns)
+  df['Time'] = T
+  return df[['Time'] + val_cols]

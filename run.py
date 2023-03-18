@@ -15,20 +15,20 @@ from importlib import import_module
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from modules import preprocess
+from modules import preprocess, transform
 from modules.descriptor import *
 from modules.dataset import *
 from modules.util import *
 from modules.typing import *
 
 # log folder layout
-JOB_FILE     = 'job.yaml'
-DATA_FILE    = 'data.csv'
-SEQ_RAW_FILE = 'seq-raw.pkl'    # seq preprocessed
-LABEL_FILE   = 'label.pkl'      # seq label for 'clf'
-STATS_FILE   = 'stats.pkl'      # transforming stats for seq
-SEQ_FILE     = 'seq.pkl'        # seq transformed
-DATASET_FILE = 'dataset.pkl'    # dataset transformed
+JOB_FILE        = 'job.yaml'
+DATA_FILE       = 'data.csv'
+PREPROCESS_FILE = 'preprocess.pkl' # seq preprocessed
+LABEL_FILE      = 'label.pkl'      # seq encoded label
+STATS_FILE      = 'stats.pkl'      # transforming stats for seq
+TRANSFORM_FILE  = 'transform.pkl'  # seq transformed
+DATASET_FILE    = 'dataset.pkl'    # dataset transformed
 
 
 def process(fn:Callable[..., Any]):
@@ -51,7 +51,7 @@ def require_data_and_model(fn:Callable[..., Any]):
     ''' Data '''
 
     if 'seq' not in env:
-      env['seq'] = load_pickle(log_dp / SEQ_FILE, logger)
+      env['seq'] = load_pickle(log_dp / TRANSFORM_FILE, logger)
       assert env['seq'] is not None
 
     if 'stats' not in env:
@@ -94,7 +94,7 @@ def process_df(env:Env):
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  df: TimeSeq = read_csv(log_dp / DATA_FILE, logger)  # 总原始数据
+  df: TimeSeq = read_csv(log_dp.parent / DATA_FILE, logger)   # 总原始数据
 
   logger.info(f'  found {len(df)} records')
   logger.info(f'  column names({len(df.columns)}): {list(df.columns)}')
@@ -112,12 +112,12 @@ def process_seq(env:Env):
 
   if 'filter T':
     for proc in job.get('preprocess/filter_T', []):
-      if hasattr(preprocess, proc):
-        logger.info (f'  apply {proc}...')
-      else:
+      if not hasattr(preprocess, proc):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
+
       try:
+        logger.info (f'  apply {proc}...')
         lendf = len(df)
         df: TimeSeq = getattr(preprocess, proc)(df)
         logger.info(f'    {proc}: {lendf} => {len(df)}')
@@ -126,20 +126,21 @@ def process_seq(env:Env):
 
   if 'project':   # NOTE: this is required!
     proc = job.get('preprocess/project')
-    assert proc and len(proc) == 1
-    proc = proc[0]
+    assert proc and isinstance(proc, str)
     assert hasattr(preprocess, proc)
-    try:    T, df = getattr(preprocess, proc)(df)
+    try:
+      logger.info (f'  apply {proc}...')
+      T, df = getattr(preprocess, proc)(df)
     except: logger.error(format_exc())
 
   if 'filter V':
     for proc in job.get('preprocess/filter_V', []):
-      if hasattr(preprocess, proc):
-        logger.info (f'  apply {proc}...')
-      else:
+      if not hasattr(preprocess, proc):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
+
       try:
+        logger.info (f'  apply {proc}...')
         lendf = len(df)
         df: Values = getattr(preprocess, proc)(df)
         logger.info(f'    {proc}: {lendf} => {len(df)}')
@@ -165,7 +166,7 @@ def process_seq(env:Env):
   T: Time = T
   seq: Seq = df.to_numpy().astype(np.float32)
   assert len(T) == len(seq)
-  save_pickle(seq, log_dp / SEQ_RAW_FILE, logger)
+  save_pickle(seq, log_dp / PREPROCESS_FILE, logger)
 
   logger.info(f'  T.shape: {T.shape}')
   logger.info(f'  seq.shape: {seq.shape}')
@@ -247,13 +248,13 @@ def process_transform(env:Env):
 
     stats: Stats = []    # keep ordered
     for proc in job.get('preprocess/transform', []):
-      if hasattr(preprocess, proc):
-        logger.info (f'  apply {proc}...')
-      else:
+      if not hasattr(transform, proc):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
+
       try:
-        seq, st = getattr(preprocess, proc)(seq)
+        logger.info (f'  apply {proc}...')
+        seq, st = getattr(transform, proc)(seq)
         stats.append((proc, st))
       except:
         logger.error(format_exc())
@@ -274,7 +275,7 @@ def process_transform(env:Env):
       for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
       save_figure(log_dp / 'hist_T.png', logger)
 
-    save_pickle(seq, log_dp / SEQ_FILE, logger)
+    save_pickle(seq, log_dp / TRANSFORM_FILE, logger)
     if stats: save_pickle(stats, log_dp / STATS_FILE, logger)
     
     env['seq']   = seq
@@ -285,7 +286,7 @@ def process_transform(env:Env):
 
     for (proc, st) in env['stats']:
       logger.info(f'  reapply {proc}...')
-      proc_fn = getattr(preprocess, f'{proc}_apply')
+      proc_fn = getattr(transform, f'{proc}_apply')
       X_train = proc_fn(X_train, *st)
       X_test  = proc_fn(X_test,  *st)
       if env['label'] is None:          # is_task_rgr
