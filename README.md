@@ -53,7 +53,7 @@ Main busisness:
 
 - write a job file, see guide => [doc/job.md](doc/job.md)
 - run `python run.py -D path/to/*.csv -J path/to/*.yaml`
-  - run all demo experiments: `run_experiments.cmd`
+  - run test demo: `run_test.cmd`
 
 ⚪ Infer
 

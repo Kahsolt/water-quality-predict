@@ -21,14 +21,7 @@ from modules.dataset import *
 from modules.util import *
 from modules.typing import *
 
-# log folder layout
-JOB_FILE        = 'job.yaml'
-DATA_FILE       = 'data.csv'
-PREPROCESS_FILE = 'preprocess.pkl' # seq preprocessed
-LABEL_FILE      = 'label.pkl'      # seq encoded label
-STATS_FILE      = 'stats.pkl'      # transforming stats for seq
-TRANSFORM_FILE  = 'transform.pkl'  # seq transformed
-DATASET_FILE    = 'dataset.pkl'    # dataset transformed
+from config import *
 
 
 def process(fn:Callable[..., Any]):
@@ -350,23 +343,23 @@ def target_eval(env:Env):
     fh.write('\n'.join(lines))
 
 
-def setup_env(args) -> Optional[Env]:
-  # job
-  job = Descriptor.load(args.job_file)
+def create_env(task_name:str, job_name:str) -> Optional[Env]:
+  ''' create a new job env '''
 
-  # names
-  model_name = job.get('model/name') ; assert model_name
-  task_name = args.name or f'{model_name}_{timestr()}'
-  job_name = args.job_file.stem
+  # check log_dp
   fullname = f'{task_name}-{job_name}'
-
-  # logger & log_dp
   log_dp: Path = args.log_path / task_name / job_name
   logger = None
   if log_dp.exists() and args.no_overwrite:
     logger = get_logger(fullname, log_dp)
     logger.info('ignore due to folder already exists and --no_overwrite enabled')
     return
+
+  # job
+  job_file: Path = Path('job') / f'{job_name}.yaml'
+  job = Descriptor.load(job_file)
+
+  # logger
   log_dp.mkdir(exist_ok=True, parents=True)
   logger = logger or get_logger(fullname, log_dp)
   logger.info('Job Info:')
@@ -380,12 +373,48 @@ def setup_env(args) -> Optional[Env]:
     'logger': logger,       # logger
     'log_dp': log_dp,       # log folder
   }
+
+  return env
+
+
+def load_env(task_name:str, job_name:str) -> Optional[Env]:
+  ''' load a pretrained job env '''
+
+  # check log_dp
+  log_dp: Path = Path('log') / task_name / job_name
+  if not log_dp.exists(): return
+
+  # job
+  job_file: Path = log_dp / 'job.yaml'
+  job = Descriptor.load(job_file)
+
+  # logger
+  fullname = f'{task_name}-{job_name}'
+  log_dp.mkdir(exist_ok=True, parents=True)
+  logger = get_logger(fullname, log_dp)
+  logger.info('Job Info:')
+  logger.info(pformat(job.cfg))
+
+  seed_everything(fix_seed(job.get('seed', -1)))
+
+  env: Env = {
+    'fullname': fullname,   # '<task_name>-<job_name>'
+    'job': job,             # 'job.yaml'
+    'logger': logger,       # logger
+    'log_dp': log_dp,       # log folder
+  }
+
+  @require_data_and_model
+  def load_data_and_model():
+    env['model'] = env['manager'].load(env['model'], log_dp, logger)
+  load_data_and_model()
+
   return env
 
 
 @timer
 def run(args):
-  env = setup_env(args)
+  env = create_env(args)
   if env is None: return
 
   job: Descriptor = env['job']
@@ -437,7 +466,7 @@ def run_batch(args):
     def log(s=''):
       fh.write(s + '\n')
       print(s)
-    
+
     if clf_tasks:
       log('[clf] F1 score:')
       for score, name in clf_tasks:
@@ -456,8 +485,6 @@ if __name__ == '__main__':
   parser.add_argument('-D', '--csv_file',   required=True,       type=Path, help='path to a *.csv data file')
   parser.add_argument('-J', '--job_file',                        type=Path, help='path to a *.yaml job file')
   parser.add_argument('-X', '--job_folder',                      type=Path, help='path to a folder of *.yaml job file')
-  parser.add_argument(      '--log_path',   default=Path('log'), type=Path, help='path to log root folder')
-  parser.add_argument(      '--tmp_path',   default=Path('tmp'), type=Path, help='path to tmp folder')
   parser.add_argument(      '--name',                                       help='custom task name')
   parser.add_argument(      '--no_overwrite', action='store_true',          help='no overwrite if log folder exists')
   args = parser.parse_args()

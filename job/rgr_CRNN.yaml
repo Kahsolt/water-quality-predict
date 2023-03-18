@@ -2,6 +2,7 @@ seed: -1
 
 preprocess:
   filter_T:
+    - ticker_timer
     - ltrim_vacant
   project:
     - to_hourly
@@ -22,7 +23,7 @@ model:
     cnn_layers: 2
     cnn_k: 3
     cnn_stride: 2
-    cnn_in: 1
+    cnn_in: 1         # := n_feature
     cnn_out: 16
     cnn_hidden: 16
     cnn_act: leaky_relu

@@ -2,6 +2,7 @@ seed: -1
 
 preprocess:
   filter_T:
+    - ticker_timer
     - ltrim_vacant
   project:
     - to_hourly
@@ -20,7 +21,7 @@ model:
   name: CRNN_rgr
   params:
     rnn_type: GRU
-    rnn_in: 1
+    rnn_in: 1         # := n_feature
     rnn_out: 6        # := dataset.out
     rnn_hidden: 32
     rnn_layers: 1

@@ -17,11 +17,8 @@ from modules.util import seed_everything
 from modules.typing import *
 
 import run as RT
+from config import *
 
-BASE_PATH = Path(__file__).parent
-HTML_PATH = BASE_PATH / 'doc'
-JOB_PATH = BASE_PATH / 'job'
-LOG_PATH = BASE_PATH / 'log'
 
 app = Flask(__name__, template_folder=HTML_PATH)
 envs: Dict[str, Env] = { }
@@ -132,8 +129,7 @@ def task_(name:str):
 
 @app.route('/infer/<task>/<job>', methods=['POST'])
 def infer_(task:str, job:str):
-  global cur_job
-
+  fullname = f'{task}-{job}'
   job_folder = LOG_PATH / task / job
   if not job_folder.is_dir(): return jsonify({'ok': False, 'error': 'job folder not found'})
 
@@ -143,26 +139,14 @@ def infer_(task:str, job:str):
   print(f'>> job: {job}')
   print(f'>> x.shape: {x.shape}')
 
-  if job != cur_job:
-    # init job
-    RT.job = Descriptor.load(LOG_PATH / task / job / 'job.yaml')
-    RT.env.clear()
-    RT.env['log_dp'] = LOG_PATH / task / job
-    seed_everything(RT.job.get('seed'))
+  if fullname not in envs:
+    envs[fullname] = RT.create_env(task, job, is_pretrained=True)
 
-    # load job states
-    @RT.require_model
-    @RT.require_data
-    def load_model_and_data():
-      RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
-    load_model_and_data()
-
-    # get context
-    manager = RT.env['manager']
-    model = RT.env['model']
-    cur_job = job
-
-  y = manager.infer(model, x)
+  env = envs[fullname]
+  manager = env['manager']
+  model = env['model']
+  
+  y = manager.infer(model, x, Logger)
   return jsonify({'y': y.tolist()})
 
 

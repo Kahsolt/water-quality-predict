@@ -2,6 +2,7 @@ seed: -1
 
 preprocess:
   filter_T:
+    - ticker_timer
     - ltrim_vacant
   project:
     - to_daily
