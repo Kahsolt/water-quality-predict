@@ -14,10 +14,17 @@ TMP_PATH  = BASE_PATH / 'tmp'
 
 
 ''' log folder layout '''
-JOB_FILE        = 'job.yaml'
-DATA_FILE       = 'data.csv'
-PREPROCESS_FILE = 'preprocess.pkl'    # seq preprocessed
-LABEL_FILE      = 'label.pkl'         # seq encoded label
-STATS_FILE      = 'stats.pkl'         # transforming stats for seq
-TRANSFORM_FILE  = 'transform.pkl'     # seq transformed
-DATASET_FILE    = 'dataset.pkl'       # dataset transformed
+RUNTIME_FILE    = 'runtime.json'      # data shared by all tasks
+
+TASK_FILE       = 'task.json'         # task descriptor
+DATA_FILE       = 'data.csv'          # data shared by all jobs of the same task
+DATA_ZIP_FILE   = 'data_hist.zip'     # history archive of raw data
+
+JOB_FILE        = 'job.yaml'          # job.yaml copied from template
+PREPROCESS_FILE = 'preprocess.pkl'    # seq (preprocessed), for visualize
+LABEL_FILE      = 'label.pkl'         # encoded target/label, for visualize
+STATS_FILE      = 'stats.pkl'         # stats of transform, for inv-transform of model prediction
+TRANSFORM_FILE  = 'transform.pkl'     # seq (transformed), for ARIMA train/eval
+DATASET_FILE    = 'dataset.pkl'       # dataset (transformed), for other model train/eval
+SCORES_FILE     = 'scores.txt'        # evaluated scores
+LOG_FILE        = 'job.log'           # job runner logs

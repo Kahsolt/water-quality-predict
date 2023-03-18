@@ -146,7 +146,7 @@ def process_seq(env:Env):
     for col in df_r.columns: plt.plot(df_r[col], label=col)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.plot(df[col], label=col)
-    save_figure(log_dp / 'timeline.png', logger)
+    save_figure(log_dp / 'timeline_preprocess.png', logger)
 
   if 'plot histogram':
     plt.clf()
@@ -154,7 +154,7 @@ def process_seq(env:Env):
     for col in df_r.columns: plt.hist(df_r[col], label=col, bins=50)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.hist(df[col], label=col, bins=50)
-    save_figure(log_dp / 'hist.png', logger)
+    save_figure(log_dp / 'hist_preprocess.png', logger)
 
   T: Time = T
   seq: Seq = df.to_numpy().astype(np.float32)
@@ -223,7 +223,6 @@ def process_dataset(env:Env):
   logger.info(f'    input:  {X_test[0].shape}')
   logger.info(f'    target: {Y_test[1].shape}')
 
-  save_pickle(dataset, log_dp / DATASET_FILE, logger)
   if label is not None: save_pickle(label, log_dp / LABEL_FILE, logger)
 
   env['label']   = label
@@ -252,21 +251,21 @@ def process_transform(env:Env):
       except:
         logger.error(format_exc())
 
-    if 'plot timeline T':
+    if 'plot timeline':
       plt.clf()
       plt.subplot(211) ; plt.title('preprocessed')
       for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
       plt.subplot(212) ; plt.title('transformed')
       for col in range(seq.shape[-1]): plt.plot(seq[:, col])
-      save_figure(log_dp / 'timeline_T.png', logger)
+      save_figure(log_dp / 'timeline_transform.png', logger)
 
-    if 'plot histogram T':
+    if 'plot histogram':
       plt.clf()
       plt.subplot(211) ; plt.title('preprocessed')
       for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)
       plt.subplot(212) ; plt.title('transformed')
       for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
-      save_figure(log_dp / 'hist_T.png', logger)
+      save_figure(log_dp / 'hist_transform.png', logger)
 
     save_pickle(seq, log_dp / TRANSFORM_FILE, logger)
     if stats: save_pickle(stats, log_dp / STATS_FILE, logger)

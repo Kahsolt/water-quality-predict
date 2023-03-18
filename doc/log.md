@@ -12,21 +12,21 @@ LOG_PATH
 ├── runtime.json            // system runtime & history
 ├── <task_name>
 │   ├── task.json           // task descriptor
-│   ├── data.csv            // raw data
+│   ├── data.csv            // data shared by all jobs of the same task
 │   ├── data_hist.zip       // history archive of raw data
 │   ├── <job_name>
 │   │   ├── job.yaml        // job config
-│   │   ├── seq-raw.pkl     // original timeseq
-│   │   ├── stats.pkl       // saved stats of preprocessing
-│   │   ├── seq.pkl         // preprocessed timeseq
-│   │   ├── label.pkl       // label
-│   │   ├── dataset.pkl     // preprocessed (+ label) => train/eval datasets
-│   │   ├── timeline*.png   // show timeseq
-│   │   ├── hist*.png       // show value histogram
-│   │   ├── filter_*.png    // debug preprocessing intermediates
-│   │   ├── model.*         // model dump / weights
+│   │   ├── preprocess.pkl  // seq (preprocessed), for visualize
+│   │   ├── label.pkl       // encoded target/label, for visualize
+│   │   ├── stats.pkl       // stats of transform, for postprocess
+│   │   ├── transform.pkl   // seq (transformed), for ARIMA train/eval
+│   │   ├── dataset.pkl     // dataset (transformed), for other model train/eval
 │   │   ├── scores.txt      // evaluated scores
-│   │   └── job.log         // job runner logs
+│   │   ├── job.log         // job runner logs
+│   │   ├── timeline_*.png  // debug curve trends (preprocess & transform)
+│   │   ├── hist_*.png      // debug value histogram (preprocess & transform)
+│   │   ├── filter_*.png    // debug preprocessors (filter_T & filter_V)
+│   │   └── model.*         // model dump / weights
 │   └── ...
 └── ...
 
