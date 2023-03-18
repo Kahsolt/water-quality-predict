@@ -8,6 +8,7 @@ from pathlib import Path
 from copy import deepcopy
 
 from modules.util import ts_now
+from modules.typing import Status
 
 
 # => see 'doc/log.md'
@@ -22,7 +23,7 @@ def new_task_init_pack():
 def new_runtime_entry():
   return {
     'name': None,         # task name
-    'status': 'created',
+    'status': Status.CREATED,
     'info': None,
     'progress': None,     # f'{n_job_finished} / {n_job_total}'
     'ts_create': ts_now(),
@@ -32,7 +33,7 @@ def new_runtime_entry():
 
 def new_task_entry():
   return {
-    'status': 'created',
+    'status': Status.CREATED,
     'target': None,
     'jobs': { },
     'ts_create': ts_now(),
@@ -102,3 +103,17 @@ class Descriptor:
   def get(self, path:str, value=None):
     try: return self[path]
     except: return value
+
+
+if __name__ == '__main__':
+  cfg = Descriptor(new_runtime_entry())
+  print(cfg)
+
+  print(cfg['status'])
+  print(cfg['ts_create'])
+
+  cfg['name'] = 'what task'
+  cfg['info'] = 'running what job'
+  cfg['progress'] = '3 / 8'
+  cfg['ts_update'] = ts_now()
+  print(cfg)

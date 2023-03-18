@@ -45,3 +45,28 @@ def std_norm_inv(seq:Seq, avg:ndarray, std:ndarray) -> Seq:
 
 def minmax_norm_inv(seq:Seq, vmin:ndarray, vmax:ndarray) -> Seq:
   return seq * (vmax - vmin) + vmin
+
+
+if __name__ == '__main__':
+  import pandas as pd
+
+  df = pd.read_csv('data/test.csv')
+  df = df[df.columns[1:]]
+  df.fillna(method='ffill', inplace=True)
+  p = df.to_numpy()
+
+  transforms = [
+    'log',
+    'std_norm',
+    'minmax_norm',
+  ]
+
+  for T in transforms:
+    p_func = globals()[T]
+    q_func = globals()[f'{T}_inv']
+
+    z, st = p_func(p)
+    q = q_func(z, *st)
+
+    e = np.abs(q - p).mean()
+    print(f'{T} error: {e}')

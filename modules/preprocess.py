@@ -54,7 +54,6 @@ def ticker_timer(df:TimeSeq) -> TimeSeq:
   else:
     return df
 
-
 def ltrim_vacant(df:TimeSeq) -> TimeSeq:
   def count_consecutive_nan(x:Series) -> Series:
     arr: List[float] = x.to_numpy()
@@ -105,11 +104,12 @@ def remove_outlier(df:Values) -> Values:
     tmp = [(arr, 'original')]
 
     if 'map 3-sigma outliers to NaN':
-      arr_n, (avg, std) = std_norm(log_apply(arr))
+      arr_v = arr[~np.isnan(arr)]
+      _, (avg, std) = std_norm(log_apply(arr_v))
       L = avg - 3 * std
       H = avg + 3 * std
-      mask = (L < arr_n) & (arr_n < H)
-      arr = mask * arr + ~mask * (np.ones_like(arr) * np.nan)
+      mask = (L < arr) & (arr < H)
+      arr = np.asarray([arr[i] if m else np.nan for i, m in enumerate(mask)])
 
       assert len(arr) == arrlen
       tmp.append((arr, f'3-sigma outlier [{L}, {H}]'))
@@ -117,9 +117,10 @@ def remove_outlier(df:Values) -> Values:
     if 'padding by edge for NaNs at two endings':
       X = np.arange(arrlen)
       idx_v = X[np.where(np.isnan(arr) == 0)]   # index of non-NaN values
-      i = idx_v[ 0] if idx_v else 0
-      j = idx_v[-1] if idx_v else arrlen - 1
-      arr = np.pad(arr[i: j+1], (i, arrlen - j - 1), mode='edge')
+      if len(idx_v):
+        i, j = idx_v[0], idx_v[-1]
+        if i != 0 or j != arrlen - 1:
+          arr = np.pad(arr[i: j+1], (i, arrlen - j - 1), mode='edge')
 
       assert len(arr) == arrlen
       tmp.append((arr, 'pad edge'))
@@ -189,3 +190,13 @@ def combine_time_and_values(T:Time, df:Values) -> TimeSeq:
   val_cols = list(df.columns)
   df['Time'] = T
   return df[['Time'] + val_cols]
+
+
+if __name__ == '__main__':
+  df = pd.read_csv('data/test.csv')
+
+  df = ticker_timer(df)
+  df = ltrim_vacant(df)
+  T, df = to_daily(df)
+  df = remove_outlier(df)
+  df = wavlet_transform(df)

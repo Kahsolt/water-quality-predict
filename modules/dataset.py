@@ -68,9 +68,9 @@ def ex_thresh_24h(seq:Seq, T:Time, **kwargs) -> Seq:
 # ↑↑↑ above are valid encoders ↑↑↑
 
 
-def encode_seq(x:Seq, T:Time, encode:Encoder) -> Seq:
-  label_func = globals()[encode['name']]
-  label_func_params = encode.get('params') or {}
+def encode_seq(x:Seq, T:Time, encoder:Encoder) -> Seq:
+  label_func = globals()[encoder['name']]
+  label_func_params = encoder.get('params') or {}
   return label_func(x, T, **label_func_params)
 
 def slice_frames(x:Seq, y:Seq, inlen:int=3, outlen:int=1, overlap:int=0) -> Dataset:
@@ -119,3 +119,27 @@ class FrameDataset(torch.utils.data.Dataset):
 
   def __getitem__(self, idx):
     return self.X[idx], self.Y[idx]
+
+
+if __name__ == '__main__':
+  x = np.random.normal(size=[24*30, 1])
+  T = None
+
+  encoder = {
+    'name': 'ex_thresh',
+    'params': {
+      'thresh': 0.2,
+    }
+  }
+  lbl = encode_seq(x, T, encoder)
+  X, Y = slice_frames(x, lbl, inlen=7, outlen=3, overlap=1)
+  trainset, testset = split_dataset(X, Y, 0.2)
+
+  dataset = FrameDataset(trainset)
+  print(len(dataset))
+
+  dataloader = DataLoader(dataset, batch_size=24)
+  g = iter(dataloader)
+  X, Y = next(g)
+  print(X.shape)
+  print(Y.shape)
