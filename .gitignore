@@ -3,13 +3,11 @@
 __pycache__/
 
 # data
-data/
-ref/
+data/*
+!data/test.csv
 
-# generated
-gen/
-out/
+# ref
+ref/
 
 # logs
 log/
-*.log

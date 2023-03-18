@@ -1,3 +1,4 @@
+@REM run unit test for modules
 @ECHO OFF
 
 SET PYTHONPATH=%CD%

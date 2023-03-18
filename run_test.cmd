@@ -1,4 +1,4 @@
-@REM run all *.yaml under job folder if hasn't been run once
+@REM run all jobs in 'job/*.yaml' over test dataset 'test.csv', if hasn't been run once
 @ECHO OFF
 
 python run.py ^
