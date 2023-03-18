@@ -39,6 +39,9 @@ def get_logger(name, log_dp=Path('.')) -> Logger:
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+def fix_seed(seed:int) -> int:
+  return seed if seed > 0 else random.randrange(np.iinfo(np.int32).max)
+
 def seed_everything(seed:int):
   random.seed(seed)
   os.environ["PYTHONHASHSEED"] = str(seed)
@@ -70,47 +73,49 @@ def timer(fn:Callable[..., Any]):
   return wrapper
 
 
-def read_csv(fp:str) -> DataFrame:
+def read_csv(fp:str, logger:Logger=None) -> DataFrame:
+  if logger: logger.info(f'  read csv from {fp}')
   return pd.read_csv(fp, encoding='utf-8')
 
-def save_csv(df:DataFrame, fp:str):
+def save_csv(df:DataFrame, fp:str, logger:Logger=None):
+  if logger: logger.info(f'  save csv to {fp}')
   df.to_csv(fp, encoding='utf-8')
 
 
-def load_pickle(fp:Path) -> CachedData:
+def load_pickle(fp:Path, logger:Logger=None) -> CachedData:
   if not fp.exists(): return
-  logger.info(f'  load pickle from {fp}')
+  if logger: logger.info(f'  load pickle from {fp}')
   with open(fp, 'rb') as fh:
     return pkl.load(fh)
 
-def save_pickle(data:CachedData, fp:Path):
-  logger.info(f'  save pickle to {fp}')
+def save_pickle(data:CachedData, fp:Path, logger:Logger=None):
+  if logger: logger.info(f'  save pickle to {fp}')
   with open(fp, 'wb') as fh:
     pkl.dump(data, fh)
 
 
-def get_metrics(truth, pred, task:TaskType) -> EvalMetrics:
-  global logger
-
+def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
   if   task == 'clf':
     prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
-    logger.info(f'prec:   {prec:.3%}')
-    logger.info(f'recall: {recall:.3%}')
-    logger.info(f'f1:     {f1:.3%}')
+    if logger:
+      logger.info(f'prec:   {prec:.3%}')
+      logger.info(f'recall: {recall:.3%}')
+      logger.info(f'f1:     {f1:.3%}')
     return prec, recall, f1
   elif task == 'rgr':
     mae = mean_absolute_error(truth, pred)
     mse = mean_squared_error (truth, pred)
     r2  = r2_score           (truth, pred)
-    logger.info(f'mae: {mae:.3f}')
-    logger.info(f'mse: {mse:.3f}')
-    logger.info(f'r2:  {r2:.3f}')
+    if logger:
+      logger.info(f'mae: {mae:.3f}')
+      logger.info(f'mse: {mse:.3f}')
+      logger.info(f'r2:  {r2:.3f}')
     return mae, mse, r2
 
-def save_figure(fp:Path, title:str=None):
+def save_figure(fp:Path, title:str=None, logger:Logger=None):
   if not plt.gcf().axes: return
 
   plt.tight_layout()
   plt.suptitle(title)
   plt.savefig(fp, dpi=400)
-  logger.info(f'  save figure to {fp}')
+  if logger: logger.info(f'  save figure to {fp}')

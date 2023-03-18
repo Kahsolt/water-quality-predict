@@ -6,26 +6,26 @@ from modules.typing import *
 TASK_TYPE: TaskType = None
 
 
-def init(params:Params) -> Model:
+def init(params:Params, logger:Logger=None) -> Model:
   ''' init a model '''
   raise NotImplementedError
 
-def train(model:Model, data:Union[Datasets, Seq], params:Params):
+def train(model:Model, data:Union[Datasets, Seq], params:Params, logger:Logger=None):
   ''' fit model with train dataset '''
   raise NotImplementedError
 
-def eval(model:Model, data:Union[Datasets, Seq], params:Params) -> EvalMetrics:
+def eval(model:Model, data:Union[Datasets, Seq], params:Params, logger:Logger=None) -> EvalMetrics:
   ''' get metric scores on eval dataset '''
   raise NotImplementedError
 
-def infer(model:Model, x:Frame) -> Frame:
+def infer(model:Model, x:Frame, logger:Logger=None) -> Frame:
   ''' predict on one time step '''
   raise NotImplementedError
 
-def save(model:Model, log_dp:Path):
+def save(model:Model, log_dp:Path, logger:Logger=None):
   ''' save model weights/dump '''
   raise NotImplementedError
 
-def load(model:Model, log_dp:Path) -> Model:
+def load(model:Model, log_dp:Path, logger:Logger=None) -> Model:
   ''' load model weights/dump '''
   raise NotImplementedError

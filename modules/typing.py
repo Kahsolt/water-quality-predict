@@ -1,31 +1,38 @@
+from pathlib import Path
+from enum import Enum
+from logging import Logger
+from typing import *
+
 from numpy import ndarray
 from pandas import DataFrame, Series
 from torch import Tensor
 from torch.nn import Module
 from torch.optim import Optimizer
-from logging import Logger
-from typing import *
+
+from modules.descriptor import Descriptor
 
 
 # 任务/作业运行目标
-Target = Union[
-  Literal['data'],      # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
-  Literal['train'],     # 训练
-  Literal['eval'],      # 评估
-  Literal['all'],       # 全部 := 制作数据 + 训练 + 评估 (糖！)
-]
-# 任务/作业进度状态
-Status = Union[
-  Literal['created'],   # 创建任务
-  Literal['queuing'],   # 执行队列中等待
-  Literal['running'],   # 正在执行中
-  Literal['finished'],  # 已完成
-  Literal['ignored'],   # 忽略
-  Literal['failed'],    # 出错
-]
+class Target(Enum):
+  DATA  = 'data'          # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
+  TRAIN = 'train'         # 训练
+  EVAL  = 'eval'          # 评估
+  ALL   = 'all'           # 全部 := 制作数据 + 训练 + 评估 (糖！)
 
-# 作业运行时环境
-Env = Dict[str, Any]
+# 任务/作业进度状态
+class Status(Enum):
+  CREATED  = 'created'    # 创建任务
+  QUEUING  = 'queuing'    # 执行队列中等待
+  RUNNING  = 'running'    # 正在执行中
+  FINISHED = 'finished'   # 已完成
+  IGNORED  = 'ignored'    # 忽略
+  FAILED   = 'failed'     # 出错
+
+# 作业类型
+class TaskType(Enum):
+  CLF = 'clf'       # 分类
+  RGR = 'rgr'       # 回归
+
 
 # 模型
 Model = object()
@@ -57,11 +64,23 @@ Dataset = Tuple[Frames, Frames]
 Datasets = Tuple[Dataset, Dataset]
 # 所有磁盘缓存的数据
 CachedData = Union[Seq, Stats, Datasets]
-
-# 作业类型
-TaskType = Union[
-  Literal['clf'],       # 分类
-  Literal['rgr'],       # 回归
-]
 # 评估结果
 EvalMetrics = Tuple[float, ...]
+
+
+# 作业运行时环境
+Env = {
+  'fullname': str, 
+  'job': Descriptor,
+  'logger': Logger,
+  'log_dp': Path,
+  'status': Status,
+  'df': TimeSeq,
+  'T': Time,
+  'seq': Seq,
+  'label': Seq,
+  'dataset': Datasets,
+  'stats': Stats,
+  'manager': object,    # 'module'
+  'model': Model,
+}

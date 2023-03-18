@@ -15,9 +15,7 @@ from modules.models.CRNN_rgr import init, save, load     # just proxy by
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def train(model:CRNN, dataset:Datasets, params:Params):
-  logger = get_logger()
-
+def train(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None):
   dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, params)
 
   model.train()
@@ -39,11 +37,11 @@ def train(model:CRNN, dataset:Datasets, params:Params):
         ok += (Y == pred).sum().item()
         cnt += len(Y)
 
-    logger.info(f'[Epoch: {i}] loss: {loss.item():.7f}, accuracy: {ok / cnt:.3%}')
+    if logger: logger.info(f'[Epoch: {i}] loss: {loss.item():.7f}, accuracy: {ok / cnt:.3%}')
 
 
 @torch.inference_mode()
-def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
+def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> EvalMetrics:
   dataloader, y_test = prepare_for_eval(model, dataset, params)
   
   preds = []
@@ -59,7 +57,7 @@ def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
 
 
 @torch.inference_mode()
-def infer(model:CRNN, x:Frame) -> Frame:
+def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
   x = torch.from_numpy(x)
   x = x.to(device)
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]

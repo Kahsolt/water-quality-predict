@@ -14,17 +14,17 @@ from modules.models.XGBoost_rgr import save, load
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(params:Params) -> AutoARIMA:
+def init(params:Params, logger:Logger=None) -> AutoARIMA:
   return AutoARIMA(**params)
 
 
-def train(model:AutoARIMA, seq:Seq, params:Params):
+def train(model:AutoARIMA, seq:Seq, params:Params, logger:Logger=None):
   seq = seq.squeeze()
   model.fit(seq)
   get_logger().info(model.summary())
 
 
-def eval(model:AutoARIMA, seq:Seq, params:Params) -> EvalMetrics:
+def eval(model:AutoARIMA, seq:Seq, params:Params, logger:Logger=None) -> EvalMetrics:
   seq = seq.squeeze()
   seqlen = len(seq)
   start = seqlen // 4
@@ -32,6 +32,6 @@ def eval(model:AutoARIMA, seq:Seq, params:Params) -> EvalMetrics:
   return get_metrics(seq[:-start], pred, task=TASK_TYPE)
 
 
-def infer(model:AutoARIMA, x:int) -> Frame:
+def infer(model:AutoARIMA, x:int, logger:Logger=None) -> Frame:
   pred = model.predict_in_sample(start=x, end=x+1)
   return np.expand_dims(pred, axis=-1)

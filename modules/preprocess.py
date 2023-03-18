@@ -7,19 +7,17 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 import pywt
 
-from modules.util import get_logger
 from modules.transform import *
 from modules.typing import *
 
 
 ''' filter_T: 含时处理，数据选择 '''
 def ticker_timer(df:TimeSeq) -> TimeSeq:
-  df
+  T = df.columns[0]
+
   return df
 
 def ltrim_vacant(df:TimeSeq) -> TimeSeq:
-  logger = get_logger()
-
   def count_consecutive_nan(x:Series) -> Series:
     arr: List[float] = x.to_numpy()
     mask = np.isnan(arr).astype(int)
@@ -40,7 +38,6 @@ def ltrim_vacant(df:TimeSeq) -> TimeSeq:
     if cnt.iloc[i].max() > limit:
       break
   df = df.iloc[i:]
-  logger.info(f'  ltrim_vacant: {lendf} => {len(df)}')
 
   return df
 
@@ -52,48 +49,52 @@ def to_hourly(df:TimeSeq) -> TimeAndValues:
 def to_daily(df:TimeSeq) -> TimeAndValues:
   T = df.columns[0]
   df[T] = df[T].map(lambda x: x.split(' ')[0])    # get date part from timestr
-  df = df.groupby(T).mean().reset_index()
+  grps = df.groupby(T)
+  df = grps.mean()                  # avg daily
+  mask = grps.count() > 12          # filter by thresh
+  mask = mask.apply(lambda s: s.map(lambda e: e if e else np.nan))
+  df = df * mask                    # map masked to NaN
+  df.reset_index(inplace=True)
   return split_time_and_values(df)
 
 
 ''' filter_V: 不含时处理，数值修正 '''
 def remove_outlier(df:Values) -> Values:
-  logger = get_logger()
-
   def process(x:Series) -> Series:
     x = x.fillna(method='ffill')
     arr: Array = np.asarray(x)
+    arrlen = len(arr)
     tmp = [(arr, 'original')]
 
     if 'map 3-sigma outliers to NaN':
       arr_n, (avg, std) = std_norm(log_apply(arr))
       L = avg - 3 * std
       H = avg + 3 * std
-      logger.info(f'  outlier: [{L}, {H}]')
-      arr_clip = arr_n.clip(L, H)
-      arr = log_inv(std_norm_inv(arr_clip, avg, std))
+      mask = (L < arr_n) & (arr_n < H)
+      arr = mask * arr + ~mask * (np.ones_like(arr) * np.nan)
 
-      tmp.append((arr, '3-sigma outlier'))
+      assert len(arr) == arrlen
+      tmp.append((arr, f'3-sigma outlier [{L}, {H}]'))
 
     if 'padding by edge for NaNs at two endings':
-      i = 0
-      while np.isnan(arr[i]): i += 1
-      j = len(arr) - 1
-      while np.isnan(arr[j]): j -= 1
-
-      arrlen = len(arr)
+      X = np.arange(arrlen)
+      idx_v = X[np.where(np.isnan(arr) == 0)]   # index of non-NaN values
+      i = idx_v[ 0] if idx_v else 0
+      j = idx_v[-1] if idx_v else arrlen - 1
       arr = np.pad(arr[i: j+1], (i, arrlen - j - 1), mode='edge')
-      assert len(arr) == arrlen
 
+      assert len(arr) == arrlen
       tmp.append((arr, 'pad edge'))
     
     if 'interpolate for inner NaNs':
       mask = np.isnan(arr)
-      X = range(len(arr))                         # gen dummy x-axis seq
-      interp = interp1d(X, arr, kind='linear')    # fit the model
-      arr_interp = interp(X)                      # predict
-      arr = arr_interp * mask + arr * ~mask
+      X = np.arange(arrlen)                # dummy x-axis
+      X_s = X  [~mask]
+      Y_s = arr[~mask]
+      interp = interp1d(X_s, Y_s, kind='linear')    # fit the model
+      arr = interp(X)                      # predict
 
+      assert len(arr) == arrlen
       tmp.append((arr, 'interp'))
 
     if 'draw plot':
@@ -124,6 +125,7 @@ def wavlet_transform(df:Values, wavelet:str='db8', threshold:float=0.04) -> Valu
       arr = arr.clip(min=0.0)     # positive fix
       arr = arr[:arrlen]          # length fix
 
+      assert len(arr) == arrlen
       tmp.append((arr, 'wavlet'))
 
     if 'draw plot':

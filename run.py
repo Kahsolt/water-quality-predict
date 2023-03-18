@@ -37,7 +37,7 @@ def process(fn:Callable[..., Any]):
     process = fn.__name__.split('_')[-1]
     logger.info(f'>> run process: {process!r}')
     t = time()
-    r = fn(*args, **kwargs)
+    r = fn(env, *args, **kwargs)
     logger.info(f'<< process done ({time() - t:.3f}s)')
     return r
   return wrapper
@@ -51,18 +51,18 @@ def require_data_and_model(fn:Callable[..., Any]):
     ''' Data '''
 
     if 'seq' not in env:
-      env['seq'] = load_pickle(log_dp / SEQ_FILE)
+      env['seq'] = load_pickle(log_dp / SEQ_FILE, logger)
       assert env['seq'] is not None
 
     if 'stats' not in env:
-      stats = load_pickle(log_dp / STATS_FILE)
+      stats = load_pickle(log_dp / STATS_FILE, logger)
       env['stats'] = stats if stats is not None else []
 
     if 'dataset' not in env:
-      env['dataset'] = load_pickle(log_dp / DATASET_FILE)
+      env['dataset'] = load_pickle(log_dp / DATASET_FILE, logger)
 
     if 'label' not in env:
-      env['label'] = load_pickle(log_dp / LABEL_FILE)
+      env['label'] = load_pickle(log_dp / LABEL_FILE, logger)
 
     ''' Model '''
 
@@ -75,7 +75,7 @@ def require_data_and_model(fn:Callable[..., Any]):
 
     if 'model' not in env:
       manager = env['manager']
-      model = manager.init(job.get('model/config', {}))
+      model = manager.init(job.get('model/params', {}), logger)
       env['model'] = model
       logger.info('model:')
       logger.info(model)
@@ -94,7 +94,7 @@ def process_df(env:Env):
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  df: TimeSeq = read_csv(log_dp / DATA_FILE)  # 总原始数据
+  df: TimeSeq = read_csv(log_dp / DATA_FILE, logger)  # 总原始数据
 
   logger.info(f'  found {len(df)} records')
   logger.info(f'  column names({len(df.columns)}): {list(df.columns)}')
@@ -118,8 +118,10 @@ def process_seq(env:Env):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
       try:
+        lendf = len(df)
         df: TimeSeq = getattr(preprocess, proc)(df)
-        save_figure(log_dp / f'filter_T_{proc}.png')
+        logger.info(f'    {proc}: {lendf} => {len(df)}')
+        save_figure(log_dp / f'filter_T_{proc}.png', logger)
       except: logger.error(format_exc())
 
   if 'project':   # NOTE: this is required!
@@ -138,8 +140,10 @@ def process_seq(env:Env):
         logger.error(f'  preprocessor {proc!r} not found!')
         continue
       try:
+        lendf = len(df)
         df: Values = getattr(preprocess, proc)(df)
-        save_figure(log_dp / f'filter_V_{proc}.png')
+        logger.info(f'    {proc}: {lendf} => {len(df)}')
+        save_figure(log_dp / f'filter_V_{proc}.png', logger)
       except: logger.error(format_exc())
 
   if 'plot timeline':
@@ -148,7 +152,7 @@ def process_seq(env:Env):
     for col in df_r.columns: plt.plot(df_r[col], label=col)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.plot(df[col], label=col)
-    save_figure(log_dp / 'timeline.png')
+    save_figure(log_dp / 'timeline.png', logger)
 
   if 'plot histogram':
     plt.clf()
@@ -156,12 +160,12 @@ def process_seq(env:Env):
     for col in df_r.columns: plt.hist(df_r[col], label=col, bins=50)
     plt.subplot(212) ; plt.title('preprocessed')
     for col in df.columns: plt.hist(df[col], label=col, bins=50)
-    save_figure(log_dp / 'hist.png')
+    save_figure(log_dp / 'hist.png', logger)
 
   T: Time = T
   seq: Seq = df.to_numpy().astype(np.float32)
   assert len(T) == len(seq)
-  save_pickle(seq, log_dp / SEQ_RAW_FILE)
+  save_pickle(seq, log_dp / SEQ_RAW_FILE, logger)
 
   logger.info(f'  T.shape: {T.shape}')
   logger.info(f'  seq.shape: {seq.shape}')
@@ -203,7 +207,7 @@ def process_dataset(env:Env):
     freq_min: float = job.get('dataset/freq_min', 0.0) ; assert 0.0 <= freq_min <= 1.0
     if bad_ratio < freq_min:
       logger.info(f'  bad_ratio({bad_ratio}) < freq_min({freq_min}), ignore modeling')
-      env['status'] = 'ignored'
+      env['status'] = Status.IGNORED
       return
 
   # make slices
@@ -225,9 +229,9 @@ def process_dataset(env:Env):
   logger.info(f'    input:  {X_test[0].shape}')
   logger.info(f'    target: {Y_test[1].shape}')
 
-  save_pickle(dataset, log_dp / DATASET_FILE)
-  if label is not None: save_pickle(label, log_dp / LABEL_FILE)
-  
+  save_pickle(dataset, log_dp / DATASET_FILE, logger)
+  if label is not None: save_pickle(label, log_dp / LABEL_FILE, logger)
+
   env['label']   = label
   env['dataset'] = dataset
 
@@ -260,7 +264,7 @@ def process_transform(env:Env):
       for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
       plt.subplot(212) ; plt.title('transformed')
       for col in range(seq.shape[-1]): plt.plot(seq[:, col])
-      save_figure(log_dp / 'timeline_T.png')
+      save_figure(log_dp / 'timeline_T.png', logger)
 
     if 'plot histogram T':
       plt.clf()
@@ -268,10 +272,10 @@ def process_transform(env:Env):
       for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)
       plt.subplot(212) ; plt.title('transformed')
       for col in range(seq.shape[-1]): plt.hist(seq[:, col], bins=50)
-      save_figure(log_dp / 'hist_T.png')
+      save_figure(log_dp / 'hist_T.png', logger)
 
-    save_pickle(seq, log_dp / SEQ_FILE)
-    if stats: save_pickle(stats, log_dp / STATS_FILE)
+    save_pickle(seq, log_dp / SEQ_FILE, logger)
+    if stats: save_pickle(stats, log_dp / STATS_FILE, logger)
     
     env['seq']   = seq
     env['stats'] = stats
@@ -289,7 +293,7 @@ def process_transform(env:Env):
         y_test  = proc_fn(y_test,  *st)
 
     dataset = (X_train, y_train), (X_test, y_test)
-    save_pickle(dataset, env['log_dp'] / DATASET_FILE)
+    save_pickle(dataset, env['log_dp'] / DATASET_FILE, logger)
 
     env['dataset'] = dataset
 
@@ -303,23 +307,25 @@ def target_data(env:Env):
 @process
 def target_train(env:Env):
   job: Descriptor = env['job']
+  logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
   manager, model = env['manager'], env['model']
   data = env['dataset'] if job.get('dataset') else env['seq']
-  manager.train(model, data, job.get('model/params'))
-  manager.save(model, log_dp)
+  manager.train(model, data, job.get('model/params'), logger)
+  manager.save(model, log_dp, logger)
 
 @require_data_and_model
 @process
 def target_eval(env:Env):
   job: Descriptor = env['job']
+  logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
   manager, model = env['manager'], env['model']
-  model = manager.load(model, log_dp)
+  model = manager.load(model, log_dp, logger)
   data = env['dataset'] if job.get('dataset') else env['seq']
-  stats = manager.eval(model, data, job.get('model/config'))
+  stats = manager.eval(model, data, job.get('model/params'), logger)
 
   task_type = job.get('model/name').split('_')[-1]
   if   task_type == 'clf':
@@ -343,32 +349,35 @@ def target_eval(env:Env):
     fh.write('\n'.join(lines))
 
 
-def setup_env(args):
+def setup_env(args) -> Optional[Env]:
+  # job
   job = Descriptor.load(args.job_file)
 
+  # names
   model_name = job.get('model/name') ; assert model_name
   task_name = args.name or f'{model_name}_{timestr()}'
   job_name = args.job_file.stem
+  fullname = f'{task_name}-{job_name}'
 
+  # logger & log_dp
   log_dp: Path = args.log_path / task_name / job_name
   logger = None
   if log_dp.exists() and args.no_overwrite:
-    logger = get_logger(f'{task_name}-{job_name}', log_dp)
+    logger = get_logger(fullname, log_dp)
     logger.info('ignore due to folder already exists and --no_overwrite enabled')
     return
-  else:
-    log_dp.mkdir(exist_ok=True, parents=True)
-  logger = logger or get_logger(f'{task_name}-{job_name}', log_dp)
-
+  log_dp.mkdir(exist_ok=True, parents=True)
+  logger = logger or get_logger(fullname, log_dp)
   logger.info('Job Info:')
   logger.info(pformat(job.cfg))
 
-  seed_everything(job.get('seed', 114514))
+  seed_everything(fix_seed(job.get('seed', -1)))
 
   env: Env = {
-    'job': job,         # 'job.yaml'
-    'logger': logger,   # logger
-    'log_dp': log_dp,   # log folder
+    'fullname': fullname,   # '<task_name>-<job_name>'
+    'job': job,             # 'job.yaml'
+    'logger': logger,       # logger
+    'log_dp': log_dp,       # log folder
   }
   return env
 
@@ -376,6 +385,8 @@ def setup_env(args):
 @timer
 def run(args):
   env = setup_env(args)
+  if env is None: return
+
   job: Descriptor = env['job']
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']

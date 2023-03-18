@@ -14,9 +14,7 @@ from modules.models.CRNN import *
 TASK_TYPE: TaskType = Path(__file__).stem.split('_')[-1]
 
 
-def init(params:Params) -> CRNN:
-  logger = get_logger()
-
+def init(params:Params, logger:Logger=None) -> CRNN:
   model = CRNN(
     r_type    = params['rnn_type'],
     r_in      = params.get('rnn_in',      1),
@@ -33,14 +31,12 @@ def init(params:Params) -> CRNN:
     c_act     = params.get('cnn_act',     'leaky_relu'),
   )
   param_cnt = sum([p.numel() for p in model.parameters() if p.requires_grad])
-  logger.info(f'  param_cnt: {param_cnt}')
+  if logger: logger.info(f'  param_cnt: {param_cnt}')
 
   return model.to(device)
 
 
-def train(model:CRNN, dataset:Datasets, params:Params):
-  logger = get_logger()
-
+def train(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None):
   dataloader, optimizer, loss_fn, epochs = prepare_for_train(model, dataset, params)
 
   model.train()
@@ -54,11 +50,11 @@ def train(model:CRNN, dataset:Datasets, params:Params):
       loss = loss_fn(y_hat, Y.squeeze(dim=-1))
       loss.backward()
       optimizer.step()
-    logger.info(f'[Epoch: {i}] loss: {loss.item():.7f}')
+    if logger: logger.info(f'[Epoch: {i}] loss: {loss.item():.7f}')
 
 
 @torch.inference_mode()
-def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
+def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> EvalMetrics:
   dataloader, y_test = prepare_for_eval(model, dataset, params)
 
   preds = []
@@ -73,7 +69,7 @@ def eval(model:CRNN, dataset:Datasets, params:Params) -> EvalMetrics:
 
 
 @torch.inference_mode()
-def infer(model:CRNN, x:Frame) -> Frame:
+def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
   x = torch.from_numpy(x)
   x = x.to(device)          # [I=96, D=1]
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]
@@ -82,15 +78,15 @@ def infer(model:CRNN, x:Frame) -> Frame:
   return y
 
 
-def save(model:CRNN, log_dp:Path):
+def save(model:CRNN, log_dp:Path, logger:Logger=None):
   fp = log_dp / 'model.pth'
-  logger.info(f'save model to {fp}')
+  if logger: logger.info(f'save model to {fp}')
   torch.save(model.state_dict(), fp)
 
 
-def load(model:CRNN, log_dp:Path) -> CRNN:
+def load(model:CRNN, log_dp:Path, logger:Logger=None) -> CRNN:
   fp = log_dp / 'model.pth'
-  logger.info(f'load model from {fp}')
+  if logger: logger.info(f'load model from {fp}')
   state_dict = torch.load(fp, map_location=device)
   model.load_state_dict(state_dict)
   return model
