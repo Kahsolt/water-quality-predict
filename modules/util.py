@@ -170,6 +170,16 @@ def save_figure(fp:Path, title:str=None, logger:Logger=None):
   if logger: logger.info(f'  save figure to {fp}')
 
 
+def frame_left_pad(x:Frame, padlen:int) -> Frame:
+  xlen = len(x)
+  if xlen < padlen:
+    x = np.pad(x, ((padlen - xlen, 0), (0, 0)), mode='edge')
+  return x
+
+def frame_shift(x:Frame, y:Frame) -> Frame:
+  return np.concatenate([x[len(y):, :], y], axis=0)
+
+
 def make_zip(src:Path, fp: Path):
   fp.parent.mkdir(exist_ok=True, parents=True)
   cmd = f'7z a -tzip "{fp.absolute()}" "{src.absolute()}"'

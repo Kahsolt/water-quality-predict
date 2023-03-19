@@ -15,7 +15,8 @@ class Target(Enum):
   DATA  = 'data'          # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
   TRAIN = 'train'         # 训练
   EVAL  = 'eval'          # 评估
-  ALL   = 'all'           # 全部 := 制作数据 + 训练 + 评估 (糖！)
+  TEST  = 'test'          # 测试 (原地预测)
+  ALL   = 'all'           # 全部 := 制作数据 + 训练 + 评估 + 测试 (糖！)
 
 # 任务/作业进度状态
 class Status(Enum):
@@ -28,8 +29,8 @@ class Status(Enum):
 
 # 作业类型
 class TaskType(Enum):
-  CLF = 'clf'       # 分类
-  RGR = 'rgr'       # 回归
+  CLF = 'clf'             # 分类
+  RGR = 'rgr'             # 回归
 
 
 # 模型
@@ -50,7 +51,7 @@ TimeAndValues = Tuple[Time, Values]
 # 预处理后的数据帧序列
 Seq    = ndarray      # [T, D]
 Array  = ndarray      # [T]
-Frame  = ndarray      # [I/O, D]
+Frame  = ndarray      # [I/O, D/1]
 Frames = ndarray      # [N, I/O, D]
 # 预处理过程中记录的一些统计量
 Stat  = Tuple[Any, ...]

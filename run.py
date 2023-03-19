@@ -333,8 +333,66 @@ def target_eval(env:Env):
   else:
     raise ValueError(f'unknown task type {task_type!r}')
 
-  with open(log_dp / 'scores.txt', 'w', encoding='utf-8') as fh:
+  with open(log_dp / SCORES_FILE, 'w', encoding='utf-8') as fh:
     fh.write('\n'.join(lines))
+
+@require_data_and_model
+@process
+def target_test(env:Env):
+  job: Descriptor = env['job']
+  logger: Logger = env['logger']
+  log_dp: Path = env['log_dp']
+
+  seq: Seq     = env['seq']
+  stats: Stats = env['stats']
+  manager      = env['manager']
+  model: Model = env['model']
+  inlen: int   = job.get('dataset/in')
+  overlap: int = job.get('dataset/overlap', 0)
+
+  if isinstance(model, Module): model = model.cpu()
+
+  is_model_arima = 'ARIMA' in job['model/name']
+  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+
+  if 'predict with oracle (one step)':
+    preds: List[Frame] = []
+    loc = inlen
+    while loc < len(seq):
+      if is_model_arima:
+        y: Frame = manager.infer(model, loc)  # [1]
+      else:
+        x = seq[loc-inlen:loc, :]
+        x = frame_left_pad(x, inlen)          # [I, D]
+        y: Frame = manager.infer(model, x)    # [O, 1]
+      preds.append(y)
+      loc += len(y) - overlap
+    preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  if 'predict with prediction (rolling)':
+    preds: List[Frame] = []
+    loc = inlen
+    x = seq[loc-inlen:loc, :]
+    x = frame_left_pad(x, inlen)              # [I, D]
+    while loc < len(seq):
+      if is_model_arima:
+        y: Frame = manager.infer(model, loc)  # [1]
+      else:
+        y: Frame = manager.infer(model, x)    # [O, 1]
+      preds.append(y)
+      x = frame_shift(x, y)
+      loc += len(y) - overlap
+    preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  if 'inv preprocess' and is_task_rgr:
+    for (proc, st) in stats:
+      invproc = getattr(preprocess, f'{proc}_inv')
+      seq     = invproc(seq,   *st)
+      preds_o = invproc(preds_o, *st)
+      preds_r = invproc(preds_r, *st)
+
+  predicted = (preds_o, preds_r)
+  save_pickle(predicted, log_dp / PREDICT_FILE, logger)
 
 
 @timer
@@ -377,7 +435,7 @@ def run_file(args) -> Status:
   log_dp: Path = env['log_dp']
 
   targets = args.target.split(',')
-  if 'all' in targets: targets = ['data', 'train', 'eval'] 
+  if 'all' in targets: targets = ['data', 'train', 'eval', 'test'] 
   for tgt in targets:
     try:
       globals()[f'target_{tgt}'](env)

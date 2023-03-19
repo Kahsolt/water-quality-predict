@@ -28,6 +28,7 @@ STATS_FILE      = 'stats.pkl'         # stats of transform, for inv-transform of
 TRANSFORM_FILE  = 'transform.pkl'     # seq (transformed), for ARIMA train/eval
 DATASET_FILE    = 'dataset.pkl'       # dataset (transformed), for other model train/eval
 SCORES_FILE     = 'scores.txt'        # evaluated scores
+PREDICT_FILE    = 'predict.pkl'       # inplace prediction
 LOG_FILE        = 'job.log'           # job runner logs
 
 SAVE_META_EVERY  = 300

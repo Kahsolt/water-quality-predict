@@ -61,6 +61,7 @@ enum Target {
   data        // 数据 := 数值预处理 + 打分类标签 + 划分数据集
   train       // 训练
   eval        // 评估
+  test        // 测试 (原地预测)
   all         // 全部
 };
 enum Status {

@@ -22,6 +22,7 @@ LOG_PATH
 │   │   ├── transform.pkl   // seq (transformed), for ARIMA train/eval
 │   │   ├── dataset.pkl     // dataset (transformed), for other model train/eval
 │   │   ├── scores.txt      // evaluated scores
+│   │   ├── predict.pkl     // inplace prediction
 │   │   ├── job.log         // job runner logs
 │   │   ├── timeline_*.png  // debug curve trends (preprocess & transform)
 │   │   ├── hist_*.png      // debug value histogram (preprocess & transform)

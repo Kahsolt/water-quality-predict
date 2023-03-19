@@ -23,16 +23,6 @@ WINDOW_SIZE   = (1000, 750)
 HIST_FIG_SIZE = (8, 8)
 
 
-def frame_left_pad(x:Frame, padlen:int) -> Frame:
-  xlen = len(x)
-  if xlen < padlen:
-    x = np.pad(x, ((padlen - xlen, 0), (0, 0)), mode='edge')
-  return x
-
-def frame_shift(x:Frame, y:Frame) -> Frame:
-  return np.concatenate([x[len(y):, :], y], axis=0)
-
-
 def load_env(job_file:Path) -> Env:
   ''' load a pretrained job env '''
 
@@ -185,10 +175,10 @@ class App:
         else:
           x = seq[loc-inlen:loc, :]
           x = frame_left_pad(x, inlen)          # [I, D]
-          y: Frame = manager.infer(model, x)    # [O, D]
+          y: Frame = manager.infer(model, x)    # [O, 1]
         preds.append(y)
         loc += len(y) - overlap
-      preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
+      preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
 
     if 'predict with prediction (rolling)' and args.draw_rolling:
       preds: List[Frame] = []
@@ -199,11 +189,11 @@ class App:
         if self.is_model_arima:
           y: Frame = manager.infer(model, loc)  # [1]
         else:
-          y: Frame = manager.infer(model, x)    # [O, D]
+          y: Frame = manager.infer(model, x)    # [O, 1]
         preds.append(y)
         x = frame_shift(x, y)
         loc += len(y) - overlap
-      preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, D]
+      preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
 
     if 'inv preprocess' and self.is_task_rgr:
       for (proc, st) in stats:
@@ -216,7 +206,7 @@ class App:
 
     if 'select range & channel':
       if self.is_task_rgr: truth = seq  [L:R, 0]
-      else:           truth = label[L:R, 0]
+      else:                truth = label[L:R, 0]
       preds_o = preds_o[:R-L+1, 0]      # [T'=R-L+1]
       if args.draw_rolling:
         preds_r = preds_r[:R-L+1, 0]    # [T'=R-L+1]
