@@ -5,9 +5,13 @@
 import os
 import sys
 import random
+import json
+import yaml
 from time import time
 from pathlib import Path
 from datetime import datetime
+from copy import deepcopy
+import base64
 import pickle as pkl
 import logging
 
@@ -73,7 +77,7 @@ def timer(fn:Callable[..., Any]):
   return wrapper
 
 
-def read_csv(fp:str, logger:Logger=None) -> DataFrame:
+def read_csv(fp:Path, logger:Logger=None) -> DataFrame:
   if logger: logger.info(f'  read csv from {fp}')
   return pd.read_csv(fp, encoding='utf-8')
 
@@ -94,9 +98,49 @@ def save_pickle(data:CachedData, fp:Path, logger:Logger=None):
     pkl.dump(data, fh)
 
 
+def load_yaml(fp:Path, init=None):
+  if init is None: assert fp.exists()
+
+  if fp.exists():
+    with open(fp, 'r', encoding='utf-8') as fh:
+      return yaml.safe_load(fh)
+  else:
+    return deepcopy(init)
+
+def save_yaml(fp:Path, data):
+  with open(fp, 'w', encoding='utf-8') as fh:
+    yaml.safe_dump(data, fh, sort_keys=False)
+
+
+def load_json(fp:Path, init=None):
+  if init is None: assert fp.exists()
+
+  if fp.exists():
+    with open(fp, 'r', encoding='utf-8') as fh:
+      return json.load(fh)
+  else:
+    return deepcopy(init)
+
+def save_json(fp:Path, data):
+  with open(fp, 'w', encoding='utf-8') as fh:
+    json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False)
+
+
+def ndarray_to_bytes(x:np.ndarray) -> Tuple[bytes, Tuple[int, ...]]:
+  shape = tuple(x.shape)
+  bdata = base64.b64encode(x)
+  return bdata, shape
+
+def bytes_to_ndarray(s:str, shape:Tuple[int, ...]) -> np.ndarray:
+  bdata = base64.decodebytes(s)
+  x = np.frombuffer(bdata)
+  x = x.reshape(shape)
+  return x
+
+
 def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
   if   task == TaskType.CLF:
-    prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='macro')
+    prec, recall, f1, supp = precision_recall_fscore_support(truth, pred, average='weighted')
     if logger:
       logger.info(f'prec:   {prec:.3%}')
       logger.info(f'recall: {recall:.3%}')
@@ -115,7 +159,7 @@ def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
 def save_figure(fp:Path, title:str=None, logger:Logger=None):
   if not plt.gcf().axes: return
 
-  plt.tight_layout()
-  plt.suptitle(title)
+  #plt.tight_layout()
+  plt.suptitle(title or fp.stem)
   plt.savefig(fp, dpi=400)
   if logger: logger.info(f'  save figure to {fp}')

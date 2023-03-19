@@ -54,14 +54,15 @@ task_init_pack = {            # => see `POST /task`
 
 ```json
 [                         // => `GET /runtime`
-  {
+  {                       // Run
+    id: int,
     name: str,            // task name
     status: str,          // task status
     info: str,            // cur job
     progress: str,        // f'{n_job_finished} / {n_job_total}'
-    ts_accept: int,       // task accept time
+    ts_create: int,       // task accept time
     ts_update: int,       // last meta info update time
-    task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task created successfully)
+    task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task marked finished)
   },
 ]
 ```

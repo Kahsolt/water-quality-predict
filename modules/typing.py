@@ -19,12 +19,12 @@ class Target(Enum):
 
 # 任务/作业进度状态
 class Status(Enum):
-  CREATED  = 'created'    # 创建任务
   QUEUING  = 'queuing'    # 执行队列中等待
-  RUNNING  = 'running'    # 正在执行中
+  CREATED  = 'created'    # 创建任务日志目录
+  RUNNING  = 'running'    # 作业正在执行中
   FINISHED = 'finished'   # 已完成
-  IGNORED  = 'ignored'    # 忽略
   FAILED   = 'failed'     # 出错
+  IGNORED  = 'ignored'    # 忽略 (作业)
 
 # 作业类型
 class TaskType(Enum):
@@ -68,11 +68,11 @@ EvalMetrics = Tuple[float, ...]
 
 # 作业运行时环境
 Env = {
-  'fullname': str, 
   'job': 'Descriptor',
   'logger': Logger,
   'log_dp': Path,
-  'status': Status,
+  'csv': str, 
+  'status': Status,     # RUNNING / IGNORED
   'df': TimeSeq,
   'T': Time,
   'seq': Seq,
@@ -81,4 +81,25 @@ Env = {
   'stats': Stats,
   'manager': 'module',
   'model': Model,
+}
+
+# 任务启动包
+TaskInit = {
+
+}
+
+# 任务运行时队列对象
+Run = {
+  'name': str,
+  'status': str,
+  'info': str,
+  'progress': str,
+  'ts_create': int,
+  'ts_update': int,
+  'task_init_pack': str,
+}
+
+# 任务日志结果
+TaskLog = {
+
 }

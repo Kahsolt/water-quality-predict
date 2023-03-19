@@ -4,8 +4,7 @@ preprocess:
   filter_T:
     - ticker_timer
     - ltrim_vacant
-  project:
-    - to_hourly
+  project: to_hourly
   filter_V:
     - remove_outlier
     - wavlet_transform

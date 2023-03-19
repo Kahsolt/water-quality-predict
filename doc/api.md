@@ -21,8 +21,9 @@ interface {
 
 // response
 interface {
-  ok: bool            // success
-  error?: str 
+  ok: bool            // success status
+  error?: str         // error message
+  data?: list|dict    // data payload
 }
 ```
 
@@ -174,9 +175,7 @@ interface {
 // response
 // => <job_name>.yaml file or 
 interface {
-  job: {
-    // config items converted from *.yaml
-  }
+  // config items converted from *.yaml
 }
 ```
 

@@ -33,6 +33,38 @@ def frame_shift(x:Frame, y:Frame) -> Frame:
   return np.concatenate([x[len(y):, :], y], axis=0)
 
 
+def load_env(task_name:str, job_name:str) -> Optional[Env]:
+  ''' load a pretrained job env '''
+
+  # job
+  log_dp: Path = Path('log') / task_name / job_name
+  job_file: Path = log_dp / 'job.yaml'
+  job = Descriptor.load(job_file)
+
+  # logger
+  fullname = f'{task_name}-{job_name}'
+  log_dp.mkdir(exist_ok=True, parents=True)
+  logger = get_logger(fullname, log_dp)
+  logger.info('Job Info:')
+  logger.info(pformat(job.cfg))
+
+  seed_everything(fix_seed(job.get('seed', -1)))
+
+  env: Env = {
+    'fullname': fullname,   # '<task_name>-<job_name>'
+    'job': job,             # 'job.yaml'
+    'logger': logger,       # logger
+    'log_dp': log_dp,       # log folder
+  }
+
+  @require_data_and_model
+  def load_data_and_model():
+    env['model'] = env['manager'].load(env['model'], log_dp, logger)
+  load_data_and_model()
+
+  return env
+
+
 class App:
 
   def __init__(self):

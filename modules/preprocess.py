@@ -112,7 +112,7 @@ def remove_outlier(df:Values) -> Values:
       arr = np.asarray([arr[i] if m else np.nan for i, m in enumerate(mask)])
 
       assert len(arr) == arrlen
-      tmp.append((arr, f'3-sigma outlier [{L}, {H}]'))
+      tmp.append((arr, f'3-sigma outlier ({L.item()}, {H.item()})'))
 
     if 'padding by edge for NaNs at two endings':
       X = np.arange(arrlen)

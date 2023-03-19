@@ -30,4 +30,9 @@ if __name__ == '__main__':
   def index():
     return redirect('/doc/api_proxy')
 
-  app.run(host='0.0.0.0', debug=True)
+  runtime = Trainer()
+  try:
+    runtime.start()
+    app.run(host='0.0.0.0', debug=True)
+  finally:
+    runtime.stop()

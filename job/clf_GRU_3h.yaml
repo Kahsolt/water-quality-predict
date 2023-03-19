@@ -4,8 +4,7 @@ preprocess:
   filter_T:
     - ticker_timer
     - ltrim_vacant
-  project:
-    - to_hourly
+  project: to_hourly
   filter_V:
     - remove_outlier
     - wavlet_transform
@@ -16,7 +15,7 @@ dataset:
   split: 0.2
   in: 72
   out: 1            # must be 1 for clf
-  encode:
+  encoder:
     name: ex_thresh_3h
     params:
       thresh: 1.5

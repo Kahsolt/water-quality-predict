@@ -2,17 +2,14 @@
 # Author: Armit
 # Create Time: 2023/03/17
 
-import json
-import yaml
 from pathlib import Path
-from copy import deepcopy
 
-from modules.util import ts_now
+from modules.util import *
 from modules.typing import Status
 
 
 # => see 'doc/log.md'
-def new_task_init_pack():
+def new_task_init_pack() -> TaskInit:
   return {
     'name': None,         # task name
     'data': None,         # *.csv file
@@ -20,18 +17,19 @@ def new_task_init_pack():
     'jobs': None,         # scheduled jobs
   }
 
-def new_runtime_entry():
+def new_runtime_entry() -> Run:
   return {
+    'id': None,
     'name': None,         # task name
-    'status': Status.CREATED,
+    'status': Status.QUEUING,
     'info': None,
     'progress': None,     # f'{n_job_finished} / {n_job_total}'
     'ts_create': ts_now(),
-    'ts_accept': None,
+    'ts_update': None,
     'task_init_pack': None,
   }
 
-def new_task_entry():
+def new_task_entry() -> TaskLog:
   return {
     'status': Status.CREATED,
     'target': None,
@@ -56,19 +54,13 @@ class Descriptor:
     return repr(self.cfg)
 
   @classmethod
-  def load(cls, fp:Path, init_cfg=None):
-    if fp.exists():
-      if fp.suffix == '.yaml':
-        with open(fp, 'r', encoding='utf-8') as fh:
-          cfg = yaml.safe_load(fh)
-      elif fp.suffix == '.json':
-        with open(fp, 'r', encoding='utf-8') as fh:
-          cfg = json.load(fh)
-      else:
-        raise ValueError(f'invalid file suffix {fp.suffix}, should be either .yaml or .json')
+  def load(cls, fp:Path, init=None):
+    if fp.suffix == '.yaml':
+      cfg = load_yaml(fp, init)
+    elif fp.suffix == '.json':
+      cfg = load_json(fp, init)
     else:
-      assert init_cfg is not None, 'invalid init_cfg, should be serializable for json/yaml, but got None'
-      cfg = deepcopy(init_cfg)
+      raise ValueError(f'invalid file suffix {fp.suffix}, should be either .yaml or .json')
     return cls(cfg, fp)
 
   def save(self, fp:Path=None):
@@ -76,11 +68,9 @@ class Descriptor:
     assert fp, 'must specify a file path to save'
 
     if fp.suffix == '.yaml':
-      with open(fp, 'w', encoding='utf-8') as fh:
-        yaml.safe_dump(self.cfg, fh, sort_keys=False)
+      save_yaml(fp, self.cfg)
     elif fp.suffix == '.json':
-      with open(fp, 'w', encoding='utf-8') as fh:
-        json.dump(self.cfg, fh, sort_keys=False, indent=2, ensure_ascii=False)
+      save_json(fp, self.cfg)
     else:
       raise ValueError(f'invalid file suffix {fp.suffix}, should be either .yaml or .json')
 

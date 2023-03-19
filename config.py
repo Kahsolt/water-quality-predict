@@ -3,6 +3,7 @@
 # Create Time: 2023/03/18 
 
 from pathlib import Path
+from argparse import ArgumentParser
 
 
 ''' basic path '''
@@ -13,7 +14,7 @@ LOG_PATH  = BASE_PATH / 'log'
 TMP_PATH  = BASE_PATH / 'tmp'
 
 
-''' log folder layout '''
+''' log folder '''
 RUNTIME_FILE    = 'runtime.json'      # data shared by all tasks
 
 TASK_FILE       = 'task.json'         # task descriptor
@@ -28,3 +29,22 @@ TRANSFORM_FILE  = 'transform.pkl'     # seq (transformed), for ARIMA train/eval
 DATASET_FILE    = 'dataset.pkl'       # dataset (transformed), for other model train/eval
 SCORES_FILE     = 'scores.txt'        # evaluated scores
 LOG_FILE        = 'job.log'           # job runner logs
+
+SAVE_META_EVERY  = 300
+CHECK_TASK_EVERY = 5
+
+
+''' HTTP auth '''
+AUTH_TOKEN = None
+
+
+''' cmdline args '''
+def cmd_args():
+  parser = ArgumentParser()
+  parser.add_argument('-D', '--csv_file',     required=True,     type=Path, help='path to a *.csv data file')
+  parser.add_argument('-J', '--job_file',                        type=Path, help='path to a *.yaml job file')
+  parser.add_argument('-X', '--job_folder',                      type=Path, help='path to a folder of *.yaml job file')
+  parser.add_argument(      '--name',         default='test',               help='task name')
+  parser.add_argument(      '--target',       default='all',                help='job targets, comma seperated string')
+  parser.add_argument(      '--no_overwrite', action='store_true',          help='no overwrite if log folder exists')
+  return parser.parse_args()

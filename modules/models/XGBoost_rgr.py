@@ -9,7 +9,7 @@ import xgboost
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics, get_logger
+from modules.util import get_metrics
 from modules.preprocess import *
 from modules.typing import *
 
@@ -30,7 +30,7 @@ def train(model:GridSearchCV, dataset:Datasets, params:Params, logger:Logger=Non
   X_train = X_train.squeeze(axis=-1)  # [N, I]
   y_train = y_train.squeeze(axis=-1)  # [N, O]
   model.fit(X_train, y_train)
-  get_logger().info('best: %f using %s' % (model.best_score_, model.best_params_))
+  logger.info('best: %f using %s' % (model.best_score_, model.best_params_))
 
 
 def eval(model:GridSearchCV, dataset:Datasets, params:Params, logger:Logger=None) -> EvalMetrics:

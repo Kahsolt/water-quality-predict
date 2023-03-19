@@ -6,7 +6,7 @@ from pathlib import Path
 
 from pmdarima import AutoARIMA
 
-from modules.util import get_metrics, get_logger
+from modules.util import get_metrics
 from modules.preprocess import *
 from modules.typing import *
 from modules.models.XGBoost_rgr import save, load
@@ -21,7 +21,7 @@ def init(params:Params, logger:Logger=None) -> AutoARIMA:
 def train(model:AutoARIMA, seq:Seq, params:Params, logger:Logger=None):
   seq = seq.squeeze()
   model.fit(seq)
-  get_logger().info(model.summary())
+  logger.info(model.summary())
 
 
 def eval(model:AutoARIMA, seq:Seq, params:Params, logger:Logger=None) -> EvalMetrics:
