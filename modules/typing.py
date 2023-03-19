@@ -15,7 +15,7 @@ class Target(Enum):
   DATA  = 'data'          # 制作数据 := 数值预处理 + 打分类标签 + 划分数据集
   TRAIN = 'train'         # 训练
   EVAL  = 'eval'          # 评估
-  TEST  = 'test'          # 测试 (原地预测)
+  INFER = 'infer'         # 测试 (原地预测)
   ALL   = 'all'           # 全部 := 制作数据 + 训练 + 评估 + 测试 (糖！)
 
 # 任务/作业进度状态
@@ -104,6 +104,11 @@ RunMeta = {
 }
 
 # 任务日志结果
+JobResult = Union[
+  Literal[Status.FINISHED],
+  Literal[Status.FAILED],
+  Literal[Status.IGNORED],
+]
 JobMeta = {
   'type': str,
   'status': str,
@@ -112,7 +117,7 @@ JobMeta = {
 TaskMeta = {
   'status': str,
   'target': List[str],
-  'jobs': Dict[str, JobMeta],
+  'jobs': Dict[str, 'JobMeta'],
   'ts_create': int,
   'ts_update': int,
 }

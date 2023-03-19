@@ -337,7 +337,7 @@ def target_eval(env:Env):
 
 @require_data_and_model
 @process
-def target_test(env:Env):
+def target_infer(env:Env):
   job: Descriptor = env['job']
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
@@ -395,7 +395,7 @@ def target_test(env:Env):
 
 
 @timer
-def run_file(args) -> Union[Status.FINISHED, Status.FAILED, Status.IGNORED]:
+def run_file(args) -> JobResult:
   # names
   task_name: str = args.name
   job_name: str = args.job_file.stem
@@ -433,8 +433,8 @@ def run_file(args) -> Union[Status.FINISHED, Status.FAILED, Status.IGNORED]:
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  targets = args.target.split(',')
-  if 'all' in targets: targets = ['data', 'train', 'eval', 'test'] 
+  targets: List[Target] = args.target.split(',')
+  if 'all' in targets: targets = ['data', 'train', 'eval', 'infer'] 
   for tgt in targets:
     try:
       globals()[f'target_{tgt}'](env)
