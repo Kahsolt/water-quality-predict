@@ -113,7 +113,7 @@ def task():
       'jobs': jobs,
     }
     TMP_PATH.mkdir(exist_ok=True, parents=True)
-    init_fp = TMP_PATH / f'{name}.pkl'
+    init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
     save_pickle(task_init, init_fp)
     trainer.add_task(name, init_fp)
 
@@ -126,14 +126,29 @@ def task():
 @app.route('/task/<name>', methods=['POST', 'GET', 'DELETE'])
 def task_(name:str):
   task_folder = LOG_PATH / name
-  if not task_folder.is_dir(): return resp_error('task folder not exists')
+  if not task_folder.exists(): return resp_error('task folder not exists')
 
-  if request.method == 'GET':
+  if request.method == 'POST':
+    if len(request.files) > 1: return resp_error(f'only need 0 or 1 file, but got {len(request.files)}')
+
     req: Dict = request.json
+    data = request.files[0].stream.read() if len(request.files) else None
+    target = req.get('target', None)
+    jobs = req.get('jobs', None)
+    task_init: TaskInit = {
+      'name': name,
+      'data': data,
+      'target': target,
+      'jobs': jobs,
+    }
+    TMP_PATH.mkdir(exist_ok=True, parents=True)
+    init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
+    save_pickle(task_init, init_fp)
+    trainer.add_task(name, init_fp)
 
-    pass
+    return resp_ok()
 
-  elif request.method == 'POST':
+  elif request.method == 'GET':
     return resp_ok(load_json(task_folder / TASK_FILE))
 
   elif request.method == 'DELETE':
@@ -144,13 +159,56 @@ def task_(name:str):
 @app.route('/infer/<task>/<job>', methods=['POST'])
 def infer_(task:str, job:str):
   job_folder = LOG_PATH / task / job
-  if not job_folder.is_dir(): return resp_error('job folder not exists')
+  if not job_folder.exists(): return resp_error('job folder not exists')
 
   req = request.json
   x: Frame = bytes_to_ndarray(req['data'], req['shape'])
   y = predictor.predict(task, job, x)
 
   return resp_error({'pred': ndarray_to_bytes(y), 'shape': tuple(y.shape)})
+
+
+@app.route('/log/<task>', methods=['GET'])
+def log_(task:str):
+  task_folder = LOG_PATH / task
+  if not task_folder.exists(): return resp_error('task folder not exists')
+
+  zip_fp = TMP_PATH / f'{task}.zip'
+  make_zip(task_folder,  zip_fp)
+  return send_file(zip_fp, mimetype='application/zip')
+
+
+@app.route('/log/<task>/<job>', methods=['GET'])
+def log__(task:str, job:str):
+  job_folder = LOG_PATH / task / job
+  if not job_folder.exists(): return resp_error('job folder not exists')
+
+  zip_fp = TMP_PATH / f'{task}@{job}.zip'
+  make_zip(job_folder, zip_fp)
+  return send_file(zip_fp, mimetype='application/zip')
+
+
+@app.route('/log/<task>/<job>.log', methods=['GET'])
+def log__log(task:str, job:str):
+  job_folder = LOG_PATH / task / job
+  if not job_folder.exists(): return resp_error('job folder not exists')
+
+  return send_file(job_folder / LOG_FILE, mimetype='plain/text')
+
+
+@app.route('/merge_csv', methods=['POST'])
+def merge_csv():
+  pass
+
+
+@app.route('/runtime', methods=['GET'])
+def runtime():
+  filters = 'queuing,running'
+  try: filters = request.args.get('status', filters)
+  except: pass
+  filters = filters.split(',')
+
+  return resp_ok([run for run in trainer.run_meta if run['status'] in filters])
 
 
 if __name__ == '__main__':
@@ -162,8 +220,6 @@ if __name__ == '__main__':
   predictor = Predictor()
   try:
     trainer.start()
-    predictor.start()
     app.run(host='0.0.0.0', debug=True)
   finally:
-    predictor.stop()
     trainer.stop()

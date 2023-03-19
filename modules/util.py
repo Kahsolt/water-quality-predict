@@ -7,6 +7,8 @@ import sys
 import random
 import json
 import yaml
+import string
+import subprocess
 from time import time
 from pathlib import Path
 from datetime import datetime
@@ -76,6 +78,9 @@ def timer(fn:Callable[..., Any]):
     return r
   return wrapper
 
+def rand_str(length=4) -> str:
+  return ''.join(random.sample(string.ascii_uppercase, length))
+
 
 def read_csv(fp:Path, logger:Logger=None) -> DataFrame:
   if logger: logger.info(f'  read csv from {fp}')
@@ -84,7 +89,6 @@ def read_csv(fp:Path, logger:Logger=None) -> DataFrame:
 def save_csv(df:DataFrame, fp:str, logger:Logger=None):
   if logger: logger.info(f'  save csv to {fp}')
   df.to_csv(fp, encoding='utf-8')
-
 
 def load_pickle(fp:Path, logger:Logger=None) -> CachedData:
   if not fp.exists(): return
@@ -96,7 +100,6 @@ def save_pickle(data:CachedData, fp:Path, logger:Logger=None):
   if logger: logger.info(f'  save pickle to {fp}')
   with open(fp, 'wb') as fh:
     pkl.dump(data, fh)
-
 
 def load_yaml(fp:Path, init=None):
   if init is None: assert fp.exists()
@@ -110,7 +113,6 @@ def load_yaml(fp:Path, init=None):
 def save_yaml(fp:Path, data):
   with open(fp, 'w', encoding='utf-8') as fh:
     yaml.safe_dump(data, fh, sort_keys=False)
-
 
 def load_json(fp:Path, init=None):
   if init is None: assert fp.exists()
@@ -163,3 +165,11 @@ def save_figure(fp:Path, title:str=None, logger:Logger=None):
   plt.suptitle(title or fp.stem)
   plt.savefig(fp, dpi=400)
   if logger: logger.info(f'  save figure to {fp}')
+
+
+def make_zip(src:Path, fp: Path):
+  fp.parent.mkdir(exist_ok=True, parents=True)
+  cmd = f'7z a -tzip "{fp.absolute()}" "{src.absolute()}"'
+  #print(f'>> run: {cmd}')
+  p = subprocess.Popen(cmd, shell=True, encoding='utf-8')
+  p.wait()

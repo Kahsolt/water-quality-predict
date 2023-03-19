@@ -23,7 +23,7 @@ class Trainer:
     self.evt = Event()
     self.worker = Thread(target=worker, args=(self.evt,self.queue))
 
-    self.run_meta: List[Dict] = load_json(LOG_PATH / TASK_FILE, [])
+    self.run_meta: List[Run] = load_json(LOG_PATH / TASK_FILE, [])
     self._resume()
 
   def _resume(self):
@@ -58,7 +58,8 @@ def worker(evt:Event, queue:Queue):
   while not evt.is_set():
     payload = None
     while payload is None:
-      payload: Tuple[Run, Trainer] = queue.get(timeout=CHECK_TASK_EVERY)
+      try: payload: Tuple[Run, Trainer] = queue.get(timeout=CHECK_TASK_EVERY)
+      except Empty: pass
       if evt.is_set(): return
 
     run, runtime = payload
@@ -133,9 +134,3 @@ class Predictor:
     env = self.envs[fullname]
     y: Frame = env['manager'].infer(env['model'], x, env['logger'])
     return y
-
-  def start(self):
-    raise NotImplemented
-
-  def stop(self):
-    raise NotImplemented
