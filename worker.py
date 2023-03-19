@@ -4,7 +4,6 @@
 
 from pathlib import Path
 from queue import Queue, Empty
-from pprint import pformat
 from threading import Thread, Event
 
 from modules.descriptor import *
@@ -13,6 +12,7 @@ from modules.util import *
 from modules.typing import *
 
 from config import *
+from run import *
 
 
 class Trainer:
@@ -23,21 +23,21 @@ class Trainer:
     self.evt = Event()
     self.worker = Thread(target=worker, args=(self.evt,self.queue))
 
-    self.run_meta: List[Run] = load_json(LOG_PATH / TASK_FILE, [])
+    self.run_meta: List[RunMeta] = load_json(LOG_PATH / TASK_FILE, [])
     self._resume()
 
   def _resume(self):
     for run in self.run_meta:
       if Status(run['status']) in [Status.QUEUING, Status.CREATED, Status.RUNNING]:
-        run['status'] = Status.QUEUING.value
+        run['status'] = Status.QUEUING.value    # reset to queuing
         run['ts_update'] = ts_now()
         self.queue.put((run, self))
 
-  def save_meta(self):
+  def save_run_meta(self):
     save_json(LOG_PATH / TASK_FILE, self.run_meta)
 
   def add_task(self, name:str, init_fp:Path):
-    run = new_runtime_entry()   # Status.QUEUING
+    run = new_run_meta()   # Status.QUEUING
     run['id'] = len(self.run_meta) + 1
     run['name'] = name
     run['task_init_pack'] = init_fp
@@ -45,76 +45,121 @@ class Trainer:
     self.queue.put((run, self))
 
   def start(self):
-    self.save_meta()
+    self.save_run_meta()
     self.worker.start()
 
   def stop(self):
     self.evt.set()
     self.worker.join()
-    self.save_meta()
+    self.save_run_meta()
 
 
 def worker(evt:Event, queue:Queue):
   while not evt.is_set():
     payload = None
     while payload is None:
-      try: payload: Tuple[Run, Trainer] = queue.get(timeout=CHECK_TASK_EVERY)
+      try: payload: Tuple[RunMeta, Trainer] = queue.get(timeout=CHECK_TASK_EVERY)
       except Empty: pass
       if evt.is_set(): return
 
     run, runtime = payload
 
+    run['info'] = "Setup task log folder"
+    log_dp: Path = LOG_FILE / run['name']
+    log_dp.mkdir(exist_ok=True, parents=True)
+
+    run['info'] = "Load/create task meta file"
+    task_meta: List[RunMeta] = load_json(log_dp / TASK_FILE, [])
+    meta = new_task_meta()
+    task_meta.append(meta)
+    save_task_meta = lambda: save_json(log_dp, TASK_FILE, task_meta)
+    save_task_meta()    # init save
+
     if run['status'] == Status.QUEUING.value:
       try: 
-        task_create(run, runtime)
-        run['status'] = Status.CREATED.value
+        run['info'] = "Unpack task init info"
+        init_fp = Path(run['task_init_pack'])
+        init: TaskInit = load_pickle(init_fp)
+
+        run['info'] = "Check init info"
+        task_name = init['name'] ; assert task_name == run['name']
+        meta['target'] = init['target']
+        args.target = ','.join(meta['target'])
+        jobs = init['jobs']
+
+        if 'data' in init and init['data'] is not None:
+          run['info'] = "Write csv file"
+          with open(log_dp / DATA_FILE, 'wb') as fh:
+            fh.write(init['data'])
+
+        meta['status'] = run['status'] = Status.CREATED.value
       except:
-        run['status'] = Status.FAILED.value
+        run['info'] = format_exc()
+        meta['status'] = run['status'] = Status.FAILED.value
+      meta['ts_update'] = run['ts_update'] = ts_now()
 
     if run['status'] == Status.CREATED.value:
-      run['status'] = Status.RUNNING.value
+      run['info'] = "Start run jobs"
+      meta['status'] = run['status'] = Status.RUNNING.value
+      meta['ts_update'] = run['ts_update'] = ts_now()
+
+    save_task_meta()
 
     if run['status'] == Status.RUNNING.value:
       try:
-        task_run(run, runtime)
-        run['status'] = Status.FINISHED.value
+        ok, tot = 0, len(jobs)
+        for i, job_name in enumerate(jobs):
+          run['info'] = f"Running job {job_name!r}"
+          run['progress'] = f"{i} / {tot}"
+          meta['ts_update'] = run['ts_update'] = ts_now()
+
+          job_file = JOB_PATH / f'{job_name}.yaml'
+          args.job_file = job_file
+          res: Status = run_file(args)
+          if res != Status.FAILED: ok += 1
+
+          if 'update task meta':
+            ttype = job_name.split('_')[0]
+            meta['job'][job_name] = {   # => 'doc/log.md'
+              'type': ttype,
+              'status': res.value,
+            }
+
+            sc_fp = log_dp / SCORES_FILE
+            if sc_fp.exists():
+              with open(sc_fp, 'r', encoding='utf-8') as fh:
+                lines = fh.read()
+
+              scores = { }
+              for line in lines:
+                name, score = line.split(':')
+                scores[name.strip()] = float(score)
+              meta['job'][job_name]['scores'] = scores
+
+            save_task_meta()
+
+        run['info'] = f"Done all jobs! (total: {tot}, failed: {tot - ok})"
+        meta['status'] = run['status'] = Status.FINISHED.value
       except:
-        run['status'] = Status.FAILED.value
+        run['info'] = format_exc()
+        meta['status'] = run['status'] = Status.FAILED.value
+      meta['ts_update'] = run['ts_update'] = ts_now()
 
     if run['status'] == Status.FINISHED.value:
-      task_cleanup(run, runtime)
+      try:
+        run['info'] = "Clean up tmp files"
+        os.unlink(run['task_init_pack'])
+        del run['task_init_pack']
 
-    runtime.save_meta()
+        run['info'] = "Done!"
+      except:
+        run['info'] = format_exc()
+      meta['ts_update'] = run['ts_update'] = ts_now()
+
+    save_task_meta()
+    runtime.save_run_meta()
+
     queue.task_done()
-
-
-def task_create(run:Run, runtime:Trainer):
-  # unpack task_init_pack
-  run['info'] = 'setup task log folder'
-  runtime.save_meta()
-
-  init_fp = Path(run['task_init_pack'])
-  init: TaskInit = load_pickle(init_fp)
-
-  name = init['name'] ; assert name == run['name']
-  target = init['target'] or ['all']
-  jobs = init['jobs'] or [job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml']
-
-  log_dp: Path = LOG_FILE / name
-  log_dp.mkdir(exist_ok=True, parents=True)
-  with open(log_dp, 'wb') as fh:
-    fh.write(log_dp / DATA_FILE)
-
-
-def task_run(run:Run, runtime:Trainer):
-  pass
-
-
-def task_cleanup(run:Run, runtime:Trainer):
-  os.unlink(run['task_init_pack'])
-  del run['task_init_pack']
-
-  run['info'] = 'all done'
 
 
 class Predictor:

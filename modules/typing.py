@@ -88,22 +88,31 @@ Env = {
 TaskInit = {
   'name': str,
   'data': bytes,
-  'target': str,
-  'jobs': str,
+  'target': List[str],
+  'jobs': List[str],
 }
 
 # 任务运行时队列对象
-Run = {
+RunMeta = {
   'name': str,
-  'status': str,
-  'info': str,
-  'progress': str,
+  'status': str,              # updatable
+  'info': str,                # updatable
+  'progress': str,            # updatable
   'ts_create': int,
-  'ts_update': int,
+  'ts_update': int,           # updatable
   'task_init_pack': str,
 }
 
 # 任务日志结果
-TaskLog = {
-
+JobMeta = {
+  'type': str,
+  'status': str,
+  'scores': Dict[str, float],
+}
+TaskMeta = {
+  'status': str,
+  'target': List[str],
+  'jobs': Dict[str, JobMeta],
+  'ts_create': int,
+  'ts_update': int,
 }

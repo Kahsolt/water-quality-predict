@@ -9,7 +9,7 @@ from modules.typing import Status
 
 
 # => see 'doc/log.md'
-def new_task_init_pack() -> TaskInit:
+def new_task_init() -> TaskInit:
   return {
     'name': None,         # task name
     'data': None,         # *.csv file
@@ -17,7 +17,7 @@ def new_task_init_pack() -> TaskInit:
     'jobs': None,         # scheduled jobs
   }
 
-def new_runtime_entry() -> Run:
+def new_run_meta() -> RunMeta:
   return {
     'id': None,
     'name': None,         # task name
@@ -29,9 +29,9 @@ def new_runtime_entry() -> Run:
     'task_init_pack': None,
   }
 
-def new_task_entry() -> TaskLog:
+def new_task_meta() -> TaskMeta:
   return {
-    'status': Status.CREATED,
+    'status': Status.QUEUING,
     'target': None,
     'jobs': { },
     'ts_create': ts_now(),
@@ -96,7 +96,7 @@ class Descriptor:
 
 
 if __name__ == '__main__':
-  cfg = Descriptor(new_runtime_entry())
+  cfg = Descriptor(new_run_meta())
   print(cfg)
 
   print(cfg['status'])

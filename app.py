@@ -32,6 +32,20 @@ def resp_error(errmsg:str) -> Response:
   })
 
 
+def fix_target(target) -> List[str]:
+  if not target: return ['all']
+  if isinstance(target, str): target = [target]
+  valid_tgt = [e.value for e in Target]
+  for tgt in target: assert tgt in valid_tgt
+  return target
+
+def fix_jobs(jobs) -> List[str]:
+  valid_job = [job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml']
+  if not jobs: return valid_job
+  for job in jobs: assert job in valid_job
+  return jobs
+
+
 @app.route('/doc/<page>')
 def doc_(page:str):
   return render_template(f'{page}.html')
@@ -104,8 +118,8 @@ def task():
 
     req: Dict = request.json
     name = req.get('name', timestr())
-    target = req.get('target', None)
-    jobs = req.get('jobs', None)
+    target = fix_target(req.get('target'))
+    jobs = fix_jobs(req.get('jobs'))
     task_init: TaskInit = {
       'name': name,
       'data': request.files[0].stream.read(),
@@ -133,8 +147,8 @@ def task_(name:str):
 
     req: Dict = request.json
     data = request.files[0].stream.read() if len(request.files) else None
-    target = req.get('target', None)
-    jobs = req.get('jobs', None)
+    target = fix_target(req.get('target'))
+    jobs = fix_jobs(req.get('jobs'))
     task_init: TaskInit = {
       'name': name,
       'data': data,

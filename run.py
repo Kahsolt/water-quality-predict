@@ -76,7 +76,6 @@ def require_data_and_model(fn:Callable[..., Any]):
 @process
 def process_csv(env:Env):
   logger: Logger = env['logger']
-  log_dp: Path = env['log_dp']
 
   df: TimeSeq = read_csv(env['csv'], logger)   # 总原始数据
 
@@ -396,7 +395,7 @@ def target_test(env:Env):
 
 
 @timer
-def run_file(args) -> Status:
+def run_file(args) -> Union[Status.FINISHED, Status.FAILED, Status.IGNORED]:
   # names
   task_name: str = args.name
   job_name: str = args.job_file.stem

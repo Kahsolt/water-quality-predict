@@ -40,18 +40,18 @@ TMP_PATH
 
 => see `modules/descriptor.py`
 
-⚪ /tmp/\<task_init_pack\>.pkl 任务请求临时转储
+⚪ task_init `/tmp/\<task_init_pack\>.pkl` 任务请求临时转储
 
 ```python
-task_init_pack = {            # => see `POST /task`
-  'name': str,                # task name
-  'data': bytes,              # files[0].stream().read()
-  'target': [str]|str|None,   # target
-  'jobs': [str]|None,         # scheduled jobs
+task_init_pack = {          # => see `POST /task`
+  'name': str,              # task name
+  'data': bytes,            # files[0].stream().read()
+  'target': List[str]|str,  # target
+  'jobs': List[str],        # scheduled jobs
 }
 ```
 
-⚪ /log/runtime.json
+⚪ run_meta `/log/runtime.json`
 
 ```json
 [                         // => `GET /runtime`
@@ -68,7 +68,7 @@ task_init_pack = {            # => see `POST /task`
 ]
 ```
 
-⚪ /log/\<task_name\>/task.json
+⚪ task_meta `/log/\<task_name\>/task.json`
 
 ```json
 [
