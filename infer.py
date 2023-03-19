@@ -16,7 +16,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from modules import preprocess
 from modules.util import *
 from modules.typing import *
-import run as RT
+from run import *
 
 WINDOW_TITLE  = 'Sequential Inference Demo'
 WINDOW_SIZE   = (1000, 750)
@@ -33,34 +33,31 @@ def frame_shift(x:Frame, y:Frame) -> Frame:
   return np.concatenate([x[len(y):, :], y], axis=0)
 
 
-def load_env(task_name:str, job_name:str) -> Optional[Env]:
+def load_env(job_file:Path) -> Env:
   ''' load a pretrained job env '''
 
   # job
-  log_dp: Path = Path('log') / task_name / job_name
-  job_file: Path = log_dp / 'job.yaml'
+  assert job_file.exists()
+  log_dp: Path = job_file.parent
   job = Descriptor.load(job_file)
 
   # logger
-  fullname = f'{task_name}-{job_name}'
-  log_dp.mkdir(exist_ok=True, parents=True)
-  logger = get_logger(fullname, log_dp)
+  logger = logging
   logger.info('Job Info:')
   logger.info(pformat(job.cfg))
 
   seed_everything(fix_seed(job.get('seed', -1)))
 
   env: Env = {
-    'fullname': fullname,   # '<task_name>-<job_name>'
     'job': job,             # 'job.yaml'
     'logger': logger,       # logger
     'log_dp': log_dp,       # log folder
   }
 
   @require_data_and_model
-  def load_data_and_model():
+  def load_data_and_model(env:Env):
     env['model'] = env['manager'].load(env['model'], log_dp, logger)
-  load_data_and_model()
+  load_data_and_model(env)
 
   return env
 
@@ -69,6 +66,8 @@ class App:
 
   def __init__(self):
     self.setup_gui()
+
+    self.env: Env = None
 
     try:
       self.wnd.mainloop()
@@ -137,29 +136,18 @@ class App:
     self.var_job_file.set(fp)
 
     # init job
-    RT.job = load_job(fp)
-    name: str = RT.job_get('misc/name')
-    assert name
-    log_dp: Path = args.log_path / name
-    assert log_dp.exists()
-    RT.env.clear()
-    RT.env['log_dp'] = log_dp
-    seed_everything(RT.job_get('misc/seed'))
+    self.env = load_env(fp)
+    env: Env = self.env
+    job: Descriptor = env['job']
 
-    # load job states
-    @RT.require_data_and_model
-    def load_data_and_model():
-      RT.env['model'] = RT.env['manager'].load(RT.env['model'], RT.env['log_dp'])
-    load_data_and_model()
-
-    self.is_model_arima = 'ARIMA' in name
-    self.is_task_rgr = RT.env['manager'].TASK_TYPE == TaskType.RGR
+    self.is_model_arima = 'ARIMA' in job['model/name']
+    self.is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
     print(f'  is_task_rgr: {self.is_task_rgr}')
 
-    seq: Seq = RT.env['seq']
+    seq: Seq = env['seq']
     print(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
-    inlen: int = RT.job_get('dataset/in', 72)
+    inlen: int = job.get('dataset/in', 72)
     res = max(seqlen // 100, inlen)
     tick = round(seqlen // 10 / 100) * 100
 
@@ -171,19 +159,22 @@ class App:
     self.plot()
 
   def plot(self):
-    if RT.job is None: return
+    if self.env is None: return
+
+    env: Env = self.env
+    job: Descriptor = env['job']
 
     L = self.var_L.get()
     R = self.var_R.get()
     if L >= R: return
 
-    seq: Seq     = RT.env['seq']
-    label: Seq   = RT.env['label']
-    stats: Stats = RT.env['stats']
-    manager      = RT.env['manager']
-    model: Model = RT.env['model']
-    inlen: int   = RT.job_get('dataset/in')
-    overlap: int = RT.job_get('dataset/overlap', 0)
+    seq: Seq     = env['seq']
+    label: Seq   = env['label']
+    stats: Stats = env['stats']
+    manager      = env['manager']
+    model: Model = env['model']
+    inlen: int   = job.get('dataset/in')
+    overlap: int = job.get('dataset/overlap', 0)
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
@@ -252,7 +243,6 @@ class App:
 
 if __name__ == '__main__':
   parser = ArgumentParser()
-  parser.add_argument('--log_path', default=Path('log'), type=Path, help='path to log root folder')
   parser.add_argument('--draw_rolling', action='store_true', help='whether draw rolling prediction')
   args = parser.parse_args()
 

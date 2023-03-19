@@ -127,7 +127,7 @@ class Predictor:
     print(f'>> job: {job}')
     print(f'>> x.shape: {x.shape}')
     
-    fullname = f'{task}-{job}'
+    fullname = get_fullname(task, job)
     if fullname not in self.envs:
       self.envs[fullname] = self.load_env(task, job)
 

@@ -81,6 +81,9 @@ def timer(fn:Callable[..., Any]):
 def rand_str(length=4) -> str:
   return ''.join(random.sample(string.ascii_uppercase, length))
 
+def get_fullname(task:str, job:str) -> str:
+  return f'{task}@{job}'
+
 
 def read_csv(fp:Path, logger:Logger=None) -> DataFrame:
   if logger: logger.info(f'  read csv from {fp}')

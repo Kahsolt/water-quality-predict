@@ -342,7 +342,7 @@ def run_file(args) -> Status:
   # names
   task_name: str = args.name
   job_name: str = args.job_file.stem
-  fullname = f'{task_name}@{job_name}'
+  fullname = get_fullname(task_name, job_name)
 
   # log_dp
   log_dp = LOG_PATH / task_name / job_name
