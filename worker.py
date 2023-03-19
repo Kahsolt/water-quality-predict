@@ -2,22 +2,11 @@
 # Author: Armit
 # Create Time: 2023/02/19 
 
-from time import time, sleep
-from copy import deepcopy
 from pathlib import Path
-from argparse import ArgumentParser
-from collections import Counter
 from queue import Queue, Empty
 from pprint import pformat
 from threading import Thread, Event
-from typing import Callable, Any
-from traceback import format_exc
-from importlib import import_module
 
-import pandas as pd
-import matplotlib.pyplot as plt
-
-from modules import preprocess, transform
 from modules.descriptor import *
 from modules.dataset import *
 from modules.util import *
@@ -129,4 +118,24 @@ def task_cleanup(run:Run, runtime:Trainer):
 
 class Predictor:
 
-  pass
+  def __init__(self) -> None:
+    self.envs: Dict[str, Env] = { }
+
+  def predict(self, task:str, job:str, x:Frame) -> Frame:
+    print(f'>> task: {task}')
+    print(f'>> job: {job}')
+    print(f'>> x.shape: {x.shape}')
+    
+    fullname = f'{task}-{job}'
+    if fullname not in self.envs:
+      self.envs[fullname] = self.load_env(task, job)
+
+    env = self.envs[fullname]
+    y: Frame = env['manager'].infer(env['model'], x, env['logger'])
+    return y
+
+  def start(self):
+    raise NotImplemented
+
+  def stop(self):
+    raise NotImplemented

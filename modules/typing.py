@@ -85,7 +85,10 @@ Env = {
 
 # 任务启动包
 TaskInit = {
-
+  'name': str,
+  'data': bytes,
+  'target': str,
+  'jobs': str,
 }
 
 # 任务运行时队列对象

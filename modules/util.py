@@ -63,7 +63,7 @@ def seed_everything(seed:int):
     pass
 
 def timestr() -> str:
-  return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-').split('.')[0]
+  return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-')    # '2023-03-19T18-43-34.485700'
 
 def ts_now() -> int:
   return int(time())

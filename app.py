@@ -3,13 +3,9 @@
 # Create Time: 2023/02/28 
 
 import os
-import yaml
-from pathlib import Path
 import shutil
-from threading import Thread
 
-import numpy as np
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask import redirect, jsonify, render_template, send_file
 
 from modules.typing import *
@@ -17,27 +13,23 @@ from modules.util import *
 
 from config import *
 from run import *
-from runtime import Trainer
+from worker import *
 
 
 app = Flask(__name__, template_folder=HTML_PATH)
 
 
-def resp_ok(data:Union[dict, list]=None) -> dict:
+def resp_ok(data:Union[dict, list]=None) -> Response:
   r = {'ok': True}
   if data is not None:
     r['data'] = data
   return jsonify(r)
 
-def resp_error(errmsg:str) -> dict:
+def resp_error(errmsg:str) -> Response:
   return jsonify({
     'ok': False,
     'error': errmsg,
   })
-
-
-def make_task_init_pack() -> Path:
-  pass
 
 
 @app.route('/doc/<page>')
@@ -110,14 +102,22 @@ def task():
   if request.method == 'POST':
     if len(request.files) != 1: return resp_error(f'only need 1 file, but got {len(request.files)}')
 
-    file = request.files[0]
-    data = file.stream.read()
-    fn = Path(file.filename).stem
-    print('fn:', fn)
-
     req: Dict = request.json
-    name = req.get('name', fn)
-    jobs = req.get('jobs')
+    name = req.get('name', timestr())
+    target = req.get('target', None)
+    jobs = req.get('jobs', None)
+    task_init: TaskInit = {
+      'name': name,
+      'data': request.files[0].stream.read(),
+      'target': target,
+      'jobs': jobs,
+    }
+    TMP_PATH.mkdir(exist_ok=True, parents=True)
+    init_fp = TMP_PATH / f'{name}.pkl'
+    save_pickle(task_init, init_fp)
+    trainer.add_task(name, init_fp)
+
+    return resp_ok({'name': name})
 
   elif request.method == 'GET':
     return resp_ok([task.name for task in LOG_PATH.iterdir() if task.is_dir()])
@@ -148,17 +148,7 @@ def infer_(task:str, job:str):
 
   req = request.json
   x: Frame = bytes_to_ndarray(req['data'], req['shape'])
-
-  print(f'>> task: {task}')
-  print(f'>> job: {job}')
-  print(f'>> x.shape: {x.shape}')
-
-  fullname = f'{task}-{job}'
-  if fullname not in envs:
-    envs[fullname] = load_env(task, job)
-
-  env = envs[fullname]
-  y: Frame = env['manager'].infer(env['model'], x, env['logger'])
+  y = predictor.predict(task, job, x)
 
   return resp_error({'pred': ndarray_to_bytes(y), 'shape': tuple(y.shape)})
 
@@ -168,9 +158,12 @@ if __name__ == '__main__':
   def index():
     return redirect('/doc/api')
 
-  runtime = Trainer()
+  trainer = Trainer()
+  predictor = Predictor()
   try:
-    runtime.start()
+    trainer.start()
+    predictor.start()
     app.run(host='0.0.0.0', debug=True)
   finally:
-    runtime.stop()
+    predictor.stop()
+    trainer.stop()

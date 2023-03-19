@@ -391,10 +391,14 @@ def run_file(args) -> Status:
 
 @timer
 def run_folder(args):
+  ok, tot = 0, 0
   for job_file in args.job_folder.iterdir():
     print(f'>> [run] {job_file}')
     args.job_file = job_file
-    run_file(args)
+    res = run_file(args)
+    ok += res == Status.FINISHED
+    tot += 1
+  print(f'>> Done (total: {tot}, failed: {tot - ok})')
 
 
 if __name__ == '__main__':
