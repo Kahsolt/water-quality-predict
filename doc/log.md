@@ -32,8 +32,8 @@ LOG_PATH
 └── ...
 
 TMP_PATH
-├── tip-*.pkl               // task init pack
-└── ...
+├── *.pkl                   // task init pack
+└── *.zip                   // download log folders
 ```
 
 ### 系统元数据
@@ -46,7 +46,7 @@ TMP_PATH
 task_init_pack = {          # => see `POST /task`
   'name': str,              # task name
   'data': bytes,            # files[0].stream().read()
-  'target': List[str]|str,  # target
+  'target': List[str],      # target
   'jobs': List[str],        # scheduled jobs
 }
 ```
@@ -79,6 +79,7 @@ task_init_pack = {          # => see `POST /task`
       "job_name": {
         type: str,
         status: str,
+        inlen: int,
         scores: {
           pres: float,
           recall: float,

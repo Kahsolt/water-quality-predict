@@ -8,7 +8,7 @@
 Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).  
 ℹ All routes are RESTful-like designed.  
 ℹ For sending json with files in a single request, refer to [python-requests-post-json-and-file-in-single-request](https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request)  
-ℹ For serializing NumPy arrays, refer to [numpy-array-to-base64-and-back-to-numpy-array-python](https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python)  
+ℹ <del> For serializing NumPy arrays, refer to [numpy-array-to-base64-and-back-to-numpy-array-python](https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python) </del>  
 
 The common JSON fields for all payloads:
 
@@ -207,15 +207,13 @@ interface {
 ```typescript
 // request
 interface {
-  inplace: true       // inplace prediction on original timeseq data
+  inplace: bool             // inplace prediction on original timeseq data
 }
 
 // response
 interface {
-  seq: bytes,         // base64 encoding of seq.flatten(): np.array
-  seq_shape: int[],   // shape of seq: np.ndarray
-  pred: bytes,        // base64 encoding of pred.flatten(): np.array
-  pred_shape: int[],  // shape of pred: np.ndarray
+  seq: List[List[float]],   // preprocessed timeseq, [T, 1]
+  pred: List[List[float]],  // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
 }
 ```
 
@@ -224,14 +222,12 @@ interface {
 ```typescript
 // request
 interface {
-  data: bytes         // base64 encoding of input.flatten(): np.array
-  shape: int[]        // shape of input: np.ndarray
+  data: List[List[float]]   // input frame, [T, D], length T is arbitary
 }
 
 // response
 interface {
-  pred: bytes         // base64 encoding of pred.flatten(): np.array
-  shape: int[]        // shape of pred: np.ndarray
+  pred: List[List[float]]   // output frame, [T', 1], T' is typically smaller than T
 }
 ```
 
@@ -263,7 +259,7 @@ interface {
 ```typescript
 // request
 // url params: ?status=
-//   status: comma seperated string select from `Status` (default: "queuing,running")
+//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'
 
 // response
 interface {

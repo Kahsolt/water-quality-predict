@@ -103,7 +103,7 @@ def test_infer_routine():
 
   # [T=256, D=1], any length is ok
   data = np.random.uniform(size=[256, 1]).astype(np.float32)
-  base64, shape = ndarray_to_base64(data)
+  data = ndarray_to_list(data)
 
   jobs: dict = resp.json()['data']['jobs']
   for job in jobs.keys():
@@ -111,11 +111,11 @@ def test_infer_routine():
 
     resp = R.post(
       EP(f'/infer/{task_name}/{job}'),
-      json={'data': base64, 'shape': shape},
+      json={'data': data},
     )
     assert resp.ok ; r = resp.json()
 
-    pred = base64_to_ndarray(r['data']['pred'], r['data']['shape'])
+    pred = list_to_ndarray(r['data']['pred'])
     print(pred.shape)
     print('pred.mean:', pred.mean())
 

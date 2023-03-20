@@ -125,7 +125,7 @@ class App:
     # set view range
     print(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
-    inlen: int = job.get('dataset/in', 72)
+    inlen: int = job.get('dataset/inlen', 72)
     res = max(seqlen // 100, inlen)
     tick = min(10, round(seqlen // 10 / 100) * 100)
 

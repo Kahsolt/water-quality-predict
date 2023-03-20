@@ -5,6 +5,7 @@
 from time import time
 from copy import deepcopy
 from pathlib import Path
+from argparse import ArgumentParser
 from collections import Counter
 from queue import Queue, Empty
 from threading import Thread, Event, RLock
@@ -96,9 +97,12 @@ def worker(evt:Event, lock:RLock, queue:Queue):
 
             if 'update task meta':
               ttype = job_name.split('_')[0]
-              meta['jobs'][job_name] = {   # => 'doc/log.md'
+              job = Descriptor.load(job_file)
+              inlen: int = job.get('dataset/inlen', 1)
+              meta['jobs'][job_name]: JobMeta = {
                 'type': ttype,
                 'status': res,
+                'inlen': inlen,
               }
 
               sc_fp = log_dp / job_name/ SCORES_FILE
@@ -190,7 +194,7 @@ def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
   else:
     seq: Seq = env['seq']     # transformed
 
-  inlen:   int = job.get('dataset/in')
+  inlen:   int = job.get('dataset/inlen')
   overlap: int = job.get('dataset/overlap', 0)
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
@@ -222,7 +226,7 @@ def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
   else:
     seq: Seq = env['seq']     # transformed
 
-  inlen:   int = job.get('dataset/in')
+  inlen:   int = job.get('dataset/inlen')
   overlap: int = job.get('dataset/overlap', 0)
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
@@ -468,8 +472,8 @@ def process_dataset(env:Env):
     tgt = label
 
   # make slices
-  inlen   = job.get('dataset/in')         ; assert inlen   > 0
-  outlen  = job.get('dataset/out')        ; assert outlen  > 0
+  inlen   = job.get('dataset/inlen')      ; assert inlen   > 0
+  outlen  = job.get('dataset/outlen')     ; assert outlen  > 0
   overlap = job.get('dataset/overlap', 0) ; assert overlap >= 0
   X, Y = slice_frames(inputs, tgt, inlen, outlen, overlap)
   logger.info(f'  dataset')

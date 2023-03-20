@@ -13,8 +13,8 @@ preprocess:
 
 dataset:
   split: 0.2
-  in: 21
-  out: 1            # must be 1 for clf
+  inlen: 21
+  outlen: 1            # must be 1 for clf
   encoder:
     name: ex_thresh
     params:

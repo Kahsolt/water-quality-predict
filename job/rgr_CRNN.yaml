@@ -13,8 +13,8 @@ preprocess:
 
 dataset:
   split: 0.2
-  in: 96
-  out: 6
+  inlen: 96
+  outlen: 6
 
 model:
   name: CRNN_rgr

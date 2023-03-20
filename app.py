@@ -159,22 +159,26 @@ def task_(name:str):
   if request.method == 'POST':
     if len(request.files) > 1: return resp_error(f'only need 0 or 1 file, but got {len(request.files)}')
 
-    req: Dict = request.json
-    data = request.files[0].stream.read() if len(request.files) else None
-    target = fix_target(req.get('target'))
-    jobs = fix_jobs(req.get('jobs'))
-    task_init: TaskInit = {
-      'name': name,
-      'data': data,
-      'target': target,
-      'jobs': jobs,
-    }
-    TMP_PATH.mkdir(exist_ok=True, parents=True)
-    init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
-    save_pickle(task_init, init_fp)
-    trainer.add_task(name, init_fp)
+    try:
+      req: Dict = request.json
 
-    return resp_ok()
+      data = request.files[0].stream.read() if len(request.files) else None
+      target = fix_target(req.get('target'))
+      jobs = fix_jobs(req.get('jobs'))
+      task_init: TaskInit = {
+        'name': name,
+        'data': data,
+        'target': target,
+        'jobs': jobs,
+      }
+      TMP_PATH.mkdir(exist_ok=True, parents=True)
+      init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
+      save_pickle(task_init, init_fp)
+      trainer.add_task(name, init_fp)
+
+      return resp_ok()
+    except:
+      return resp_error(format_exc())
 
   elif request.method == 'GET':
     return resp_ok(load_json(task_folder / TASK_FILE)[-1])    # only last run
@@ -189,26 +193,25 @@ def infer_(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
 
-  req = request.json
-  if req.get('inplace', False):
-    try:
-      seq:  Seq = load_pickle(job_folder / PREPROCESS_FILE)
-      pred: Seq = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
-      seq,  seq_shape  = ndarray_to_base64(seq)
-      pred, pred_shape = ndarray_to_base64(pred)
-      return resp_ok({
-        'seq': seq, 
-        'seq_shape': seq_shape,
-        'pred': pred, 
-        'pred_shape': pred_shape,
-      })
-    except:
-      return resp_error(format_exc())
-  else:
-    x: Frame = base64_to_ndarray(req['data'], req['shape'])
-    y = predictor.predict(task, job, x)
-    pred, shape = ndarray_to_base64(y)
-    return resp_ok({'pred': pred, 'shape': shape})
+  try:
+    req: Dict = request.json
+
+    if req.get('inplace', False):
+        seq:  Seq = load_pickle(job_folder / PREPROCESS_FILE)
+        pred: Seq = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+        seq  = ndarray_to_list(seq)
+        pred = ndarray_to_list(pred)
+        return resp_ok({
+          'seq': seq, 
+          'pred': pred, 
+        })
+    else:
+      x: Frame = list_to_ndarray(req['data'])
+      y = predictor.predict(task, job, x)
+      pred = ndarray_to_list(y)
+      return resp_ok({'pred': pred})
+  except:
+    return resp_error(format_exc())
 
 
 @app.route('/log/<task>', methods=['GET'])
@@ -253,7 +256,10 @@ def runtime():
   except: pass
   filters = filters.split(',')
 
-  return resp_ok({'runtime_hist': [run for run in trainer.run_meta if run['status'] in filters]})
+  if 'all' in filters:
+    return resp_ok({'runtime_hist': trainer.run_meta})
+  else:
+    return resp_ok({'runtime_hist': [run for run in trainer.run_meta if run['status'] in filters]})
 
 
 if __name__ == '__main__':

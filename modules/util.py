@@ -152,6 +152,12 @@ def base64_to_ndarray(s:str, shape:Tuple[int, ...]) -> np.ndarray:
   x = x.reshape(shape)
   return x
 
+def ndarray_to_list(x:np.ndarray) -> List[List[float]]:
+  return x.tolist()
+
+def list_to_ndarray(ls:List[List[float]]) -> np.ndarray:
+  return np.asarray(ls, dtype=np.float32)
+
 
 def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
   if   task == TaskType.CLF:

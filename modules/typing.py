@@ -100,12 +100,13 @@ TaskInit = {
 
 # 任务运行时队列对象
 RunMeta = {
+  'id': int,
   'name': str,
-  'status': str,              # updatable
-  'info': str,                # updatable
-  'progress': str,            # updatable
+  'status': str,
+  'info': str,
+  'progress': str,
   'ts_create': int,
-  'ts_update': int,           # updatable
+  'ts_update': int,
   'task_init_pack': str,
 }
 
@@ -118,6 +119,7 @@ JobResult = Union[
 JobMeta = {
   'type': str,
   'status': str,
+  'inlen': int,    # for ref of infer 
   'scores': Dict[str, float],
 }
 TaskMeta = {

@@ -3,15 +3,14 @@
 # Create Time: 2023/03/18 
 
 from pathlib import Path
-from argparse import ArgumentParser
 
 
 ''' basic path '''
 BASE_PATH = Path(__file__).parent
 HTML_PATH = BASE_PATH / 'doc'
-JOB_PATH  = BASE_PATH / 'job'
-LOG_PATH  = BASE_PATH / 'log'
-TMP_PATH  = BASE_PATH / 'tmp'
+JOB_PATH  = BASE_PATH / 'job' ; JOB_PATH.mkdir(exist_ok=True)
+LOG_PATH  = BASE_PATH / 'log' ; LOG_PATH.mkdir(exist_ok=True)
+TMP_PATH  = BASE_PATH / 'tmp' ; TMP_PATH.mkdir(exist_ok=True)
 
 
 ''' log folder '''

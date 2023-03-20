@@ -293,8 +293,8 @@ pre[data-line] .line-highlight[data-end]:after {
 &#x2514;&#x2500;&#x2500; <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
 
 TMP_PATH
-&#x251C;&#x2500;&#x2500; tip<span class="token operator">-</span><span class="token operator">*</span><span class="token punctuation">.</span>pkl               <span class="token comment">// task init pack</span>
-&#x2514;&#x2500;&#x2500; <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+&#x251C;&#x2500;&#x2500; <span class="token operator">*</span><span class="token punctuation">.</span>pkl                   <span class="token comment">// task init pack</span>
+&#x2514;&#x2500;&#x2500; <span class="token operator">*</span><span class="token punctuation">.</span>zip                   <span class="token comment">// download log folders</span>
 </pre><h3 class="mume-header" id="%E7%B3%BB%E7%BB%9F%E5%85%83%E6%95%B0%E6%8D%AE">&#x7CFB;&#x7EDF;&#x5143;&#x6570;&#x636E;</h3>
 
 <p>=&gt; see <code>modules/descriptor.py</code></p>
@@ -302,7 +302,7 @@ TMP_PATH
 <pre data-role="codeBlock" data-info="python" class="language-python">task_init_pack <span class="token operator">=</span> <span class="token punctuation">{</span>          <span class="token comment"># =&gt; see `POST /task`</span>
   <span class="token string">&apos;name&apos;</span><span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span>              <span class="token comment"># task name</span>
   <span class="token string">&apos;data&apos;</span><span class="token punctuation">:</span> <span class="token builtin">bytes</span><span class="token punctuation">,</span>            <span class="token comment"># files[0].stream().read()</span>
-  <span class="token string">&apos;target&apos;</span><span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token operator">|</span><span class="token builtin">str</span><span class="token punctuation">,</span>  <span class="token comment"># target</span>
+  <span class="token string">&apos;target&apos;</span><span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span>      <span class="token comment"># target</span>
   <span class="token string">&apos;jobs&apos;</span><span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span>        <span class="token comment"># scheduled jobs</span>
 <span class="token punctuation">}</span>
 </pre><p>&#x26AA; run_meta <code>/log/runtime.json</code></p>
@@ -327,6 +327,7 @@ TMP_PATH
       <span class="token property">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
         type<span class="token operator">:</span> str<span class="token punctuation">,</span>
         status<span class="token operator">:</span> str<span class="token punctuation">,</span>
+        inlen<span class="token operator">:</span> int<span class="token punctuation">,</span>
         scores<span class="token operator">:</span> <span class="token punctuation">{</span>
           pres<span class="token operator">:</span> float<span class="token punctuation">,</span>
           recall<span class="token operator">:</span> float<span class="token punctuation">,</span>

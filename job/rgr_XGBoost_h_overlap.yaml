@@ -13,8 +13,8 @@ preprocess:
 
 dataset:
   split: 0.2
-  in: 168
-  out: 24
+  inlen: 168
+  outlen: 24
   overlap: 8
 
 # ref: https://xgboost.readthedocs.io/en/stable/parameter.html
