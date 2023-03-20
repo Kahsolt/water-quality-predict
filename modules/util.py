@@ -141,7 +141,7 @@ def save_json(fp:Path, data):
 
 def ndarray_to_base64(x:np.ndarray) -> Tuple[str, Tuple[int, ...]]:
   shape = tuple(x.shape)
-  bdata = base64.b64encode(x)
+  bdata = base64.b64encode(x.astype(np.float32))
   sdata = str(bdata, encoding='utf-8')
   return sdata, shape
 

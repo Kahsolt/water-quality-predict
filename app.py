@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import psutil
 
 from flask import Flask, request, Response
 from flask import redirect, jsonify, render_template, send_file
@@ -51,6 +52,11 @@ def doc_(page:str):
 
 @app.route('/debug')
 def debug():
+  pid = os.getpid()
+  loadavg = psutil.getloadavg()
+  p = psutil.Process(pid)
+  meminfo = p.memory_full_info()
+  
   return f'''
 <div>
   <p>pwd: {os.getcwd()}</p>
@@ -58,6 +64,10 @@ def debug():
   <p>HTML_PATH: {HTML_PATH}</p>
   <p>JOB_PATH: {JOB_PATH}</p>
   <p>LOG_PATH: {LOG_PATH}</p>
+  <p>loadavg: {loadavg}</p>
+  <p>mem use: {meminfo.rss / 2**20:.3f} MB</p>
+  <p>mem vms: {meminfo.vms / 2**20:.3f} MB</p>
+  <p>mem percent: {p.memory_percent()} %</p>
 </div>
 '''
 
@@ -198,7 +208,7 @@ def infer_(task:str, job:str):
     x: Frame = base64_to_ndarray(req['data'], req['shape'])
     y = predictor.predict(task, job, x)
     pred, shape = ndarray_to_base64(y)
-    return resp_error({'pred': pred, 'shape': shape})
+    return resp_ok({'pred': pred, 'shape': shape})
 
 
 @app.route('/log/<task>', methods=['GET'])

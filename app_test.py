@@ -116,10 +116,11 @@ def test_infer_routine():
     assert resp.ok ; r = resp.json()
 
     pred = base64_to_ndarray(r['data']['pred'], r['data']['shape'])
-    print(pred)
+    print(pred.shape)
+    print('pred.mean:', pred.mean())
 
 
 if __name__ == '__main__':
-  #test_basic_info()
-  #test_train_routine()
+  test_basic_info()
+  test_train_routine()
   test_infer_routine()
