@@ -16,6 +16,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from modules import preprocess
 from modules.util import *
 from modules.typing import *
+
+from worker import *
 from run import *
 
 WINDOW_TITLE  = 'Sequential Inference Demo'
@@ -44,7 +46,7 @@ def load_env(job_file:Path) -> Env:
     'log_dp': log_dp,       # log folder
   }
 
-  @require_data_and_model
+  @prepare_for_
   def load_data_and_model(env:Env):
     env['model'] = env['manager'].load(env['model'], log_dp, logger)
   load_data_and_model(env)
@@ -134,7 +136,19 @@ class App:
     self.is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
     print(f'  is_task_rgr: {self.is_task_rgr}')
 
-    seq: Seq = env['seq']
+    # precalc whole seq
+    seq:   Seq   = env['seq']     # transformed
+    label: Seq   = env['label']
+    stats: Stats = env['stats']
+
+    self.preds_o: Seq = predict_with_oracle(env)
+    self.preds_r: Seq = predict_with_predicted(env)
+    if self.is_task_rgr:
+      self.truth = inv_transforms(seq, stats)
+    else:
+      self.truth = label
+
+    # set view range
     print(f'  seq.shape: {seq.shape}')
     seqlen = len(seq)
     inlen: int = job.get('dataset/in', 72)
@@ -143,73 +157,23 @@ class App:
 
     self.sc_L.configure(to=seqlen, resolution=res, tickinterval=tick) ; self.sc_L_pack()
     self.sc_R.configure(to=seqlen, resolution=res, tickinterval=tick) ; self.sc_R_pack()
-
     self.var_L.set(tick)
     self.var_R.set(tick * 2)
+
     self.plot()
 
   def plot(self):
     if self.env is None: return
 
-    env: Env = self.env
-    job: Descriptor = env['job']
-
     L = self.var_L.get()
     R = self.var_R.get()
     if L >= R: return
 
-    seq: Seq     = env['seq']
-    label: Seq   = env['label']
-    stats: Stats = env['stats']
-    manager      = env['manager']
-    model: Model = env['model']
-    inlen: int   = job.get('dataset/in')
-    overlap: int = job.get('dataset/overlap', 0)
-
-    if 'predict with oracle (one step)':
-      preds: List[Frame] = []
-      loc = L + (1 if self.is_model_arima else 0)
-      while loc < R:
-        if self.is_model_arima:
-          y: Frame = manager.infer(model, loc)  # [1]
-        else:
-          x = seq[loc-inlen:loc, :]
-          x = frame_left_pad(x, inlen)          # [I, D]
-          y: Frame = manager.infer(model, x)    # [O, 1]
-        preds.append(y)
-        loc += len(y) - overlap
-      preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
-
-    if 'predict with prediction (rolling)' and args.draw_rolling:
-      preds: List[Frame] = []
-      loc = L + (1 if self.is_model_arima else 0)
-      x = seq[loc-inlen:loc, :]
-      x = frame_left_pad(x, inlen)              # [I, D]
-      while loc < R:
-        if self.is_model_arima:
-          y: Frame = manager.infer(model, loc)  # [1]
-        else:
-          y: Frame = manager.infer(model, x)    # [O, 1]
-        preds.append(y)
-        x = frame_shift(x, y)
-        loc += len(y) - overlap
-      preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
-
-    if 'inv preprocess' and self.is_task_rgr:
-      for (proc, st) in stats:
-        #print(f'  apply inv of {proc}')
-        invproc = getattr(preprocess, f'{proc}_inv')
-        seq     = invproc(seq,   *st)
-        preds_o = invproc(preds_o, *st)
-        if args.draw_rolling:
-          preds_r = invproc(preds_r, *st)
-
     if 'select range & channel':
-      if self.is_task_rgr: truth = seq  [L:R, 0]
-      else:                truth = label[L:R, 0]
-      preds_o = preds_o[:R-L, 0]      # [T'=R-L+1]
+      truth = self.truth[L:R, 0]
+      preds_o = self.preds_o[:R-L, 0]      # [T'=R-L+1]
       if args.draw_rolling:
-        preds_r = preds_r[:R-L, 0]    # [T'=R-L+1]
+        preds_r = self.preds_r[:R-L, 0]    # [T'=R-L+1]
 
     if 'show acc':
       if self.is_task_rgr:

@@ -17,14 +17,20 @@
 
 Main busisness:
 
-- `POST /merge_csv` to merge data all-in-one if you have multiple data source
-- `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
 - `POST /task` to create a task and put in processing queue
-- `GET /runtime` to see running status
-- `GET /task/<name>` to get task status or results 
+- `GET /task/<name>` to get task results 
 - `POST /infer` to predict on new data
-- `GET /log/<task_name>/<job_name>.log` to see job log
+
+Extras:
+
+- `GET /runtime` to see running status
+- `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
 - `GET /log/<task_name>` to download the task log folder
+- `GET /log/<task_name>/<job_name>` to download the job log folder
+- `GET /log/<task_name>/<job_name>.log` to see job log
+- `POST /merge_csv` to merge data all-in-one if you have multiple data source
+
+=> see client demo: [app_test.py](app_test.py)
 
 
 ### Local run

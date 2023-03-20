@@ -6,6 +6,7 @@ from pathlib import Path
 from queue import Queue, Empty
 from threading import Thread, Event, RLock
 
+from modules import transform
 from modules.descriptor import *
 from modules.dataset import *
 from modules.util import *
@@ -184,5 +185,92 @@ class Predictor:
       self.envs[fullname] = self.load_env(task, job)
 
     env = self.envs[fullname]
-    y: Frame = env['manager'].infer(env['model'], x, env['logger'])
+    y: Frame = predict_with_oracle(env, x)
     return y
+
+
+def frame_left_pad(x:Frame, padlen:int) -> Frame:
+  xlen = len(x)
+  if xlen < padlen:
+    x = np.pad(x, ((padlen - xlen, 0), (0, 0)), mode='edge')
+  return x
+
+def frame_shift(x:Frame, y:Frame) -> Frame:
+  return np.concatenate((x[len(y):, :], y), axis=0)
+
+
+def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
+  job: Descriptor = env['job']
+  manager      = env['manager']
+  model: Model = env['model']
+  stats: Stats = env['stats']
+
+  if x is not None:
+    seq: Seq = apply_transforms(x, stats)
+  else:
+    seq: Seq = env['seq']     # transformed
+
+  inlen:   int = job.get('dataset/in')
+  overlap: int = job.get('dataset/overlap', 0)
+
+  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+  is_model_arima = 'ARIMA' in job['model/name']
+
+  preds: List[Frame] = []
+  loc = inlen + (1 if is_model_arima else 0)
+  while loc < len(seq):
+    if is_model_arima:
+      y: Frame = manager.infer(model, loc)  # [1]
+    else:
+      x = seq[loc-inlen:loc, :]
+      x = frame_left_pad(x, inlen)          # [I, D]
+      y: Frame = manager.infer(model, x)    # [O, 1]
+    preds.append(y)
+    loc += len(y) - overlap
+  preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  return inv_transforms(preds_o, stats) if is_task_rgr else preds_o
+
+def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
+  job: Descriptor = env['job']
+  manager      = env['manager']
+  model: Model = env['model']
+  stats: Stats = env['stats']
+
+  if x is not None:
+    seq: Seq = apply_transforms(x, stats)
+  else:
+    seq: Seq = env['seq']     # transformed
+
+  inlen:   int = job.get('dataset/in')
+  overlap: int = job.get('dataset/overlap', 0)
+
+  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+  is_model_arima = 'ARIMA' in job['model/name']
+
+  preds: List[Frame] = []
+  loc = inlen + (1 if is_model_arima else 0)
+  x = seq[loc-inlen:loc, :]
+  x = frame_left_pad(x, inlen)              # [I, D]
+  while loc < len(seq):
+    if is_model_arima:
+      y: Frame = manager.infer(model, loc)  # [1]
+    else:
+      y: Frame = manager.infer(model, x)    # [O, 1]
+    preds.append(y)
+    x = frame_shift(x, y)
+    loc += len(y) - overlap
+  preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  return inv_transforms(preds_r, stats) if is_task_rgr else preds_r
+
+
+def apply_transforms(seq, stats):
+  for (proc, st) in stats:
+    seq = getattr(transform, proc)(seq, *st)
+  return seq
+
+def inv_transforms(seq, stats):
+  for (proc, st) in reversed(stats):
+    seq = getattr(transform, f'{proc}_inv')(seq, *st)
+  return seq

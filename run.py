@@ -19,6 +19,7 @@ from modules.util import *
 from modules.typing import *
 
 from config import *
+from worker import *
 
 
 def process(fn:Callable[..., Any]):
@@ -32,43 +33,47 @@ def process(fn:Callable[..., Any]):
     return r
   return wrapper
 
-def require_data_and_model(fn:Callable[..., Any]):
-  def wrapper(env, *args, **kwargs):
-    job: Descriptor = env['job']
-    logger: Logger = env['logger']
-    log_dp: Path = env['log_dp']
+def prepare_for_(what:str=Union[Literal['train'], Literal['infer']]):
+  def wrapper(fn:Callable[..., Any]):
+    assert what in ['train', 'infer']
+    def wrapper(env, *args, **kwargs):
+      job: Descriptor = env['job']
+      logger: Logger = env['logger']
+      log_dp: Path = env['log_dp']
 
-    # Data
-    if 'seq' not in env:
-      env['seq'] = load_pickle(log_dp / TRANSFORM_FILE, logger)
-      assert env['seq'] is not None
+      # Data
+      if 'seq' not in env:
+        env['seq'] = load_pickle(log_dp / TRANSFORM_FILE, logger)
+        assert env['seq'] is not None
 
-    if 'stats' not in env:
-      stats = load_pickle(log_dp / STATS_FILE, logger)
-      env['stats'] = stats if stats is not None else []
+      if 'stats' not in env:
+        stats = load_pickle(log_dp / STATS_FILE, logger)
+        env['stats'] = stats if stats is not None else []
 
-    if 'dataset' not in env:
-      env['dataset'] = load_pickle(log_dp / DATASET_FILE, logger)
+      if what == 'train':
+        if 'dataset' not in env:
+          env['dataset'] = load_pickle(log_dp / DATASET_FILE, logger)
 
-    if 'label' not in env:
-      env['label'] = load_pickle(log_dp / LABEL_FILE, logger)
+        if 'label' not in env:
+          env['label'] = load_pickle(log_dp / LABEL_FILE, logger)
 
-    # Model
-    if 'manager' not in env:
-      model_name = job.get('model/name') ; assert model_name
-      manager = import_module(f'modules.models.{model_name}')
-      env['manager'] = manager
-      logger.info('manager:')
-      logger.info(manager)
+      # Model
+      if 'manager' not in env:
+        model_name = job.get('model/name') ; assert model_name
+        manager = import_module(f'modules.models.{model_name}')
+        env['manager'] = manager
+        logger.info('manager:')
+        logger.info(manager)
 
-    if 'model' not in env:
-      manager = env['manager']
-      model = manager.init(job.get('model/params', {}), logger)
-      env['model'] = model
-      logger.info('model:')
-      logger.info(model)
+      if 'model' not in env:
+        manager = env['manager']
+        model = manager.init(job.get('model/params', {}), logger)
+        env['model'] = model
+        logger.info('model:')
+        logger.info(model)
 
-    return fn(env, *args, **kwargs)
+      return fn(env, *args, **kwargs)
+    return wrapper
   return wrapper
 
 
@@ -233,16 +238,9 @@ def process_transform(env:Env):
 
     stats: Stats = []    # keep ordered
     for proc in job.get('preprocess/transform', []):
-      if not hasattr(transform, proc):
-        logger.error(f'  preprocessor {proc!r} not found!')
-        continue
-
-      try:
-        logger.info (f'  apply {proc}...')
-        seq, st = getattr(transform, proc)(seq)
-        stats.append((proc, st))
-      except:
-        logger.error(format_exc())
+      logger.info (f'  apply {proc}...')
+      seq, st = getattr(transform, proc)(seq)
+      stats.append((proc, st))
 
     if 'plot timeline':
       plt.clf()
@@ -290,7 +288,7 @@ def target_data(env:Env):
   if env['status'] == Status.IGNORED: return
   process_transform(env)
 
-@require_data_and_model
+@prepare_for_('train')
 @process
 def target_train(env:Env):
   job: Descriptor = env['job']
@@ -302,7 +300,7 @@ def target_train(env:Env):
   manager.train(model, data, job.get('model/params'), logger)
   manager.save(model, log_dp, logger)
 
-@require_data_and_model
+@prepare_for_('train')
 @process
 def target_eval(env:Env):
   job: Descriptor = env['job']
@@ -335,59 +333,14 @@ def target_eval(env:Env):
   with open(log_dp / SCORES_FILE, 'w', encoding='utf-8') as fh:
     fh.write('\n'.join(lines))
 
-@require_data_and_model
+@prepare_for_('infer')
 @process
 def target_infer(env:Env):
-  job: Descriptor = env['job']
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  seq: Seq     = env['seq']
-  stats: Stats = env['stats']
-  manager      = env['manager']
-  model: Model = env['model']
-  inlen: int   = job.get('dataset/in', 0)       # fix for ARIMA
-  overlap: int = job.get('dataset/overlap', 0)
-
-  is_model_arima = 'ARIMA' in job['model/name']
-  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
-
-  if 'predict with oracle (one step)':
-    preds: List[Frame] = []
-    loc = inlen + (1 if is_model_arima else 0)
-    while loc < len(seq):
-      if is_model_arima:
-        y: Frame = manager.infer(model, loc)  # [1]
-      else:
-        x = seq[loc-inlen:loc, :]
-        x = frame_left_pad(x, inlen)          # [I, D]
-        y: Frame = manager.infer(model, x)    # [O, 1]
-      preds.append(y)
-      loc += len(y) - overlap
-    preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
-
-  if 'predict with prediction (rolling)':
-    preds: List[Frame] = []
-    loc = inlen + (1 if is_model_arima else 0)
-    x = seq[loc-inlen:loc, :]
-    x = frame_left_pad(x, inlen)              # [I, D]
-    while loc < len(seq):
-      if is_model_arima:
-        y: Frame = manager.infer(model, loc)  # [1]
-      else:
-        y: Frame = manager.infer(model, x)    # [O, 1]
-      preds.append(y)
-      x = frame_shift(x, y)
-      loc += len(y) - overlap
-    preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
-
-  if 'inv preprocess' and is_task_rgr:
-    for (proc, st) in stats:
-      invproc = getattr(preprocess, f'{proc}_inv')
-      seq     = invproc(seq,   *st)
-      preds_o = invproc(preds_o, *st)
-      preds_r = invproc(preds_r, *st)
-
+  preds_o: Seq = predict_with_oracle   (env)
+  preds_r: Seq = predict_with_predicted(env)
   predicted = (preds_o, preds_r)
   save_pickle(predicted, log_dp / PREDICT_FILE, logger)
 

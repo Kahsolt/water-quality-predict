@@ -181,10 +181,22 @@ def infer_(task:str, job:str):
   if not job_folder.exists(): return resp_error('job folder not exists')
 
   req = request.json
-  x: Frame = bytes_to_ndarray(req['data'], req['shape'])
-  y = predictor.predict(task, job, x)
-
-  return resp_error({'pred': ndarray_to_bytes(y), 'shape': tuple(y.shape)})
+  if req.get('inplace', False):
+    try:
+      seq:  Seq = load_pickle(job_folder / PREPROCESS_FILE)
+      pred: Seq = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+      return resp_ok({
+        'seq': ndarray_to_bytes(seq), 
+        'seq_shape': tuple(seq.shape),
+        'pred': ndarray_to_bytes(pred), 
+        'pred_shape': tuple(pred.shape),
+      })
+    except:
+      return resp_error(format_exc())
+  else:
+    x: Frame = bytes_to_ndarray(req['data'], req['shape'])
+    y = predictor.predict(task, job, x)
+    return resp_error({'pred': ndarray_to_bytes(y), 'shape': tuple(y.shape)})
 
 
 @app.route('/log/<task>', methods=['GET'])
@@ -212,7 +224,9 @@ def log__log(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
 
-  return send_file(job_folder / LOG_FILE, mimetype='plain/text')
+  with open(job_folder / LOG_FILE, 'r', encoding='utf-8') as fh:
+    logs = fh.read().strip()
+  return '<br/>'.join(logs.split('\n'))
 
 
 @app.route('/merge_csv', methods=['POST'])

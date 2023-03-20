@@ -202,16 +202,35 @@ interface {
 
 ### POST /infer/\<task_name\>/\<job_name\> 推断
 
+⚪ infer inplace
+
 ```typescript
 // request
 interface {
-  data: str           // base64 codec of input.flatten(): np.array
+  inplace: true       // inplace prediction on original timeseq data
+}
+
+// response
+interface {
+  seq: bytes,         // base64 encoding of seq.flatten(): np.array
+  seq_shape: int[],   // shape of seq: np.ndarray
+  pred: bytes,        // base64 encoding of pred.flatten(): np.array
+  pred_shape: int[],  // shape of pred: np.ndarray
+}
+```
+
+⚪ infer new
+
+```typescript
+// request
+interface {
+  data: bytes         // base64 encoding of input.flatten(): np.array
   shape: int[]        // shape of input: np.ndarray
 }
 
 // response
 interface {
-  pred: str           // base64 codec of pred.flatten(): np.array
+  pred: bytes         // base64 encoding of pred.flatten(): np.array
   shape: int[]        // shape of pred: np.ndarray
 }
 ```
