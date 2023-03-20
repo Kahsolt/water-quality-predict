@@ -13,7 +13,6 @@ from modules.util import *
 
 from config import *
 from run import *
-from worker import *
 
 app = Flask(__name__, template_folder=HTML_PATH)
 
@@ -185,18 +184,21 @@ def infer_(task:str, job:str):
     try:
       seq:  Seq = load_pickle(job_folder / PREPROCESS_FILE)
       pred: Seq = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+      seq,  seq_shape  = ndarray_to_base64(seq)
+      pred, pred_shape = ndarray_to_base64(pred)
       return resp_ok({
-        'seq': ndarray_to_bytes(seq), 
-        'seq_shape': tuple(seq.shape),
-        'pred': ndarray_to_bytes(pred), 
-        'pred_shape': tuple(pred.shape),
+        'seq': seq, 
+        'seq_shape': seq_shape,
+        'pred': pred, 
+        'pred_shape': pred_shape,
       })
     except:
       return resp_error(format_exc())
   else:
-    x: Frame = bytes_to_ndarray(req['data'], req['shape'])
+    x: Frame = base64_to_ndarray(req['data'], req['shape'])
     y = predictor.predict(task, job, x)
-    return resp_error({'pred': ndarray_to_bytes(y), 'shape': tuple(y.shape)})
+    pred, shape = ndarray_to_base64(y)
+    return resp_error({'pred': pred, 'shape': shape})
 
 
 @app.route('/log/<task>', methods=['GET'])

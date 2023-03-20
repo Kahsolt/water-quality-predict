@@ -25,35 +25,6 @@ WINDOW_SIZE   = (1000, 750)
 HIST_FIG_SIZE = (8, 8)
 
 
-def load_env(job_file:Path) -> Env:
-  ''' load a pretrained job env '''
-
-  # job
-  assert job_file.exists()
-  log_dp: Path = job_file.parent
-  job = Descriptor.load(job_file)
-
-  # logger
-  logger = logging
-  logger.info('Job Info:')
-  logger.info(pformat(job.cfg))
-
-  seed_everything(fix_seed(job.get('seed', -1)))
-
-  env: Env = {
-    'job': job,             # 'job.yaml'
-    'logger': logger,       # logger
-    'log_dp': log_dp,       # log folder
-  }
-
-  @prepare_for_
-  def load_data_and_model(env:Env):
-    env['model'] = env['manager'].load(env['model'], log_dp, logger)
-  load_data_and_model(env)
-
-  return env
-
-
 class App:
 
   def __init__(self):
@@ -142,7 +113,10 @@ class App:
     stats: Stats = env['stats']
 
     self.preds_o: Seq = predict_with_oracle(env)
-    self.preds_r: Seq = predict_with_predicted(env)
+    self.preds_o = np.pad(self.preds_o, (len(seq) - len(self.preds_o), 0), mode='edge')
+    if args.draw_rolling:
+      self.preds_r: Seq = predict_with_predicted(env)
+      self.preds_r = np.pad(self.preds_o, (len(seq) - len(self.preds_r), 0), mode='edge')
     if self.is_task_rgr:
       self.truth = inv_transforms(seq, stats)
     else:
@@ -153,7 +127,7 @@ class App:
     seqlen = len(seq)
     inlen: int = job.get('dataset/in', 72)
     res = max(seqlen // 100, inlen)
-    tick = round(seqlen // 10 / 100) * 100
+    tick = min(10, round(seqlen // 10 / 100) * 100)
 
     self.sc_L.configure(to=seqlen, resolution=res, tickinterval=tick) ; self.sc_L_pack()
     self.sc_R.configure(to=seqlen, resolution=res, tickinterval=tick) ; self.sc_R_pack()
@@ -170,10 +144,10 @@ class App:
     if L >= R: return
 
     if 'select range & channel':
-      truth = self.truth[L:R, 0]
-      preds_o = self.preds_o[:R-L, 0]      # [T'=R-L+1]
+      truth   = self.truth  [L:R, 0]
+      preds_o = self.preds_o[L:R, 0]      # [T'=R-L+1]
       if args.draw_rolling:
-        preds_r = self.preds_r[:R-L, 0]    # [T'=R-L+1]
+        preds_r = self.preds_r[L:R, 0]    # [T'=R-L+1]
 
     if 'show acc':
       if self.is_task_rgr:

@@ -139,14 +139,16 @@ def save_json(fp:Path, data):
     json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False, default=default_fn)
 
 
-def ndarray_to_bytes(x:np.ndarray) -> Tuple[bytes, Tuple[int, ...]]:
+def ndarray_to_base64(x:np.ndarray) -> Tuple[str, Tuple[int, ...]]:
   shape = tuple(x.shape)
   bdata = base64.b64encode(x)
-  return bdata, shape
+  sdata = str(bdata, encoding='utf-8')
+  return sdata, shape
 
-def bytes_to_ndarray(s:str, shape:Tuple[int, ...]) -> np.ndarray:
-  bdata = base64.decodebytes(s)
-  x = np.frombuffer(bdata)
+def base64_to_ndarray(s:str, shape:Tuple[int, ...]) -> np.ndarray:
+  sdata = s.encode('utf-8')
+  bdata = base64.decodebytes(sdata)
+  x = np.frombuffer(bdata, dtype=np.float32)
   x = x.reshape(shape)
   return x
 

@@ -101,24 +101,21 @@ def test_infer_routine():
   resp = R.get(EP(f'/task/{task_name}'))
   assert resp.ok
 
-  data = np.random.uniform(size=[256, 1])    # [T=256, D=1], any length is ok
-  bdata = ndarray_to_bytes(data)
-  shape = data.shape
+  # [T=256, D=1], any length is ok
+  data = np.random.uniform(size=[256, 1]).astype(np.float32)
+  base64, shape = ndarray_to_base64(data)
 
   jobs: dict = resp.json()['data']['jobs']
   for job in jobs.keys():
     print(f'>> querying {job!r}...')
-    
+
     resp = R.post(
       EP(f'/infer/{task_name}/{job}'),
-      data={
-        'data': bdata,
-        'shape': shape,
-      }
+      json={'data': base64, 'shape': shape},
     )
     assert resp.ok ; r = resp.json()
 
-    pred = bytes_to_ndarray(r['data']['pred'], r['data']['shape'])
+    pred = base64_to_ndarray(r['data']['pred'], r['data']['shape'])
     print(pred)
 
 

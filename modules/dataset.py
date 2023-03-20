@@ -106,6 +106,16 @@ def split_dataset(X:Frames, Y:Frames, split:float=0.2) -> Dataset:
   return (X_train, Y_train), (X_eval, Y_eval)
 
 
+def frame_left_pad(x:Frame, padlen:int) -> Frame:
+  xlen = len(x)
+  if xlen < padlen:
+    x = np.pad(x, ((padlen - xlen, 0), (0, 0)), mode='edge')
+  return x
+
+def frame_shift(x:Frame, y:Frame) -> Frame:
+  return np.concatenate((x[len(y):, :], y), axis=0)
+
+
 class FrameDataset(torch.utils.data.Dataset):
 
   def __init__(self, dataset:Dataset):

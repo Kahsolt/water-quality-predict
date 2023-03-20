@@ -43,6 +43,12 @@ Encoder = {
   'params': Params,
 }
 
+# 作业运行时环境类型
+EnvKind = Union[
+  Literal['train'],     # for train
+  Literal['infer'],     # for infer
+  Literal['demo'],      # for demo infer, `infer.py`
+]
 # 含时间轴的原始数据
 TimeSeq = DataFrame
 Time    = Series

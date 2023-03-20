@@ -6,20 +6,257 @@ from time import time
 from copy import deepcopy
 from pathlib import Path
 from collections import Counter
+from queue import Queue, Empty
+from threading import Thread, Event, RLock
+from importlib import import_module
 from pprint import pformat
 from traceback import format_exc
-from importlib import import_module
 
 import matplotlib.pyplot as plt
 
 from modules import preprocess, transform
 from modules.descriptor import *
 from modules.dataset import *
+from modules.transform import *
 from modules.util import *
 from modules.typing import *
 
 from config import *
-from worker import *
+
+
+def worker(evt:Event, lock:RLock, queue:Queue):
+  while not evt.is_set():
+    payload = None
+    while payload is None:
+      try: payload: Tuple[RunMeta, Trainer] = queue.get(timeout=CHECK_TASK_EVERY)
+      except Empty: pass
+      if evt.is_set(): return
+
+    with lock:
+      run, runtime = payload
+
+      run['info'] += "Setup task log folder\n"
+      log_dp: Path = LOG_PATH / run['name']
+      log_dp.mkdir(exist_ok=True, parents=True)
+
+      run['info'] += "Load/create task meta file\n"
+      task_meta: List[RunMeta] = load_json(log_dp / TASK_FILE, [])
+      meta: TaskMeta = new_task_meta()
+      task_meta.append(meta)
+      save_task_meta = lambda: save_json(log_dp / TASK_FILE, task_meta)
+      save_task_meta()    # init save
+
+      args = cmd_args()
+      args.name = run['name']
+      args.csv_file = log_dp / DATA_FILE
+
+      if run['status'] == Status.QUEUING:
+        try: 
+          run['info'] += "Unpack task init info\n"
+          init_fp = Path(run['task_init_pack'])
+          init: TaskInit = load_pickle(init_fp)
+
+          run['info'] += "Check init info\n"
+          task_name = init['name'] ; assert task_name == run['name']
+          meta['target'] = init['target']
+          args.target = ','.join(meta['target'])
+          jobs = init['jobs']
+
+          if 'data' in init and init['data'] is not None:
+            run['info'] += "Write csv file\n"
+            with open(log_dp / DATA_FILE, 'wb') as fh:
+              fh.write(init['data'])
+
+          meta['status'] = run['status'] = Status.CREATED
+        except:
+          run['info'] += format_exc() + '\n'
+          meta['status'] = run['status'] = Status.FAILED
+        meta['ts_update'] = run['ts_update'] = ts_now()
+
+      if run['status'] == Status.CREATED:
+        run['info'] += "Start run jobs\n"
+        meta['status'] = run['status'] = Status.RUNNING
+        meta['ts_update'] = run['ts_update'] = ts_now()
+
+      save_task_meta()
+
+      if run['status'] == Status.RUNNING:
+        try:
+          ok, tot = 0, len(jobs)
+          for i, job_name in enumerate(jobs):
+            run['info'] += f"Running job {job_name!r}\n"
+            run['progress'] = f"{i+1} / {tot}"
+            meta['ts_update'] = run['ts_update'] = ts_now()
+
+            job_file = JOB_PATH / f'{job_name}.yaml'
+            args.job_file = job_file
+            res: Status = run_file(args)
+            if res != Status.FAILED: ok += 1
+
+            if 'update task meta':
+              ttype = job_name.split('_')[0]
+              meta['jobs'][job_name] = {   # => 'doc/log.md'
+                'type': ttype,
+                'status': res,
+              }
+
+              sc_fp = log_dp / job_name/ SCORES_FILE
+              if sc_fp.exists():
+                with open(sc_fp, 'r', encoding='utf-8') as fh:
+                  lines = fh.read().strip()
+
+                scores = { }
+                for line in lines.split('\n'):
+                  name, score = line.split(':')
+                  scores[name.strip()] = float(score)
+                meta['jobs'][job_name]['scores'] = scores
+
+              save_task_meta()
+
+          run['info'] += f"Done all jobs! (total: {tot}, failed: {tot - ok})\n"
+          meta['status'] = run['status'] = Status.FINISHED
+        except:
+          run['info'] += format_exc() + '\n'
+          meta['status'] = run['status'] = Status.FAILED
+        meta['ts_update'] = run['ts_update'] = ts_now()
+
+      if run['status'] == Status.FINISHED:
+        try:
+          run['info'] += "Clean up tmp files\n"
+          os.unlink(run['task_init_pack'])
+          del run['task_init_pack']
+
+          run['info'] += "Done!\n"
+        except:
+          run['info'] += format_exc() + '\n'
+        meta['ts_update'] = run['ts_update'] = ts_now()
+
+      save_task_meta()
+      runtime.save_run_meta()
+
+      queue.task_done()
+
+
+class Trainer:
+
+  def __init__(self):
+    self.envs: Dict[str, Env] = { }
+    self.queue = Queue()
+    self.evt = Event()
+    self.lock = RLock()
+    self.worker = Thread(target=worker, args=(self.evt, self.lock, self.queue))
+
+    self.run_meta: List[RunMeta] = load_json(LOG_PATH / TASK_FILE, [])
+    self._resume()
+
+  def _resume(self):
+    for run in self.run_meta:
+      if Status(run['status']) in [Status.QUEUING, Status.CREATED, Status.RUNNING]:
+        run['status'] = Status.QUEUING    # reset to queuing
+        run['ts_update'] = ts_now()
+        self.queue.put((run, self))
+
+  def save_run_meta(self):
+    save_json(LOG_PATH / TASK_FILE, self.run_meta)
+
+  def add_task(self, name:str, init_fp:Path):
+    print(f'>> new task: {name}')
+    run = new_run_meta()   # Status.QUEUING
+    run['id'] = len(self.run_meta) + 1
+    run['name'] = name
+    run['task_init_pack'] = init_fp
+    self.run_meta.append(run)
+    self.queue.put((run, self))
+
+  def start(self):
+    self.save_run_meta()
+    self.worker.start()
+
+  def stop(self):
+    self.evt.set()
+    self.worker.join()
+    self.save_run_meta()
+
+
+def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
+  job: Descriptor = env['job']
+  manager      = env['manager']
+  model: Model = env['model']
+  stats: Stats = env['stats']
+
+  if x is not None:
+    seq: Seq = apply_transforms(x, stats)
+  else:
+    seq: Seq = env['seq']     # transformed
+
+  inlen:   int = job.get('dataset/in')
+  overlap: int = job.get('dataset/overlap', 0)
+
+  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+  is_model_arima = 'ARIMA' in job['model/name']
+
+  preds: List[Frame] = []
+  loc = 10 if is_model_arima else inlen
+  while loc < len(seq):
+    if is_model_arima:
+      y: Frame = manager.infer(model, loc)  # [1]
+    else:
+      x = seq[loc-inlen:loc, :]
+      x = frame_left_pad(x, inlen)          # [I, D]
+      y: Frame = manager.infer(model, x)    # [O, 1]
+    preds.append(y)
+    loc += len(y) - overlap
+  preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  return inv_transforms(preds_o, stats) if is_task_rgr else preds_o
+
+def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
+  job: Descriptor = env['job']
+  manager      = env['manager']
+  model: Model = env['model']
+  stats: Stats = env['stats']
+
+  if x is not None:
+    seq: Seq = apply_transforms(x, stats)
+  else:
+    seq: Seq = env['seq']     # transformed
+
+  inlen:   int = job.get('dataset/in')
+  overlap: int = job.get('dataset/overlap', 0)
+
+  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+  is_model_arima = 'ARIMA' in job['model/name']
+
+  preds: List[Frame] = []
+  loc = 10 if is_model_arima else inlen
+  x = seq[loc-inlen:loc, :]
+  x = frame_left_pad(x, inlen)              # [I, D]
+  while loc < len(seq):
+    if is_model_arima:
+      y: Frame = manager.infer(model, loc)  # [1]
+    else:
+      y: Frame = manager.infer(model, x)    # [O, 1]
+    preds.append(y)
+    x = frame_shift(x, y)
+    loc += len(y) - overlap
+  preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+
+  return inv_transforms(preds_r, stats) if is_task_rgr else preds_r
+
+
+class Predictor:
+
+  def __init__(self) -> None:
+    self.envs: Dict[str, Env] = { }
+
+  def predict(self, task:str, job:str, x:Frame) -> Frame:
+    fullname = get_fullname(task, job)
+    if fullname not in self.envs:
+      self.envs[fullname] = load_env(LOG_PATH / task / job / 'job.yaml')
+
+    env = self.envs[fullname]
+    y: Frame = predict_with_oracle(env, x)
+    return y
 
 
 def process(fn:Callable[..., Any]):
@@ -33,9 +270,9 @@ def process(fn:Callable[..., Any]):
     return r
   return wrapper
 
-def prepare_for_(what:str=Union[Literal['train'], Literal['infer']]):
+def prepare_for_(what:EnvKind):
   def wrapper(fn:Callable[..., Any]):
-    assert what in ['train', 'infer']
+    assert what in ['train', 'infer', 'demo']
     def wrapper(env, *args, **kwargs):
       job: Descriptor = env['job']
       logger: Logger = env['logger']
@@ -50,12 +287,11 @@ def prepare_for_(what:str=Union[Literal['train'], Literal['infer']]):
         stats = load_pickle(log_dp / STATS_FILE, logger)
         env['stats'] = stats if stats is not None else []
 
-      if what == 'train':
-        if 'dataset' not in env:
-          env['dataset'] = load_pickle(log_dp / DATASET_FILE, logger)
+      if 'dataset' not in env and what == 'train':
+        env['dataset'] = load_pickle(log_dp / DATASET_FILE, logger)
 
-        if 'label' not in env:
-          env['label'] = load_pickle(log_dp / LABEL_FILE, logger)
+      if 'label' not in env and what != 'infer':
+        env['label'] = load_pickle(log_dp / LABEL_FILE, logger)
 
       # Model
       if 'manager' not in env:
@@ -75,6 +311,34 @@ def prepare_for_(what:str=Union[Literal['train'], Literal['infer']]):
       return fn(env, *args, **kwargs)
     return wrapper
   return wrapper
+
+def load_env(job_file:Path) -> Env:
+  ''' load a pretrained job env '''
+
+  # job
+  assert job_file.exists()
+  log_dp: Path = job_file.parent
+  job = Descriptor.load(job_file)
+
+  # logger
+  logger = logging
+  logger.info('Job Info:')
+  logger.info(pformat(job.cfg))
+
+  seed_everything(fix_seed(job.get('seed', -1)))
+
+  env: Env = {
+    'job': job,             # 'job.yaml'
+    'logger': logger,       # logger
+    'log_dp': log_dp,       # log folder
+  }
+
+  @prepare_for_('demo')
+  def load_data_and_model(env:Env):
+    env['model'] = env['manager'].load(env['model'], log_dp, logger)
+  load_data_and_model(env)
+
+  return env
 
 
 @process
@@ -344,6 +608,16 @@ def target_infer(env:Env):
   predicted = (preds_o, preds_r)
   save_pickle(predicted, log_dp / PREDICT_FILE, logger)
 
+
+def cmd_args():
+  parser = ArgumentParser()
+  parser.add_argument('-D', '--csv_file',     type=Path,           help='path to a *.csv data file')
+  parser.add_argument('-J', '--job_file',     type=Path,           help='path to a *.yaml job file')
+  parser.add_argument('-X', '--job_folder',   type=Path,           help='path to a folder of *.yaml job file')
+  parser.add_argument(      '--name',         default='test',      help='task name')
+  parser.add_argument(      '--target',       default='all',       help='job targets, comma seperated string')
+  parser.add_argument(      '--no_overwrite', action='store_true', help='no overwrite if log folder exists')
+  return parser.parse_args()
 
 @timer
 def run_file(args) -> JobResult:

@@ -47,6 +47,17 @@ def minmax_norm_inv(seq:Seq, vmin:ndarray, vmax:ndarray) -> Seq:
   return seq * (vmax - vmin) + vmin
 
 
+def apply_transforms(seq:Seq, stats:Stats):
+  for (proc, st) in stats:
+    seq = globals().get(proc)(seq, *st)
+  return seq
+
+def inv_transforms(seq:Seq, stats:Stats):
+  for (proc, st) in reversed(stats):
+    seq = globals().get(f'{proc}_inv')(seq, *st)
+  return seq
+
+
 if __name__ == '__main__':
   import pandas as pd
 

@@ -421,15 +421,29 @@ pre[data-line] .line-highlight[data-end]:after {
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"></pre><hr>
 <h3 class="mume-header" id="post-infertask_namejob_name-%E6%8E%A8%E6%96%AD">POST /infer/&lt;task_name&gt;/&lt;job_name&gt; &#x63A8;&#x65AD;</h3>
 
+<p>&#x26AA; infer inplace</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  data<span class="token operator">:</span> str           <span class="token comment">// base64 codec of input.flatten(): np.array</span>
+  inplace<span class="token operator">:</span> <span class="token boolean">true</span>       <span class="token comment">// inplace prediction on original timeseq data</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// response</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  seq<span class="token operator">:</span> bytes<span class="token punctuation">,</span>         <span class="token comment">// base64 encoding of seq.flatten(): np.array</span>
+  seq_shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>   <span class="token comment">// shape of seq: np.ndarray</span>
+  pred<span class="token operator">:</span> bytes<span class="token punctuation">,</span>        <span class="token comment">// base64 encoding of pred.flatten(): np.array</span>
+  pred_shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>  <span class="token comment">// shape of pred: np.ndarray</span>
+<span class="token punctuation">}</span>
+</pre><p>&#x26AA; infer new</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  data<span class="token operator">:</span> bytes         <span class="token comment">// base64 encoding of input.flatten(): np.array</span>
   shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// shape of input: np.ndarray</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  pred<span class="token operator">:</span> str           <span class="token comment">// base64 codec of pred.flatten(): np.array</span>
+  pred<span class="token operator">:</span> bytes         <span class="token comment">// base64 encoding of pred.flatten(): np.array</span>
   shape<span class="token operator">:</span> int<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// shape of pred: np.ndarray</span>
 <span class="token punctuation">}</span>
 </pre><hr>
