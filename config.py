@@ -42,10 +42,10 @@ AUTH_TOKEN = None
 ''' cmdline args '''
 def cmd_args():
   parser = ArgumentParser()
-  parser.add_argument('-D', '--csv_file',     required=True,     type=Path, help='path to a *.csv data file')
-  parser.add_argument('-J', '--job_file',                        type=Path, help='path to a *.yaml job file')
-  parser.add_argument('-X', '--job_folder',                      type=Path, help='path to a folder of *.yaml job file')
-  parser.add_argument(      '--name',         default='test',               help='task name')
-  parser.add_argument(      '--target',       default='all',                help='job targets, comma seperated string')
-  parser.add_argument(      '--no_overwrite', action='store_true',          help='no overwrite if log folder exists')
+  parser.add_argument('-D', '--csv_file',     type=Path,           help='path to a *.csv data file')
+  parser.add_argument('-J', '--job_file',     type=Path,           help='path to a *.yaml job file')
+  parser.add_argument('-X', '--job_folder',   type=Path,           help='path to a folder of *.yaml job file')
+  parser.add_argument(      '--name',         default='test',      help='task name')
+  parser.add_argument(      '--target',       default='all',       help='job targets, comma seperated string')
+  parser.add_argument(      '--no_overwrite', action='store_true', help='no overwrite if log folder exists')
   return parser.parse_args()

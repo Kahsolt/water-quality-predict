@@ -22,7 +22,7 @@ def new_run_meta() -> RunMeta:
     'id': None,
     'name': None,         # task name
     'status': Status.QUEUING,
-    'info': None,
+    'info': '',           # accumulative
     'progress': None,     # f'{n_job_finished} / {n_job_total}'
     'ts_create': ts_now(),
     'ts_update': None,

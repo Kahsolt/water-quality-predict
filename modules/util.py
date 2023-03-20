@@ -84,6 +84,9 @@ def rand_str(length=4) -> str:
 def get_fullname(task:str, job:str) -> str:
   return f'{task}@{job}'
 
+def enum_values(enum_cls:Enum) -> List[str]:
+  return [e.value for e in enum_cls]
+
 
 def read_csv(fp:Path, logger:Logger=None) -> DataFrame:
   if logger: logger.info(f'  read csv from {fp}')
@@ -127,8 +130,13 @@ def load_json(fp:Path, init=None):
     return deepcopy(init)
 
 def save_json(fp:Path, data):
+  def default_fn(x:Any):
+    if isinstance(x, (Target, Status, TaskType)): return x.value
+    if isinstance(x, Path): return str(x)
+    raise TypeError
+
   with open(fp, 'w', encoding='utf-8') as fh:
-    json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False)
+    json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False, default=default_fn)
 
 
 def ndarray_to_bytes(x:np.ndarray) -> Tuple[bytes, Tuple[int, ...]]:

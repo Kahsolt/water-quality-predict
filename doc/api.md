@@ -79,7 +79,8 @@ enum Status {
 
 ```typescript
 // request
-// <= single *.csv file
+// <= single *.csv file named "csv"
+// NOTE: must send jsonify(data) as a file named "json"
 interface {
   target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
@@ -98,7 +99,8 @@ interface {
 
 ```typescript
 // request
-// <= single *.csv file (optional), **replacing** the old one
+// <= single *.csv file (optional) named "csv", **replacing** the old one
+// NOTE: must send jsonify(data) as a file named "json"
 interface {
   target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
@@ -175,7 +177,9 @@ interface {
 // response
 // => <job_name>.yaml file or 
 interface {
-  // config items converted from *.yaml
+  job: {
+    // config items converted from *.yaml
+  }
 }
 ```
 
@@ -183,11 +187,10 @@ interface {
 
 ```typescript
 // request:
-// NOTE: <name> in url must starts with 'rgr_' or 'clf_'
 // <= *.yaml file
-interface {
-  overwrite?: bool    // overwrite if exists, default to false
-}
+// NOTE: <name> in url must starts with 'rgr_' or 'clf_'
+// url params: ?overwrite=
+//   overwrite: 0 or 1, default: 0
 ```
 
 ### DELETE /job/\<name\> 删除任务模板
@@ -233,7 +236,7 @@ interface {
 
 ```typescript
 // response
-// => plain html page
+// => job.log file
 ```
 
 ### GET [/runtime](/runtime) 查看系统运行时状态
@@ -244,7 +247,20 @@ interface {
 //   status: comma seperated string select from `Status` (default: "queuing,running")
 
 // response
-// => plain html page (auto refresh per 5s)
+interface {
+  runtime_hist: [
+    {                       // Run
+      id: int,
+      name: str,            // task name
+      status: str,          // task status
+      info: str,            // cur job
+      progress: str,        // f'{n_job_finished} / {n_job_total}'
+      ts_create: int,       // task accept time
+      ts_update: int,       // last meta info update time
+      task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task marked finished)
+    },
+  ]
+}
 ```
 
 ----

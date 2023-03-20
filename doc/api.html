@@ -330,7 +330,8 @@ pre[data-line] .line-highlight[data-end]:after {
 <h3 class="mume-header" id="post-task-%E5%88%9B%E5%BB%BA%E6%96%B0%E4%BB%BB%E5%8A%A1%E5%B9%B6%E8%BF%90%E8%A1%8C">POST /task &#x521B;&#x5EFA;&#x65B0;&#x4EFB;&#x52A1;&#x5E76;&#x8FD0;&#x884C;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token comment">// &lt;= single *.csv file</span>
+<span class="token comment">// &lt;= single *.csv file named &quot;csv&quot;</span>
+<span class="token comment">// NOTE: must send jsonify(data) as a file named &quot;json&quot;</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
@@ -345,7 +346,8 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <p>&#x2139; &#x4E3B;&#x8981;&#x7528;&#x4E8E;&#x6570;&#x636E;&#x66F4;&#x65B0;&#xFF0C;&#x4FEE;&#x6539;&#x4F5C;&#x4E1A;&#x9879;&#xFF0C;&#x6216;&#x8005;&#x60F3;&#x4ECE;&#x5934;&#x5236;&#x4F5C;&#x6570;&#x636E;&#x96C6;&#x91CD;&#x65B0;&#x5F00;&#x59CB; &#x1F626;</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token comment">// &lt;= single *.csv file (optional), **replacing** the old one</span>
+<span class="token comment">// &lt;= single *.csv file (optional) named &quot;csv&quot;, **replacing** the old one</span>
+<span class="token comment">// NOTE: must send jsonify(data) as a file named &quot;json&quot;</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
@@ -403,16 +405,17 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token comment">// response</span>
 <span class="token comment">// =&gt; &lt;job_name&gt;.yaml file or </span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  <span class="token comment">// config items converted from *.yaml</span>
+  job<span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token comment">// config items converted from *.yaml</span>
+  <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="post-jobname-%E4%B8%8A%E4%BC%A0%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">POST /job/&lt;name&gt; &#x4E0A;&#x4F20;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request:</span>
-<span class="token comment">// NOTE: &lt;name&gt; in url must starts with &apos;rgr_&apos; or &apos;clf_&apos;</span>
 <span class="token comment">// &lt;= *.yaml file</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  overwrite<span class="token operator">?</span><span class="token operator">:</span> bool    <span class="token comment">// overwrite if exists, default to false</span>
-<span class="token punctuation">}</span>
+<span class="token comment">// NOTE: &lt;name&gt; in url must starts with &apos;rgr_&apos; or &apos;clf_&apos;</span>
+<span class="token comment">// url params: ?overwrite=</span>
+<span class="token comment">//   overwrite: 0 or 1, default: 0</span>
 </pre><h3 class="mume-header" id="delete-jobname-%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1%E6%A8%A1%E6%9D%BF">DELETE /job/&lt;name&gt; &#x5220;&#x9664;&#x4EFB;&#x52A1;&#x6A21;&#x677F;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"></pre><hr>
@@ -441,7 +444,7 @@ pre[data-line] .line-highlight[data-end]:after {
 </pre><h3 class="mume-header" id="get-logtask_namejob_namelog-%E6%9F%A5%E7%9C%8B%E4%BD%9C%E4%B8%9A%E6%97%A5%E5%BF%97">GET /log/&lt;task_name&gt;/&lt;job_name&gt;.log &#x67E5;&#x770B;&#x4F5C;&#x4E1A;&#x65E5;&#x5FD7;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
-<span class="token comment">// =&gt; plain html page</span>
+<span class="token comment">// =&gt; job.log file</span>
 </pre><h3 class="mume-header" id="get-runtimeruntime-%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8A%B6%E6%80%81">GET <a href="..\runtime">/runtime</a> &#x67E5;&#x770B;&#x7CFB;&#x7EDF;&#x8FD0;&#x884C;&#x65F6;&#x72B6;&#x6001;</h3>
 
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
@@ -449,7 +452,20 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token comment">//   status: comma seperated string select from `Status` (default: &quot;queuing,running&quot;)</span>
 
 <span class="token comment">// response</span>
-<span class="token comment">// =&gt; plain html page (auto refresh per 5s)</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  runtime_hist<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>                       <span class="token comment">// Run</span>
+      id<span class="token operator">:</span> int<span class="token punctuation">,</span>
+      name<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// task name</span>
+      status<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task status</span>
+      info<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// cur job</span>
+      progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f&apos;{n_job_finished} / {n_job_total}&apos;</span>
+      ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task accept time</span>
+      ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// last meta info update time</span>
+      task_init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>  <span class="token comment">// path to tmp task_init_pack.pkl file (will be deleted once task marked finished)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
 </pre><hr>
 <h3 class="mume-header" id="post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv &#x5408;&#x5E76;&#x591A;&#x4E2A;csv&#x6587;&#x4EF6;</h3>
 

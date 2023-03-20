@@ -19,10 +19,10 @@ app = Flask(__name__, template_folder=HTML_PATH)
 
 
 def resp_ok(data:Union[dict, list]=None) -> Response:
-  r = {'ok': True}
-  if data is not None:
-    r['data'] = data
-  return jsonify(r)
+  return jsonify({
+    'ok': True,
+    'data': data,
+  })
 
 def resp_error(errmsg:str) -> Response:
   return jsonify({
@@ -34,7 +34,7 @@ def resp_error(errmsg:str) -> Response:
 def fix_target(target) -> List[str]:
   if not target: return ['all']
   if isinstance(target, str): target = [target]
-  valid_tgt = [e.value for e in Target]
+  valid_tgt = enum_values(Target)
   for tgt in target: assert tgt in valid_tgt
   return target
 
@@ -65,13 +65,13 @@ def debug():
 
 @app.route('/model')
 def model():
-  return resp_ok([job.stem for job in (BASE_PATH / 'modules' / 'models').iterdir() 
-                  if job.suffix == '.py' and job.stem != '___init___'])
+  return resp_ok({'models': [job.stem for job in (BASE_PATH / 'modules' / 'models').iterdir() 
+                                      if job.suffix == '.py' and job.stem != '___init___']})
 
 
 @app.route('/job')
 def job():
-  return resp_ok([job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml'])
+  return resp_ok({'jobs': [job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml']})
 
 
 @app.route('/job/<name>', methods=['POST', 'GET', 'DELETE'])
@@ -83,15 +83,17 @@ def job_(name:str):
 
   if request.method == 'POST':
     if len(request.files) != 1: return resp_error(f'only need 1 file, but got {len(request.files)} files')
+    name = list(request.files.keys())[0]
+    file = request.files[name]
 
-    overwrite = False
-    try:
-      req: Dict = request.json
-      overwrite = req.get('overwrite', overwrite)
+    if name.split('_')[0] not in enum_values(TaskType): return resp_error('file name must starts with "rgr_" or "clf_"')
+
+    overwrite = 0
+    try: overwrite = int(request.args.get('overwrite', overwrite))
     except: pass
     if not overwrite and job_file.exists(): return resp_error('no overwrite existing file')
 
-    request.files[0].save(job_file)
+    file.save(job_file)
     return resp_ok()
 
   elif request.method == 'GET':
@@ -99,9 +101,7 @@ def job_(name:str):
     if format == 'yaml':
       return send_file(job_file, mimetype='text/yaml')
     elif format == 'json':
-      with open(job_file, 'r', encoding='utf-8') as fh:
-        cfg = load_yaml(fh)
-      return resp_ok(cfg)
+      return resp_ok({'job': load_yaml(job_file)})
     else:
       return resp_error(f'unknown format: {format}')
 
@@ -113,15 +113,21 @@ def job_(name:str):
 @app.route('/task', methods=['POST', 'GET'])
 def task():
   if request.method == 'POST':
-    if len(request.files) != 1: return resp_error(f'only need 1 file, but got {len(request.files)}')
+    if len(request.files) > 2: return resp_error(f'only need at most 2 files: "json" ad "csv", but got {len(request.files)}')
+    if 'csv' not in request.files: return resp_error(f'not found required "csv" in uploaded files')
 
-    req: Dict = request.json
+    fjson = request.files['json'].stream.read() if 'json' in request.files else None
+    fcsv  = request.files['csv'] .stream.read()
+
+    req: Dict = json.loads(fjson) if fjson is not None else {}
+    if 'name' in req and (LOG_PATH / req['name']).exists(): return resp_error('task already exists, should use POST /task/<name> to retrain/modify')
+
     name = req.get('name', timestr())
     target = fix_target(req.get('target'))
     jobs = fix_jobs(req.get('jobs'))
     task_init: TaskInit = {
       'name': name,
-      'data': request.files[0].stream.read(),
+      'data': fcsv,
       'target': target,
       'jobs': jobs,
     }
@@ -133,7 +139,7 @@ def task():
     return resp_ok({'name': name})
 
   elif request.method == 'GET':
-    return resp_ok([task.name for task in LOG_PATH.iterdir() if task.is_dir()])
+    return resp_ok({'tasks': [task.name for task in LOG_PATH.iterdir() if task.is_dir()]})
 
 
 @app.route('/task/<name>', methods=['POST', 'GET', 'DELETE'])
@@ -162,7 +168,7 @@ def task_(name:str):
     return resp_ok()
 
   elif request.method == 'GET':
-    return resp_ok(load_json(task_folder / TASK_FILE))
+    return resp_ok(load_json(task_folder / TASK_FILE)[-1])    # only last run
 
   elif request.method == 'DELETE':
     shutil.rmtree(str(task_folder))
@@ -221,7 +227,7 @@ def runtime():
   except: pass
   filters = filters.split(',')
 
-  return resp_ok([run for run in trainer.run_meta if run['status'] in filters])
+  return resp_ok({'runtime_hist': [run for run in trainer.run_meta if run['status'] in filters]})
 
 
 if __name__ == '__main__':

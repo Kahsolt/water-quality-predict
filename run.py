@@ -7,7 +7,6 @@ from copy import deepcopy
 from pathlib import Path
 from collections import Counter
 from pprint import pformat
-from typing import Callable, Any
 from traceback import format_exc
 from importlib import import_module
 
@@ -78,6 +77,7 @@ def process_csv(env:Env):
   logger: Logger = env['logger']
 
   df: TimeSeq = read_csv(env['csv'], logger)   # 总原始数据
+  for col in df.columns[1:]: df[col] = df[col].astype('float32')
 
   logger.info(f'  found {len(df)} records')
   logger.info(f'  column names({len(df.columns)}): {list(df.columns)}')
@@ -346,10 +346,8 @@ def target_infer(env:Env):
   stats: Stats = env['stats']
   manager      = env['manager']
   model: Model = env['model']
-  inlen: int   = job.get('dataset/in')
+  inlen: int   = job.get('dataset/in', 0)       # fix for ARIMA
   overlap: int = job.get('dataset/overlap', 0)
-
-  if isinstance(model, Module): model = model.cpu()
 
   is_model_arima = 'ARIMA' in job['model/name']
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR

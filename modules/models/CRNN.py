@@ -7,6 +7,7 @@ import torch.nn.functional as F
 from torch import optim
 
 from modules.dataset import FrameDataset, DataLoader
+from modules.util import device
 from modules.typing import *
 
 
@@ -75,6 +76,7 @@ def prepare_for_train(model:Module, dataset:Datasets, params:Params):
   assert isinstance(optimizer, Optimizer)
   assert isinstance(loss_fn, Callable)
 
+  model = model.to(device)
   return dataloader, optimizer, loss_fn, E
 
 
@@ -83,4 +85,5 @@ def prepare_for_eval(model:Module, dataset:Datasets, params:Params):
   y_test = evalset[1]
   dataloader = DataLoader(FrameDataset(evalset), batch_size=1, shuffle=False, pin_memory=False)
 
+  model = model.to(device)
   return dataloader, y_test
