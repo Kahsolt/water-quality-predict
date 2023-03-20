@@ -15,7 +15,6 @@ from config import *
 from run import *
 from worker import *
 
-
 app = Flask(__name__, template_folder=HTML_PATH)
 
 
@@ -212,7 +211,7 @@ def log__log(task:str, job:str):
 
 @app.route('/merge_csv', methods=['POST'])
 def merge_csv():
-  pass
+  return resp_ok({'status': 'not impl'})
 
 
 @app.route('/runtime', methods=['GET'])

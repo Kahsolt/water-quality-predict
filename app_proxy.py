@@ -5,23 +5,72 @@
 from app import *
 
 
+def resp_ok(data:Union[dict, list]=None) -> Response:
+  return jsonify({
+    'code': 200,
+    'msg': 'success',
+    'data': data,
+  })
+
+def resp_error(errmsg:str) -> Response:
+  return jsonify({
+    'code': 500,
+    'msg': errmsg,
+    'data': None,
+  })
+
+
 @app.route('/page2/getFittingCurve')
 def getFittingCurve():
-  return 'getFittingCurve'
+  req = request.json
+  code   = req['dischargeCode']
+  factor = req['monitorFactor']
+  start  = req['start']
+  end    = req['end']
+
+  scores = {
+    'R2': None,
+    'MAE': None,
+    'RMSE': None,
+  }
+
+  return resp_ok({
+    'evaluation': scores,
+    'realData': [],
+    'fitData': [],
+  })
 
 
 @app.route('/page2/get6hPredictionResult')
 def get6hPredictionResult():
+  req = request.json
+  code   = req['dischargeCode']
+  factor = req['monitorFactor']
+  start  = req['start']
+  end    = req['end']
+
   return 'get6hPredictionResult'
 
 
 @app.route('/page2/getModelPerformance')
 def getModelPerformance():
+  req = request.json
+  code   = req['dischargeCode']
+  factor = req['monitorFactor']
+  start  = req['start']
+  end    = req['end']
+
   return 'getModelPerformance'
 
 
 @app.route('/page2/getExceedingPredictionResult')
 def getExceedingPredictionResult():
+  req = request.json
+  code   = req['dischargeCode']
+  factor = req['monitorFactor']
+  start  = req['start']
+  end    = req['end']
+
   return 'getExceedingPredictionResult'
 
 
