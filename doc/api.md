@@ -1,6 +1,5 @@
 # API documentation
 
-=> see proxy API doc: [/doc/api_proxy](/doc/api_proxy)  
 => see job.yaml doc: [/doc/job](/doc/job)  
 => see log folder doc: [/doc/log](/doc/log)  
 

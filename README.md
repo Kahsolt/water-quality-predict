@@ -26,18 +26,6 @@ Main busisness:
 - `GET /log/<task_name>/<job_name>.log` to see job log
 - `GET /log/<task_name>` to download the task log folder
 
-⚪ Proxy API
-
-- start server `python app_proxy.py`
-- point your browser to `http://127.0.0.1:5000/` to see API documentation
-
-Main busisness:
-
-- `POST /page2/getFittingCurve`
-- `POST /page2/get6hPredictionResult`
-- `POST /page2/getModelPerformance`
-- `POST /page2/getExceedingPredictionResult`
-
 
 ### Local run
 
