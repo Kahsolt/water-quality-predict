@@ -17,8 +17,8 @@ from modules import preprocess
 from modules.util import *
 from modules.typing import *
 
-from worker import *
 from run import *
+import matplotlib ; matplotlib.use('QtAgg')
 
 WINDOW_TITLE  = 'Sequential Inference Demo'
 WINDOW_SIZE   = (1000, 750)

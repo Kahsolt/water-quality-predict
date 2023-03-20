@@ -12,6 +12,7 @@ from importlib import import_module
 from pprint import pformat
 from traceback import format_exc
 
+import matplotlib ; matplotlib.use('agg')
 import matplotlib.pyplot as plt
 
 from modules import preprocess, transform

@@ -93,7 +93,7 @@ def test_train_routine():
 
   ''' Step 3: download log '''
   job_name = random.choice(list(jobs.keys()))
-  resp = R.get(EP(f'/task/{task_name}/{job_name}.log'))
+  resp = R.get(EP(f'/log/{task_name}/{job_name}.log'))
   assert resp.ok, resp.text
 
 
