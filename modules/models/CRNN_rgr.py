@@ -74,6 +74,7 @@ def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
   x = x.to(device)          # [I=96, D=1]
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]
   y = model(x)              # [B=1, O=6]
+  y = y.T                   # [O=6, D=1]
   y = y.cpu().numpy()
   return y
 

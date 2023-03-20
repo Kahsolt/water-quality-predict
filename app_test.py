@@ -94,7 +94,7 @@ def test_task_routine():
   ''' Step 3: download log '''
   job_name = random.choice(list(jobs.keys()))
   resp = R.get(EP(f'/task/{task_name}/{job_name}.log'))
-  assert resp.ok, resp.json()
+  assert resp.ok, resp.text
 
 
 if __name__ == '__main__':

@@ -117,7 +117,7 @@ def worker(evt:Event, lock:RLock, queue:Queue):
           ok, tot = 0, len(jobs)
           for i, job_name in enumerate(jobs):
             run['info'] += f"Running job {job_name!r}\n"
-            run['progress'] = f"{i} / {tot}"
+            run['progress'] = f"{i+1} / {tot}"
             meta['ts_update'] = run['ts_update'] = ts_now()
 
             job_file = JOB_PATH / f'{job_name}.yaml'

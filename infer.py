@@ -168,7 +168,7 @@ class App:
 
     if 'predict with oracle (one step)':
       preds: List[Frame] = []
-      loc = L
+      loc = L + (1 if self.is_model_arima else 0)
       while loc < R:
         if self.is_model_arima:
           y: Frame = manager.infer(model, loc)  # [1]
@@ -182,7 +182,7 @@ class App:
 
     if 'predict with prediction (rolling)' and args.draw_rolling:
       preds: List[Frame] = []
-      loc = L
+      loc = L + (1 if self.is_model_arima else 0)
       x = seq[loc-inlen:loc, :]
       x = frame_left_pad(x, inlen)              # [I, D]
       while loc < R:
@@ -207,9 +207,9 @@ class App:
     if 'select range & channel':
       if self.is_task_rgr: truth = seq  [L:R, 0]
       else:                truth = label[L:R, 0]
-      preds_o = preds_o[:R-L+1, 0]      # [T'=R-L+1]
+      preds_o = preds_o[:R-L, 0]      # [T'=R-L+1]
       if args.draw_rolling:
-        preds_r = preds_r[:R-L+1, 0]    # [T'=R-L+1]
+        preds_r = preds_r[:R-L, 0]    # [T'=R-L+1]
 
     if 'show acc':
       if self.is_task_rgr:

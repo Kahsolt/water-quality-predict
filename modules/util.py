@@ -185,7 +185,7 @@ def frame_left_pad(x:Frame, padlen:int) -> Frame:
   return x
 
 def frame_shift(x:Frame, y:Frame) -> Frame:
-  return np.concatenate([x[len(y):, :], y], axis=0)
+  return np.concatenate((x[len(y):, :], y), axis=0)
 
 
 def make_zip(src:Path, fp: Path):

@@ -354,7 +354,7 @@ def target_infer(env:Env):
 
   if 'predict with oracle (one step)':
     preds: List[Frame] = []
-    loc = inlen
+    loc = inlen + (1 if is_model_arima else 0)
     while loc < len(seq):
       if is_model_arima:
         y: Frame = manager.infer(model, loc)  # [1]
@@ -368,7 +368,7 @@ def target_infer(env:Env):
 
   if 'predict with prediction (rolling)':
     preds: List[Frame] = []
-    loc = inlen
+    loc = inlen + (1 if is_model_arima else 0)
     x = seq[loc-inlen:loc, :]
     x = frame_left_pad(x, inlen)              # [I, D]
     while loc < len(seq):

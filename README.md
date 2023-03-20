@@ -40,14 +40,15 @@ Main busisness:
 ⚪ Dataset & Train & Eval
 
 - write a job file, see guide => [doc/job.md](doc/job.md)
-- run `python run.py -D path/to/*.csv -J path/to/*.yaml`
-  - run test demo: `run_test.cmd`
+- run a single job: `python run.py -D path/to/*.csv -J path/to/*.yaml --target all`
+- run folder of jobs: `py run.py -D data\test.csv -X job`
+  - run all test demo: `run_test.cmd`
 
 ⚪ Infer
 
 ![demo](img/demo.png)
 
-- run `python run_infer.py`
+- run `python infer.py`
 
 
 ----

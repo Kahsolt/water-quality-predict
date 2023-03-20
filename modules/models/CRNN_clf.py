@@ -60,9 +60,9 @@ def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> Eva
 def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
   x = torch.from_numpy(x).float()
   x = x.to(device)
-  x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]
+  x = x.unsqueeze(axis=0)   # [B=1, I=96, D]
   y = model(x)              # [B=1, NC=4]
   y = y.argmax(dim=-1)      # [B=1]
-  y = y.unsqueeze_(dim=-1)  # [B=1, D=1]
+  y = y.unsqueeze_(dim=-1)  # [B=O=1, D=1]
   y = y.cpu().numpy()
   return y
