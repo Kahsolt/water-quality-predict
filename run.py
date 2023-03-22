@@ -482,13 +482,17 @@ def process_dataset(env:Env):
 
   # split dataset
   split   = job.get('dataset/split', 0.2) ; assert 0.0 < split < 1.0
-  dataset = ((X_train, Y_train), (X_test, Y_test)) = split_dataset(X, Y)
+  trainset, testset = split_dataset(X, Y)
+  if encoder is not None:    # clf, fix label not present in data
+    trainset = check_label_presented_cover_expected(trainset, encoder['name'])
+    testset  = check_label_presented_cover_expected(testset,  encoder['name'])
+  dataset = (X_train, Y_train), (X_test, Y_test) = trainset, testset
   logger.info(f'  train split')
-  logger.info(f'    input:  {X_train[0].shape}')
-  logger.info(f'    target: {Y_train[1].shape}')
+  logger.info(f'    input:  {X_train.shape}')
+  logger.info(f'    target: {Y_train.shape}')
   logger.info(f'  test split')
-  logger.info(f'    input:  {X_test[0].shape}')
-  logger.info(f'    target: {Y_test[1].shape}')
+  logger.info(f'    input:  {X_test.shape}')
+  logger.info(f'    target: {Y_test.shape}')
 
   if label is not None: save_pickle(label, log_dp / LABEL_FILE, logger)
 

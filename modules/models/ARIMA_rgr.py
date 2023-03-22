@@ -29,7 +29,7 @@ def eval(model:AutoARIMA, seq:Seq, params:Params, logger:Logger=None) -> EvalMet
   seqlen = len(seq)
   start = seqlen // 4
   pred = model.predict_in_sample(start=start, end=seqlen-1)
-  return get_metrics(seq[:-start], pred, task=TASK_TYPE)
+  return get_metrics(seq[:-start], pred, task=TASK_TYPE, logger=logger)
 
 
 def infer(model:AutoARIMA, x:int, logger:Logger=None) -> Frame:

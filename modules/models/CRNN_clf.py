@@ -53,7 +53,7 @@ def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> Eva
     preds.append(pred.cpu().numpy())
 
   pred: Frames = np.stack(preds, axis=0)                            # [N, O]
-  return get_metrics(y_test.squeeze(), pred.squeeze(), task=TASK_TYPE)     # [N]
+  return get_metrics(y_test.squeeze(), pred.squeeze(), task=TASK_TYPE, logger=logger)     # [N]
 
 
 @torch.inference_mode()

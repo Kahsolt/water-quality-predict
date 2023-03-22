@@ -13,24 +13,20 @@ preprocess:
 
 dataset:
   split: 0.2
-  inlen: 24
+  inlen: 72
   outlen: 1            # must be 1 for clf
   encoder:
-    name: ex_thresh_3h
+    name: ex_thresh_24h
     params:
-      thresh: 1.5
+      thresh: 1
 
 model:
   name: XGBoost_clf
   params:
     model: XGBClassifier
     objective: multi:softprob
-    gs_params:
-      param_grid:
-        max_depth: [3, 5]
-        n_estimators: [20]
-        learning_rate: [0.1, 0.15]
-      cv: 5
-      verbose: 2
-      n_jobs: -1
-      scoring: accuracy
+    # no GridSearchCV, no 'gs_param'
+    param:
+      max_depth: 5
+      n_estimators: 30
+      learning_rate: 0.1

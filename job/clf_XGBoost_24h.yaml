@@ -24,7 +24,7 @@ model:
   name: XGBoost_clf
   params:
     model: XGBClassifier
-    objective: 'multi:softprob'
+    objective: multi:softprob
     gs_params:
       param_grid:
         max_depth: [3, 5]

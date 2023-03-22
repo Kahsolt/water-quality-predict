@@ -68,10 +68,18 @@ def ex_thresh_24h(seq:Seq, T:Time, **kwargs) -> Seq:
 # ↑↑↑ above are valid encoders ↑↑↑
 
 
+def get_num_classes(encoder_name:str) -> int:
+  return {
+    'ex_thresh':     2,
+    'ex_thresh_3h':  4,
+    'ex_thresh_24h': 4,
+  }[encoder_name]
+
 def encode_seq(x:Seq, T:Time, encoder:Encoder) -> Seq:
   label_func = globals()[encoder['name']]
   label_func_params = encoder.get('params') or {}
   return label_func(x, T, **label_func_params)
+
 
 def slice_frames(x:Seq, y:Seq, inlen:int=3, outlen:int=1, overlap:int=0) -> Dataset:
   ''' 在时间序列上滚动切片产生数据集样本，知 inlen 推 outlen 时间步 '''
@@ -98,12 +106,33 @@ def slice_frames(x:Seq, y:Seq, inlen:int=3, outlen:int=1, overlap:int=0) -> Data
 
   return X, Y
 
-def split_dataset(X:Frames, Y:Frames, split:float=0.2) -> Dataset:
+def split_dataset(X:Frames, Y:Frames, split:float=0.2) -> Datasets:
   cp = int(len(X) * split)
   X_eval, X_train = X[:cp, ...], X[cp:, ...]
   Y_eval, Y_train = Y[:cp, ...], Y[cp:, ...]
 
   return (X_train, Y_train), (X_eval, Y_eval)
+
+def check_label_presented_cover_expected(XY: Dataset, encoder_name:str) -> Dataset:
+  X, Y = XY
+  presented = set(Y.flatten())
+  expected  = set(range(get_num_classes(encoder_name)))
+  if presented == expected: return XY
+
+  x_new, y_new = [], []
+  for lbl in expected:
+    if lbl not in presented:
+      N, T, D = X.shape
+      x_new.append(np.zeros([1, T, D], dtype=X.dtype))
+      N, T, D = Y.shape
+      y = np.zeros([1, T, D], dtype=Y.dtype)
+      y[0, :, :] = lbl
+      y_new.append(y)
+
+  X_ex = np.concatenate([X, np.concatenate(x_new, axis=0)], axis=0)
+  Y_ex = np.concatenate([Y, np.concatenate(y_new, axis=0)], axis=0)
+  assert set(Y_ex.flatten()) == expected
+  return X_ex, Y_ex
 
 
 def frame_left_pad(x:Frame, padlen:int) -> Frame:

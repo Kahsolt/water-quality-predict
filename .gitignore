@@ -12,3 +12,7 @@ ref/
 # logs
 log/
 tmp/
+
+# local debug
+bug/
+run_bug.cmd

@@ -263,8 +263,9 @@ pre[data-line] .line-highlight[data-end]:after {
       <div class="mume markdown-preview  ">
       <h1 class="mume-header" id="api-documentation">API documentation</h1>
 
-<p>=&gt; see job.yaml doc: <a href="job">/doc/job</a><br>
-=&gt; see log folder doc: <a href="log">/doc/log</a></p>
+<p>=&gt; see job.yaml doc: <a href="job">/doc/job</a> for job config<br>
+=&gt; see log folder doc: <a href="log">/doc/log</a> for log folder layout<br>
+=&gt; see encoder: <a href="encoder">/doc/encoder</a> for pred class_ids of each ecnoder</p>
 <h3 class="mume-header" id="general-%E6%80%BB%E8%AE%BA">General &#x603B;&#x8BBA;</h3>
 
 <p>Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).<br>
@@ -367,6 +368,7 @@ pre[data-line] .line-highlight[data-end]:after {
     <span class="token string">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
       type<span class="token operator">:</span> str
       statue<span class="token operator">:</span> str
+      inlen<span class="token operator">:</span> int
       scores<span class="token operator">:</span> <span class="token punctuation">{</span>       <span class="token comment">// for &apos;clf&apos; task</span>
         pres<span class="token operator">:</span> float
         recall<span class="token operator">:</span> float

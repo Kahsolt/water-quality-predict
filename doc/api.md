@@ -1,7 +1,8 @@
 # API documentation
 
-=> see job.yaml doc: [/doc/job](/doc/job)  
-=> see log folder doc: [/doc/log](/doc/log)  
+=> see job.yaml doc: [/doc/job](/doc/job) for job config  
+=> see log folder doc: [/doc/log](/doc/log) for log folder layout  
+=> see encoder: [/doc/encoder](/doc/encoder) for pred class_ids of each ecnoder 
 
 ### General 总论
 
@@ -126,6 +127,7 @@ interface {
     "job_name": {
       type: str
       statue: str
+      inlen: int
       scores: {       // for 'clf' task
         pres: float
         recall: float

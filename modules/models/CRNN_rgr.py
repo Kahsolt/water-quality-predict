@@ -65,7 +65,7 @@ def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> Eva
     preds.append(y_hat.cpu().numpy())
 
   pred: Frames = np.concatenate(preds, axis=0)                  # [N, O=6]
-  return get_metrics(y_test.squeeze(axis=-1), pred, task=TASK_TYPE)    # [N, O=6]
+  return get_metrics(y_test.squeeze(axis=-1), pred, task=TASK_TYPE, logger=logger)    # [N, O=6]
 
 
 @torch.inference_mode()

@@ -17,11 +17,13 @@ TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> GridSearchCV:
-  model: XGBClassifier = getattr(xgboost, params['model'])(
-    objective=params['objective'], 
-  )
-  model_gs = GridSearchCV(model, **params['gs_params'])
-  return model_gs
+  model_cls: XGBClassifier = getattr(xgboost, params['model'])
+  if 'gs_params' in params:
+    model = model_cls(objective=params['objective'])
+    model = GridSearchCV(model, **params['gs_params'])
+  else:
+    model = model_cls(objective=params['objective'], **params['param'])
+  return model
 
 
 def infer(model:GridSearchCV, x:Frame, logger:Logger=None) -> Frame:
@@ -38,4 +40,4 @@ def eval(model:GridSearchCV, dataset:Datasets, params:Params, logger:Logger=None
   X_test = X_test.squeeze(axis=-1)  # [N, I]
   y_test = y_test.squeeze(axis=-1)  # [N, O]
   pred = model.predict(X_test)      # [N, I] => [N, O]
-  return get_metrics(y_test, pred, task=TASK_TYPE)
+  return get_metrics(y_test, pred, task=TASK_TYPE, logger=logger)

@@ -21,7 +21,7 @@ model:
   name: XGBoost_rgr
   params:
     model: XGBRegressor
-    objective: 'reg:squarederror'
+    objective: reg:squarederror
     gs_params:
       param_grid:
         max_depth: [3, 5]
