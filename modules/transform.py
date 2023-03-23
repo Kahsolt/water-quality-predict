@@ -28,7 +28,7 @@ def minmax_norm(seq:Seq) -> SeqAndStat:
 
 ''' transform (apply): 数值变换 '''
 def log_apply(seq:Seq) -> Seq:
-  return np.log(seq + 1e-8)
+  return np.log(seq + 1e-5)
 
 def std_norm_apply(seq:Seq, avg:ndarray, std:ndarray) -> Seq:
   return (seq - avg) / std

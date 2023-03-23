@@ -114,6 +114,25 @@ def remove_outlier(df:Values) -> Values:
       assert len(arr) == arrlen
       tmp.append((arr, f'3-sigma outlier ({L.item()}, {H.item()})'))
 
+    if 'draw plot':
+      plt.clf()
+      n_fig = len(tmp)
+      for i, (arr, title) in enumerate(tmp):
+        plt.subplot(n_fig, 1, i+1)
+        plt.plot(arr)
+        plt.title(title)
+
+    return Series(arr)
+
+  return df.apply(process)
+
+def fill_nan(df:Values) -> Values:
+  def process(x:Series) -> Series:
+    x = x.fillna(method='ffill')
+    arr: Array = np.asarray(x)
+    arrlen = len(arr)
+    tmp = [(arr, 'original')]
+
     if 'padding by edge for NaNs at two endings':
       X = np.arange(arrlen)
       idx_v = X[np.where(np.isnan(arr) == 0)]   # index of non-NaN values
