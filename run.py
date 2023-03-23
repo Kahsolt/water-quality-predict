@@ -197,6 +197,8 @@ def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
   inlen:   int = job.get('dataset/inlen')
   overlap: int = job.get('dataset/overlap', 0)
 
+  seq = frame_left_pad(seq, inlen)
+
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
   is_model_arima = 'ARIMA' in job['model/name']
 
@@ -228,6 +230,8 @@ def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
 
   inlen:   int = job.get('dataset/inlen')
   overlap: int = job.get('dataset/overlap', 0)
+
+  seq = frame_left_pad(seq, inlen)
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
   is_model_arima = 'ARIMA' in job['model/name']
