@@ -21,7 +21,8 @@ DATA_FILE       = 'data.csv'          # data shared by all jobs of the same task
 DATA_ZIP_FILE   = 'data_hist.zip'     # history archive of raw data
 
 JOB_FILE        = 'job.yaml'          # job.yaml copied from template
-PREPROCESS_FILE = 'preprocess.pkl'    # seq (preprocessed), for visualize
+TIME_FILE       = 'time.pkl'          # seq time (preprocessed), for visualize
+PREPROCESS_FILE = 'preprocess.pkl'    # seq values (preprocessed), for visualize
 LABEL_FILE      = 'label.pkl'         # encoded target/label, for visualize
 STATS_FILE      = 'stats.pkl'         # stats of transform, for inv-transform of model prediction
 TRANSFORM_FILE  = 'transform.pkl'     # seq (transformed), for ARIMA train/eval

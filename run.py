@@ -425,6 +425,7 @@ def process_preprocess(env:Env):
   T: Time = T
   seq: Seq = df.to_numpy().astype(np.float32)
   assert len(T) == len(seq)
+  save_pickle(T,   log_dp / TIME_FILE,       logger)
   save_pickle(seq, log_dp / PREPROCESS_FILE, logger)
 
   logger.info(f'  T.shape: {T.shape}')

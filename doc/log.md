@@ -16,7 +16,8 @@ LOG_PATH
 │   ├── data_hist.zip       // history archive of raw data
 │   ├── <job_name>
 │   │   ├── job.yaml        // job config
-│   │   ├── preprocess.pkl  // seq (preprocessed), for visualize
+│   │   ├── time.pkl        // seq time (preprocessed), for visualize
+│   │   ├── preprocess.pkl  // seq values (preprocessed), for visualize
 │   │   ├── label.pkl       // encoded target/label, for visualize
 │   │   ├── stats.pkl       // stats of transform, for postprocess
 │   │   ├── transform.pkl   // seq (transformed), for ARIMA train/eval
