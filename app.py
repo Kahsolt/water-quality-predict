@@ -197,19 +197,25 @@ def infer_(task:str, job:str):
     req: Dict = request.json
 
     if req.get('inplace', False):
-        seq:  Seq = load_pickle(job_folder / PREPROCESS_FILE)
-        pred: Seq = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+        time: Time = load_pickle(job_folder / TIME_FILE)
+        seq:  Seq  = load_pickle(job_folder / PREPROCESS_FILE)
+        pred: Seq  = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+        time = time.to_list()
         seq  = ndarray_to_list(seq)
         pred = ndarray_to_list(pred)
         return resp_ok({
+          'time': time,
           'seq': seq, 
           'pred': pred, 
         })
     else:
       x: Frame = list_to_ndarray(req['data'])
-      y = predictor.predict(task, job, x)
+      y = predictor.predict(task, job, x, prob=False)
       pred = ndarray_to_list(y)
-      return resp_ok({'pred': pred})
+      if job.startswith('rgr_'): return resp_ok({'pred': pred})
+      y_prb = predictor.predict(task, job, x, prob=True)
+      prob = ndarray_to_list(y_prb)
+      return resp_ok({'pred': pred, 'prob': prob})
   except:
     return resp_error(format_exc())
 

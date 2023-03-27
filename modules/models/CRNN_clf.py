@@ -5,6 +5,7 @@
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 
 from modules.util import *
 from modules.preprocess import *
@@ -58,11 +59,20 @@ def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> Eva
 
 @torch.inference_mode()
 def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
-  x = torch.from_numpy(x).float()
-  x = x.to(device)
+  x = torch.from_numpy(x).float().to(device)
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D]
   y = model(x)              # [B=1, NC=4]
   y = y.argmax(dim=-1)      # [B=1]
   y = y.unsqueeze_(dim=-1)  # [B=O=1, D=1]
+  y = y.cpu().numpy()
+  return y
+
+
+@torch.inference_mode()
+def infer_prob(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
+  x = torch.from_numpy(x).float().to(device)
+  x = x.unsqueeze(axis=0)   # [B=1, I=96, D]
+  y = model(x)              # [B=1, NC=4]
+  y = F.softmax(y, dim=-1)  # [B=1, NC=4]
   y = y.cpu().numpy()
   return y

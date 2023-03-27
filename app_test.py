@@ -115,9 +115,15 @@ def test_infer_routine():
     )
     assert resp.ok ; r = resp.json()
 
+    if not r['ok']: breakpoint()
+
     pred = list_to_ndarray(r['data']['pred'])
     print(pred.shape)
     print('pred.mean:', pred.mean())
+    if 'prob' in r['data']:
+      prob = list_to_ndarray(r['data']['prob'])
+      print(prob.shape)
+      print('prob.mean:', prob.mean())
 
 
 if __name__ == '__main__':

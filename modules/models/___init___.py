@@ -22,6 +22,10 @@ def infer(model:Model, x:Frame, logger:Logger=None) -> Frame:
   ''' predict on one time step '''
   raise NotImplementedError
 
+def infer_prob(model:Model, x:Frame, logger:Logger=None) -> Frame:
+  ''' predict on one time step (clf only)'''
+  raise NotImplementedError
+
 def save(model:Model, log_dp:Path, logger:Logger=None):
   ''' save model weights/dump '''
   raise NotImplementedError

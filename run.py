@@ -183,7 +183,7 @@ class Trainer:
     self.save_run_meta()
 
 
-def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
+def predict_with_oracle(env:Env, x:Seq=None, prob=False) -> Frame:
   job: Descriptor = env['job']
   manager      = env['manager']
   model: Model = env['model']
@@ -194,30 +194,31 @@ def predict_with_oracle(env:Env, x:Seq=None) -> Frame:
   else:
     seq: Seq = env['seq']     # transformed
 
-  inlen:   int = job.get('dataset/inlen')
+  inlen:   int = job.get('dataset/inlen',   1)
   overlap: int = job.get('dataset/overlap', 0)
 
   seq = frame_left_pad(seq, inlen)
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
   is_model_arima = 'ARIMA' in job['model/name']
+  predictor = manager.infer_prob if prob else manager.infer
 
   preds: List[Frame] = []
   loc = 10 if is_model_arima else inlen
   while loc < len(seq):
     if is_model_arima:
-      y: Frame = manager.infer(model, loc)  # [1]
+      y: Frame = predictor(model, loc)  # [NC]
     else:
       x = seq[loc-inlen:loc, :]
-      x = frame_left_pad(x, inlen)          # [I, D]
-      y: Frame = manager.infer(model, x)    # [O, 1]
+      x = frame_left_pad(x, inlen)      # [I, D]
+      y: Frame = predictor(model, x)    # [O, 1]
     preds.append(y)
     loc += len(y) - overlap
   preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
 
   return inv_transforms(preds_o, stats) if is_task_rgr else preds_o
 
-def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
+def predict_with_predicted(env:Env, x:Seq=None, prob=False) -> Frame:
   job: Descriptor = env['job']
   manager      = env['manager']
   model: Model = env['model']
@@ -228,23 +229,24 @@ def predict_with_predicted(env:Env, x:Seq=None) -> Frame:
   else:
     seq: Seq = env['seq']     # transformed
 
-  inlen:   int = job.get('dataset/inlen')
+  inlen:   int = job.get('dataset/inlen',   1)
   overlap: int = job.get('dataset/overlap', 0)
 
   seq = frame_left_pad(seq, inlen)
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
   is_model_arima = 'ARIMA' in job['model/name']
+  predictor = manager.infer_prob if prob else manager.infer
 
   preds: List[Frame] = []
   loc = 10 if is_model_arima else inlen
   x = seq[loc-inlen:loc, :]
-  x = frame_left_pad(x, inlen)              # [I, D]
+  x = frame_left_pad(x, inlen)          # [I, D]
   while loc < len(seq):
     if is_model_arima:
-      y: Frame = manager.infer(model, loc)  # [1]
+      y: Frame = predictor(model, loc)  # [1]
     else:
-      y: Frame = manager.infer(model, x)    # [O, 1]
+      y: Frame = predictor(model, x)    # [O, 1]
     preds.append(y)
     x = frame_shift(x, y)
     loc += len(y) - overlap
@@ -258,13 +260,13 @@ class Predictor:
   def __init__(self) -> None:
     self.envs: Dict[str, Env] = { }
 
-  def predict(self, task:str, job:str, x:Frame) -> Frame:
+  def predict(self, task:str, job:str, x:Frame, prob=False) -> Frame:
     fullname = get_fullname(task, job)
     if fullname not in self.envs:
       self.envs[fullname] = load_env(LOG_PATH / task / job / 'job.yaml')
 
     env = self.envs[fullname]
-    y: Frame = predict_with_oracle(env, x)
+    y: Frame = predict_with_oracle(env, x, prob)
     return y
 
 

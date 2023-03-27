@@ -214,8 +214,9 @@ interface {
 
 // response
 interface {
-  seq: List[List[float]],   // preprocessed timeseq, [T, 1]
-  pred: List[List[float]],  // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
+  time: List[str]           // preprocessed time, [T]
+  seq: List[List[float]]    // preprocessed values, [T, 1]
+  pred: List[List[float]]   // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
 }
 ```
 

@@ -34,6 +34,13 @@ def infer(model:GridSearchCV, x:Frame, logger:Logger=None) -> Frame:
   return y
 
 
+def infer_prob(model:GridSearchCV, x:Frame, logger:Logger=None) -> Frame:
+  assert x.shape[-1] == 1
+  x = x.T                         # [I, D=1] => [N=1, I]
+  y = model.predict_proba(x)      # [N=1, NC]
+  return y
+
+
 def eval(model:GridSearchCV, dataset:Datasets, params:Params, logger:Logger=None) -> EvalMetrics:
   _, (X_test, y_test) = dataset
   assert X_test.shape[-1] == 1
