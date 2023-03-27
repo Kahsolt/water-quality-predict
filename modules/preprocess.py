@@ -105,7 +105,7 @@ def remove_outlier(df:Values) -> Values:
 
     if 'map 3-sigma outliers to NaN':
       arr_v = arr[~np.isnan(arr)]
-      _, (avg, std) = std_norm(log_apply(arr_v))
+      _, (avg, std) = std_norm(arr_v)
       L = avg - 3 * std
       H = avg + 3 * std
       mask = (L < arr) & (arr < H)
