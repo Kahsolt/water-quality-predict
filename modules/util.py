@@ -120,6 +120,11 @@ def save_yaml(fp:Path, data):
   with open(fp, 'w', encoding='utf-8') as fh:
     yaml.safe_dump(data, fh, sort_keys=False)
 
+def _type_cvt_json(x:Any):
+  if isinstance(x, (Target, Status, TaskType)): return x.value
+  if isinstance(x, Path): return str(x)
+  raise TypeError
+
 def load_json(fp:Path, init=None):
   if init is None: assert fp.exists()
 
@@ -130,13 +135,11 @@ def load_json(fp:Path, init=None):
     return deepcopy(init)
 
 def save_json(fp:Path, data):
-  def default_fn(x:Any):
-    if isinstance(x, (Target, Status, TaskType)): return x.value
-    if isinstance(x, Path): return str(x)
-    raise TypeError
-
   with open(fp, 'w', encoding='utf-8') as fh:
-    json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False, default=default_fn)
+    json.dump(data, fh, sort_keys=False, indent=2, ensure_ascii=False, default=_type_cvt_json)
+
+def serialize_json(data:Any) -> Any:
+  return json.loads(json.dumps(data, sort_keys=False, indent=2, ensure_ascii=False, default=_type_cvt_json))
 
 
 def ndarray_to_base64(x:np.ndarray) -> Tuple[str, Tuple[int, ...]]:

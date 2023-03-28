@@ -257,15 +257,15 @@ def merge_csv():
 
 @app.route('/runtime', methods=['GET'])
 def runtime():
-  filters = 'queuing,running'
+  filters = ','.join([e.value for e in [Status.QUEUING, Status.RUNNING]])
   try: filters = request.args.get('status', filters)
   except: pass
   filters = filters.split(',')
 
   if 'all' in filters:
-    return resp_ok({'runtime_hist': trainer.run_meta})
+    return resp_ok({'runtime_hist': serialize_json(trainer.run_meta)})
   else:
-    return resp_ok({'runtime_hist': [run for run in trainer.run_meta if run['status'] in filters]})
+    return resp_ok({'runtime_hist': serialize_json([run for run in trainer.run_meta if run['status'] in filters])})
 
 
 if __name__ == '__main__':

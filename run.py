@@ -151,7 +151,7 @@ class Trainer:
     self.lock = RLock()
     self.worker = Thread(target=worker, args=(self.evt, self.lock, self.queue))
 
-    self.run_meta: List[RunMeta] = load_json(LOG_PATH / TASK_FILE, [])
+    self.run_meta: List[RunMeta] = load_json(LOG_PATH / RUNTIME_FILE, [])
     self._resume()
 
   def _resume(self):
@@ -166,7 +166,7 @@ class Trainer:
 
   def add_task(self, name:str, init_fp:Path):
     print(f'>> new task: {name}')
-    run = new_run_meta()   # Status.QUEUING
+    run = new_run_meta()    # Status.QUEUING
     run['id'] = len(self.run_meta) + 1
     run['name'] = name
     run['task_init_pack'] = init_fp
