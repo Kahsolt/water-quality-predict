@@ -210,10 +210,10 @@ def infer_(task:str, job:str):
         })
     else:
       x: Frame = list_to_ndarray(req['data'])
-      y = predictor.predict(task, job, x, prob=False)
+      y = predict(task, job, x, prob=False)
       pred = ndarray_to_list(y)
       if job.startswith('rgr_'): return resp_ok({'pred': pred})
-      y_prb = predictor.predict(task, job, x, prob=True)
+      y_prb = predict(task, job, x, prob=True)
       prob = ndarray_to_list(y_prb)
       return resp_ok({'pred': pred, 'prob': prob})
   except:
@@ -265,7 +265,11 @@ def runtime():
   if 'all' in filters:
     return resp_ok({'runtime_hist': serialize_json(trainer.run_meta)})
   else:
-    return resp_ok({'runtime_hist': serialize_json([run for run in trainer.run_meta if run['status'] in filters])})
+    filtered: List[RunMeta] = []
+    for run in trainer.run_meta:
+      if isinstance(run['status'], str)    and run['status']       in filters: filtered.append(run)
+      if isinstance(run['status'], Status) and run['status'].value in filters: filtered.append(run)
+    return resp_ok({'runtime_hist': serialize_json(filtered)})
 
 
 if __name__ == '__main__':
@@ -274,7 +278,6 @@ if __name__ == '__main__':
     return redirect('/doc/api')
 
   trainer = Trainer()
-  predictor = Predictor()
   try:
     trainer.start()
     app.run(host='0.0.0.0', debug=True)
