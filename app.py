@@ -5,6 +5,7 @@
 import os
 import shutil
 import psutil
+import gc
 
 from flask import Flask, request, Response
 from flask import redirect, jsonify, render_template, send_file
@@ -19,12 +20,14 @@ app = Flask(__name__, template_folder=HTML_PATH)
 
 
 def resp_ok(data:Union[dict, list]=None) -> Response:
+  gc.collect()
   return jsonify({
     'ok': True,
     'data': data,
   })
 
 def resp_error(errmsg:str) -> Response:
+  gc.collect()
   return jsonify({
     'ok': False,
     'error': errmsg,
@@ -102,7 +105,7 @@ def job_(name:str):
     except: pass
     if not overwrite and job_file.exists(): return resp_error('no overwrite existing file')
 
-    file.save(job_file)
+    file.save(job_file) ; file.close()
     return resp_ok()
 
   elif request.method == 'GET':
@@ -145,6 +148,7 @@ def task():
     save_pickle(task_init, init_fp)
     trainer.add_task(name, init_fp)
 
+    for f in request.files.values(): f.close()
     return resp_ok({'name': name})
 
   elif request.method == 'GET':
@@ -176,6 +180,7 @@ def task_(name:str):
       save_pickle(task_init, init_fp)
       trainer.add_task(name, init_fp)
 
+      for f in request.files.values(): f.close()
       return resp_ok()
     except:
       return resp_error(format_exc())
@@ -280,6 +285,6 @@ if __name__ == '__main__':
   trainer = Trainer()
   try:
     trainer.start()
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', threaded=False, debug=False)
   finally:
     trainer.stop()

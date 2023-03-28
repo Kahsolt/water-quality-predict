@@ -12,6 +12,7 @@ from threading import Thread, Event, RLock
 from importlib import import_module
 from pprint import pformat
 from traceback import format_exc
+import gc
 
 import matplotlib ; matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -140,6 +141,7 @@ def worker(evt:Event, queue:Queue):
 
     save_meta()
 
+    gc.collect()
     queue.task_done()
 
 

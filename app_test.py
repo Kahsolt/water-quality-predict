@@ -126,7 +126,34 @@ def test_infer_routine():
       print('prob.mean:', prob.mean())
 
 
+def test_train_pressure(idx:int):
+  real_task_name = f'{task_name}-{idx}'
+
+  ''' Step 0: delete old task '''
+  resp = R.delete(EP(f'/task/{real_task_name}'))
+  assert resp.ok ; r = resp.json() ; print(r)
+
+  ''' Step 1: create task '''
+  resp: Response = R.post(
+    EP('/task'), 
+    files={
+      'json': json.dumps({
+        'target': ['data', 'train', 'eval', 'infer'],
+        #'target': 'all',
+        'jobs': None,
+        'name': real_task_name,
+      }),
+      'csv': open('data/test.csv', 'rb'),
+    },
+  )
+  assert resp.ok ; r = resp.json() ; print(r)
+  assert task_name == r['data']['name']
+
+
 if __name__ == '__main__':
   test_basic_info()
   test_train_routine()
+  for i in range(10):
+    try: test_train_pressure(i)
+    except: pass
   test_infer_routine()
