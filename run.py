@@ -585,8 +585,9 @@ def target_eval(env:Env):
 
   task_type = TaskType(job.get('model/name').split('_')[-1])
   if   task_type == TaskType.CLF:
-    prec, recall, f1 = stats
+    acc, prec, recall, f1 = stats
     lines = [
+      f'acc: {acc}',
       f'prec: {prec}',
       f'recall: {recall}',
       f'f1: {f1}',

@@ -82,6 +82,7 @@ task_init_pack = {          # => see `POST /task`
         status: str,
         inlen: int,
         scores: {
+          acc: float,
           pres: float,
           recall: float,
           f1: float,

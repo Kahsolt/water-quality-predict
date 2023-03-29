@@ -129,6 +129,7 @@ interface {
       statue: str
       inlen: int
       scores: {       // for 'clf' task
+        acc: float
         pres: float
         recall: float
         f1: float
