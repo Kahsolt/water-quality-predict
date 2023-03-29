@@ -86,6 +86,7 @@ interface {
   target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
   name?: str          // custom task name
+  thresh?: float      // override `dataset.encoder.params.thresh` of all `clf_` jobs of this task
 }
 
 // response
@@ -105,6 +106,7 @@ interface {
 interface {
   target?: str|str[]  // task target, choose from `Target`, default to 'all'
   jobs?: str[]        // scheduled jobs, default to all applicable jobs
+  thresh?: float      // override `dataset.encoder.params.thresh` of all `clf_` jobs of this task
 }
 ```
 

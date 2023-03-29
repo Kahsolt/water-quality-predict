@@ -96,6 +96,7 @@ TaskInit = {
   'data': bytes,
   'target': List[str],
   'jobs': List[str],
+  'thresh': float,
 }
 
 # 任务运行时队列对象

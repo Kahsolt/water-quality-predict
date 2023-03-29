@@ -15,6 +15,7 @@ def new_task_init() -> TaskInit:
     'data': None,         # *.csv file
     'target': None,       # target
     'jobs': None,         # scheduled jobs
+    'thresh': None,       # override `dataset.encoder.params.thresh`
   }
 
 def new_run_meta() -> RunMeta:

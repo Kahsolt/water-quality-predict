@@ -137,11 +137,13 @@ def task():
     name = req.get('name', timestr())
     target = fix_target(req.get('target'))
     jobs = fix_jobs(req.get('jobs'))
-    task_init: TaskInit = {
+    thresh: float = req.get('thresh')
+    task_init: TaskInit = {   # new_task_init()
       'name': name,
       'data': fcsv,
       'target': target,
       'jobs': jobs,
+      'thresh': thresh,
     }
     TMP_PATH.mkdir(exist_ok=True, parents=True)
     init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
@@ -169,11 +171,13 @@ def task_(name:str):
       data = request.files[0].stream.read() if len(request.files) else None
       target = fix_target(req.get('target'))
       jobs = fix_jobs(req.get('jobs'))
-      task_init: TaskInit = {
+      thresh: float = req.get('thresh')
+      task_init: TaskInit = {   # new_task_init()
         'name': name,
         'data': data,
         'target': target,
         'jobs': jobs,
+        'thresh': thresh,
       }
       TMP_PATH.mkdir(exist_ok=True, parents=True)
       init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'

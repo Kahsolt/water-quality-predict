@@ -60,12 +60,14 @@ def worker(evt:Event, queue:Queue):
         run['info'] += "Unpack task init info\n"
         init_fp = Path(run['task_init_pack'])
         init: TaskInit = load_pickle(init_fp)
+        assert init
 
         run['info'] += "Check init info\n"
         task_name = init['name'] ; assert task_name == run['name']
         meta['target'] = init['target']
         args.target = ','.join(meta['target'])
         jobs = init['jobs']
+        thresh = init['thresh']
 
         if 'data' in init and init['data'] is not None:
           run['info'] += "Write csv file\n"
@@ -95,7 +97,11 @@ def worker(evt:Event, queue:Queue):
 
           job_file = JOB_PATH / f'{job_name}.yaml'
           args.job_file = job_file
-          res: Status = run_file(args)
+          override_cfg = {}
+          if job_name.startswith('clf_'):
+            if thresh is not None:
+              override_cfg['dataset/encoder/params/thresh'] = thresh
+          res: Status = run_file(args, override_cfg=override_cfg)
           if res != Status.FAILED: ok += 1
 
           if 'update task meta':
@@ -628,7 +634,7 @@ def cmd_args():
   return parser.parse_args()
 
 @timer
-def run_file(args) -> JobResult:
+def run_file(args, override_cfg={}) -> JobResult:
   # names
   task_name: str = args.name
   job_name: str = args.job_file.stem
@@ -645,6 +651,9 @@ def run_file(args) -> JobResult:
   # job template
   log_dp.mkdir(exist_ok=True, parents=True)
   job = Descriptor.load(args.job_file)
+  for key, val in override_cfg.items():
+    try: job[key] = val
+    except: print(f'[run_file] override_cfg failed to find key: {key}')
   job.save(log_dp / JOB_FILE)
 
   # logger
