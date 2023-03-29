@@ -10,4 +10,3 @@ matplotlib
 pywt
 Flask
 requests
-gevent

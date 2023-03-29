@@ -289,32 +289,7 @@ if __name__ == '__main__':
   trainer = Trainer()
   try:
     trainer.start()
-    #app.run(host='0.0.0.0', threaded=False, debug=False)
-
-    # https://www.zhihu.com/question/23153641
-    from gevent import monkey
-    from gevent.pywsgi import WSGIServer
-    monkey.patch_all()
-
-    import os
-    from multiprocessing import cpu_count, Process
-    from flask import Flask, jsonify
-
-    MULTI_PROCESS = False
-
-    if MULTI_PROCESS == False:
-      WSGIServer(('0.0.0.0', 500), app).serve_forever()
-    else:
-      mulserver = WSGIServer(('0.0.0.0', 500), app)
-      mulserver.start()
-
-      def server_forever():
-        mulserver.start_accepting()
-        mulserver._stop_event.wait()
-
-      for i in range(cpu_count()):
-        Process(target=server_forever).start()
-
+    app.run(host='0.0.0.0', threaded=False, debug=False)
   finally:
     trainer.stop()
     logging.shutdown()
