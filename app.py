@@ -317,3 +317,4 @@ if __name__ == '__main__':
 
   finally:
     trainer.stop()
+    logging.shutdown()

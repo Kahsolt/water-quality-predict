@@ -42,6 +42,12 @@ def get_logger(name, log_dp=Path('.')) -> Logger:
   logger.addHandler(h)
   return logger
 
+def close_logger(logger:Logger):
+  for handler in logger.handlers:
+    if isinstance(handler, logging.FileHandler):
+      handler.flush()
+      handler.close()
+
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 

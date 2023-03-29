@@ -646,6 +646,7 @@ def run_file(args, override_cfg={}) -> JobResult:
   if log_dp.exists() and args.no_overwrite:
     logger = get_logger(fullname, log_dp)
     logger.info('ignore due to folder already exists and --no_overwrite enabled')
+    close_logger(logger)
     return Status.IGNORED
 
   # job template
@@ -684,8 +685,10 @@ def run_file(args, override_cfg={}) -> JobResult:
         return Status.IGNORED
     except:
       logger.error(format_exc())
+      close_logger(logger)
       return Status.FAILED
 
+  close_logger(logger)
   return Status.FINISHED
 
 @timer
