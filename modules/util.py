@@ -68,7 +68,7 @@ def seed_everything(seed:int):
     patch_sklearn()
     print('>> extension "sklearn-intelex" enabled for speeding up, comment above line if you found it actually slows down or gets compatiblilty error')
   except ImportError:
-    pass
+    print('>> extension "sklearn-intelex" not found, performance may be very slow')
 
 def timestr() -> str:
   return f'{datetime.now()}'.replace(' ', 'T').replace(':', '-')    # '2023-03-19T18-43-34.485700'
