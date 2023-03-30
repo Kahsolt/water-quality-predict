@@ -9,7 +9,7 @@ import xgboost
 from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics
+from modules.util import get_metrics, device
 from modules.preprocess import *
 from modules.typing import *
 
@@ -17,9 +17,11 @@ TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> GridSearchCV:
-  model: XGBRegressor = getattr(xgboost, params['model'])(
-    objective=params['objective'],
-  )
+  model_cls: type[XGBRegressor] = getattr(xgboost, params['model'])
+  if device == 'cuda':
+    model = model_cls(objective=params['objective'], tree_method='gpu_hist', gpu_id=0)
+  else:
+    model = model_cls(objective=params['objective'])
   model_gs = GridSearchCV(model, **params['gs_params'])
   return model_gs
 

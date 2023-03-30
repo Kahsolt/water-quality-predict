@@ -8,7 +8,7 @@ import xgboost
 from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics
+from modules.util import get_metrics, device
 from modules.preprocess import *
 from modules.typing import *
 from modules.models.XGBoost_rgr import train, save, load     # just proxy by
@@ -17,12 +17,18 @@ TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 
 
 def init(params:Params, logger:Logger=None) -> GridSearchCV:
-  model_cls: XGBClassifier = getattr(xgboost, params['model'])
+  model_cls: type[XGBClassifier] = getattr(xgboost, params['model'])
   if 'gs_params' in params:
-    model = model_cls(objective=params['objective'])
+    if device == 'cuda':
+      model = model_cls(objective=params['objective'], tree_method='gpu_hist', gpu_id=0)
+    else:
+      model = model_cls(objective=params['objective'])
     model = GridSearchCV(model, **params['gs_params'])
   else:
-    model = model_cls(objective=params['objective'], **params['param'])
+    if device == 'cuda':
+      model = model_cls(objective=params['objective'], tree_method='gpu_hist', gpu_id=0, **params['param'])
+    else:
+      model = model_cls(objective=params['objective'], **params['param'])
   return model
 
 
