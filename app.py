@@ -289,7 +289,7 @@ if __name__ == '__main__':
   trainer = Trainer()
   try:
     trainer.start()
-    app.run(host='0.0.0.0', threaded=False, debug=False)
+    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000), threaded=True, debug=False)
   finally:
     trainer.stop()
     logging.shutdown()

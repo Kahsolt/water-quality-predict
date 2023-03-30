@@ -2,6 +2,7 @@
 # Author: Armit
 # Create Time: 2023/03/20 
 
+import os
 import random
 from time import sleep
 import requests as R
@@ -10,7 +11,7 @@ from requests import Response
 from config import *
 from modules.util import *
 
-API_BASE = 'http://localhost:5000'
+API_BASE = f'http://localhost:{os.environ.get("PORT", 5000)}'
 EP = lambda api: f'{API_BASE}{api}'
 
 task_name = 'test-api'
