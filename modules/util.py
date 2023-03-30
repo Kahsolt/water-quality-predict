@@ -26,8 +26,8 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 from modules.typing import *
 
-plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
-plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
+#plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
+#plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
