@@ -277,7 +277,8 @@ pre[data-line] .line-highlight[data-end]:after {
 &#x2502;   &#x251C;&#x2500;&#x2500; data_hist<span class="token punctuation">.</span>zip       <span class="token comment">// history archive of raw data</span>
 &#x2502;   &#x251C;&#x2500;&#x2500; <span class="token operator">&lt;</span>job_name<span class="token operator">&gt;</span>
 &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; job<span class="token punctuation">.</span>yaml        <span class="token comment">// job config</span>
-&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; preprocess<span class="token punctuation">.</span>pkl  <span class="token comment">// seq (preprocessed), for visualize</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; time<span class="token punctuation">.</span>pkl        <span class="token comment">// seq time (preprocessed), for visualize</span>
+&#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; preprocess<span class="token punctuation">.</span>pkl  <span class="token comment">// seq values (preprocessed), for visualize</span>
 &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; label<span class="token punctuation">.</span>pkl       <span class="token comment">// encoded target/label, for visualize</span>
 &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; stats<span class="token punctuation">.</span>pkl       <span class="token comment">// stats of transform, for postprocess</span>
 &#x2502;   &#x2502;   &#x251C;&#x2500;&#x2500; transform<span class="token punctuation">.</span>pkl   <span class="token comment">// seq (transformed), for ARIMA train/eval</span>
@@ -329,6 +330,7 @@ TMP_PATH
         status<span class="token operator">:</span> str<span class="token punctuation">,</span>
         inlen<span class="token operator">:</span> int<span class="token punctuation">,</span>
         scores<span class="token operator">:</span> <span class="token punctuation">{</span>
+          acc<span class="token operator">:</span> float<span class="token punctuation">,</span>
           pres<span class="token operator">:</span> float<span class="token punctuation">,</span>
           recall<span class="token operator">:</span> float<span class="token punctuation">,</span>
           f1<span class="token operator">:</span> float<span class="token punctuation">,</span>

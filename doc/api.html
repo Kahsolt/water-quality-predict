@@ -337,6 +337,7 @@ pre[data-line] .line-highlight[data-end]:after {
   target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
   name<span class="token operator">?</span><span class="token operator">:</span> str          <span class="token comment">// custom task name</span>
+  thresh<span class="token operator">?</span><span class="token operator">:</span> float      <span class="token comment">// override `dataset.encoder.params.thresh` of all `clf_` jobs of this task</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>
@@ -352,6 +353,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
+  thresh<span class="token operator">?</span><span class="token operator">:</span> float      <span class="token comment">// override `dataset.encoder.params.thresh` of all `clf_` jobs of this task</span>
 <span class="token punctuation">}</span>
 </pre><h3 class="mume-header" id="get-tasktask-%E5%88%97%E5%87%BA%E4%BB%BB%E5%8A%A1">GET <a href="..\task">/task</a> &#x5217;&#x51FA;&#x4EFB;&#x52A1;</h3>
 
@@ -370,6 +372,7 @@ pre[data-line] .line-highlight[data-end]:after {
       statue<span class="token operator">:</span> str
       inlen<span class="token operator">:</span> int
       scores<span class="token operator">:</span> <span class="token punctuation">{</span>       <span class="token comment">// for &apos;clf&apos; task</span>
+        acc<span class="token operator">:</span> float
         pres<span class="token operator">:</span> float
         recall<span class="token operator">:</span> float
         f1<span class="token operator">:</span> float
@@ -431,8 +434,9 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">,</span>   <span class="token comment">// preprocessed timeseq, [T, 1]</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">,</span>  <span class="token comment">// inplace predicted timeseq, [T&apos;, 1], T&apos; is shorter than T by `inlen`</span>
+  time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
+  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>    <span class="token comment">// preprocessed values, [T, 1]</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// inplace predicted timeseq, [T&apos;, 1], T&apos; is shorter than T by `inlen`</span>
 <span class="token punctuation">}</span>
 </pre><p>&#x26AA; infer new</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>

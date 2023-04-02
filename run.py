@@ -478,7 +478,7 @@ def process_dataset(env:Env):
   # make slices
   inlen   = job.get('dataset/inlen')      ; assert inlen   > 0
   outlen  = job.get('dataset/outlen')     ; assert outlen  > 0
-  overlap = job.get('dataset/overlap', 0) ; assert overlap >= 0
+  overlap = job.get('dataset/overlap', 0)
   X, Y = slice_frames(inputs, tgt, inlen, outlen, overlap)
   logger.info(f'  dataset')
   logger.info(f'    X: {X.shape}')
