@@ -53,7 +53,7 @@ def train(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None):
     if logger: logger.info(f'[Epoch: {i}] loss: {loss.item():.7f}')
 
 
-@torch.inference_mode()
+@torch.no_grad()
 def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> EvalMetrics:
   dataloader, y_test = prepare_for_eval(model, dataset, params)
 
@@ -68,7 +68,7 @@ def eval(model:CRNN, dataset:Datasets, params:Params, logger:Logger=None) -> Eva
   return get_metrics(y_test.squeeze(axis=-1), pred, task=TASK_TYPE, logger=logger)    # [N, O=6]
 
 
-@torch.inference_mode()
+@torch.no_grad()
 def infer(model:CRNN, x:Frame, logger:Logger=None) -> Frame:
   x = torch.from_numpy(x).float().to(device)  # [I=96, D=1]
   x = x.unsqueeze(axis=0)   # [B=1, I=96, D=1]
