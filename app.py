@@ -208,15 +208,20 @@ def infer_(task:str, job:str):
     if req.get('inplace', False):
         time: Time = load_pickle(job_folder / TIME_FILE)
         seq:  Seq  = load_pickle(job_folder / PREPROCESS_FILE)
+        lbl:  Seq  = load_pickle(job_folder / LABEL_FILE)
         pred: Seq  = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
         time = time.to_list()
         seq  = ndarray_to_list(seq)
         pred = ndarray_to_list(pred)
-        return resp_ok({
+        r = {
           'time': time,
           'seq': seq, 
           'pred': pred, 
-        })
+        }
+        if lbl is not None:
+          lbl = ndarray_to_list(lbl)
+          r.update({'lbl', lbl})
+        return resp_ok(r)
     else:
       x: Frame = list_to_ndarray(req['data'])
       y = predict(task, job, x, prob=False)

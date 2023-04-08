@@ -435,8 +435,9 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
-  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>    <span class="token comment">// preprocessed values, [T, 1]</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// inplace predicted timeseq, [T&apos;, 1], T&apos; is shorter than T by `inlen`</span>
+  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>          <span class="token comment">// preprocessed values, [T, 1]</span>
+  lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for &apos;clf&apos; tasks</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T&apos;, 1], T&apos; is shorter than T by `inlen`</span>
 <span class="token punctuation">}</span>
 </pre><p>&#x26AA; infer new</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>

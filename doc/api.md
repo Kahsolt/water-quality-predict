@@ -218,8 +218,9 @@ interface {
 // response
 interface {
   time: List[str]           // preprocessed time, [T]
-  seq: List[List[float]]    // preprocessed values, [T, 1]
-  pred: List[List[float]]   // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
+  seq: List[float]          // preprocessed values, [T, 1]
+  lbl?: List[int]           // preprocessed labels, [T, 1], for 'clf' tasks
+  pred: List[float]         // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
 }
 ```
 
