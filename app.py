@@ -215,12 +215,11 @@ def infer_(task:str, job:str):
         pred = ndarray_to_list(pred)
         r = {
           'time': time,
-          'seq': seq, 
+          'seq':  seq, 
           'pred': pred, 
         }
         if lbl is not None:
-          lbl = ndarray_to_list(lbl)
-          r.update({'lbl': lbl})
+          r.update({'lbl': ndarray_to_list(lbl)})
         return resp_ok(r)
     else:
       x: Frame = list_to_ndarray(req['data'])

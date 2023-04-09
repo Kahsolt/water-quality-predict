@@ -14,7 +14,7 @@ from modules.util import *
 API_BASE = f'http://localhost:{os.environ.get("PORT", 5000)}'
 EP = lambda api: f'{API_BASE}{api}'
 
-task_name = 'test-api'
+task_name = 'test'
 
 
 def test_basic_info():
@@ -127,6 +127,33 @@ def test_infer_routine():
       print('prob.mean:', prob.mean())
 
 
+def test_infer_inplace_routine():
+  resp = R.get(EP(f'/task/{task_name}'))
+  assert resp.ok
+
+  jobs: dict = resp.json()['data']['jobs']
+  for job in jobs.keys():
+    print(f'>> querying {job!r}...')
+
+    resp = R.post(
+      EP(f'/infer/{task_name}/{job}'),
+      json={'inplace': True},
+    )
+    assert resp.ok ; r = resp.json()
+
+    if not r['ok']: breakpoint()
+
+    pred = list_to_ndarray(r['data']['pred'])
+    print('pred.shape:', pred.shape)
+    print('pred.mean:', pred.mean())
+    if 'prob' in r['data']:
+      prob = list_to_ndarray(r['data']['prob'])
+      print('prob.mean:', prob.mean())
+    if 'lbl' in r['data']:
+      lbl = list_to_ndarray(r['data']['lbl'])
+      print(f'lbl bad ratio: {(lbl > 0).sum() / len(lbl):.3%}')
+
+
 def test_train_pressure(idx:int):
   real_task_name = f'{task_name}-{idx}'
 
@@ -152,9 +179,10 @@ def test_train_pressure(idx:int):
 
 
 if __name__ == '__main__':
-  test_basic_info()
-  test_train_routine()
-  for i in range(10):
-    try: test_train_pressure(i)
-    except: pass
-  test_infer_routine()
+  #test_basic_info()
+  #test_train_routine()
+  #for i in range(10):
+  #  try: test_train_pressure(i)
+  #  except: pass
+  #test_infer_routine()
+  test_infer_inplace_routine()
