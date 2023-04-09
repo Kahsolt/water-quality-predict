@@ -16,6 +16,7 @@ dataset:
   split: 0.2
   inlen: 21
   outlen: 1            # must be 1 for clf
+  overlap: -1
   encoder:
     name: ex_thresh
     params:
@@ -29,7 +30,7 @@ model:
     gs_params:
       param_grid:
         max_depth: [3, 5]
-        n_estimators: [20]
+        n_estimators: [20, 50]
         learning_rate: [0.1, 0.15]
       cv: 5
       verbose: 2

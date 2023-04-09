@@ -220,7 +220,7 @@ def infer_(task:str, job:str):
         }
         if lbl is not None:
           lbl = ndarray_to_list(lbl)
-          r.update({'lbl', lbl})
+          r.update({'lbl': lbl})
         return resp_ok(r)
     else:
       x: Frame = list_to_ndarray(req['data'])

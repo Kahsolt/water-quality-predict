@@ -14,8 +14,9 @@ preprocess:
 
 dataset:
   split: 0.2
-  inlen: 72
-  outlen: 1            # must be 1 for clf
+  inlen: 168
+  outlen: 1           # must be 1 for clf
+  overlap: -24             
   encoder:
     name: ex_thresh_24h
     params:

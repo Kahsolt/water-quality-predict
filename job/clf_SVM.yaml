@@ -16,6 +16,7 @@ dataset:
   split: 0.2
   inlen: 21
   outlen: 1            # must be 1 for clf
+  overlap: -1
   encoder:
     name: ex_thresh
     params:
