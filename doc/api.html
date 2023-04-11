@@ -370,7 +370,7 @@ pre[data-line] .line-highlight[data-end]:after {
     <span class="token string">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
       type<span class="token operator">:</span> str
       statue<span class="token operator">:</span> str
-      inlen<span class="token operator">:</span> int
+      inlen<span class="token operator">:</span> int      <span class="token comment">// data length needed for query once</span>
       scores<span class="token operator">:</span> <span class="token punctuation">{</span>       <span class="token comment">// for &apos;clf&apos; task</span>
         acc<span class="token operator">:</span> float
         pres<span class="token operator">:</span> float
@@ -443,6 +443,7 @@ pre[data-line] .line-highlight[data-end]:after {
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   data<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// input frame, [T, D], length T is arbitary</span>
+  time<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>long<span class="token punctuation">]</span>         <span class="token comment">// unix timestamp, [T]</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>

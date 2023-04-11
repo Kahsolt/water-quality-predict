@@ -49,6 +49,10 @@ EnvKind = Union[
   Literal['infer'],     # for infer
   Literal['demo'],      # for demo infer, `infer.py`
 ]
+PredictKind = Union[
+  Literal['oracle'],
+  Literal['prediction'],
+]
 # 含时间轴的原始数据
 TimeSeq = DataFrame
 Time    = Series

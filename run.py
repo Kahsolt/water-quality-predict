@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 from modules import preprocess, transform
 from modules.descriptor import *
 from modules.dataset import *
-from modules.transform import *
 from modules.util import *
 from modules.typing import *
 
@@ -111,7 +110,7 @@ def worker(evt:Event, queue:Queue):
             meta['jobs'][job_name]: JobMeta = {
               'type': ttype,
               'status': res,
-              'inlen': inlen,
+              'inlen': inlen * 24 if job.get('preprocess/project') == 'to_hourly' else inlen,
             }
 
             sc_fp = log_dp / job_name/ SCORES_FILE
@@ -190,16 +189,18 @@ class Trainer:
     self.save_run_meta()
 
 
-def predict_with_oracle(env:Env, x:Seq=None, prob=False) -> Frame:
+def predict_with_(env:Env, how:PredictKind='prediction', x:Seq=None, ret_prob=False, n_roll:int=1) -> Union[Frames, Tuple[Frames, Frames]]:
+  assert how in ['oracle', 'prediction']
+
   job: Descriptor = env['job']
   manager      = env['manager']
   model: Model = env['model']
   stats: Stats = env['stats']
 
   if x is not None:
-    seq: Seq = apply_transforms(x, stats)
+    seq: Seq = transform.apply_transforms(x, stats)
   else:
-    seq: Seq = env['seq']     # transformed
+    seq: Seq = env['seq']     # already transformed
 
   inlen:   int = job.get('dataset/inlen',   1)
   overlap: int = job.get('dataset/overlap', 0)
@@ -208,63 +209,79 @@ def predict_with_oracle(env:Env, x:Seq=None, prob=False) -> Frame:
 
   is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
   is_model_arima = 'ARIMA' in job['model/name']
-  predictor = manager.infer_prob if prob else manager.infer
 
-  preds: List[Frame] = []
-  loc = 10 if is_model_arima else inlen
-  while loc < len(seq):
-    if is_model_arima:
-      y: Frame = predictor(model, loc)  # [NC]
-    else:
-      x = seq[loc-inlen:loc, :]
-      x = frame_left_pad(x, inlen)      # [I, D]
-      y: Frame = predictor(model, x)    # [O, 1]
-    preds.append(y)
-    loc += len(y) - overlap
-  preds_o: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+  def predict_rolling(predictor):
+    preds: List[Frame] = []
+    loc = 10 if is_model_arima else inlen
 
-  return inv_transforms(preds_o, stats) if is_task_rgr else preds_o
+    ''' predict with oracle: given a seq longer than `inlen`, rolling predict in window '''
+    if how == 'oracle':
+      while loc < len(seq):
+        if is_model_arima:
+          y: Frame = predictor(model, loc)  # [NC]
+        else:
+          x = seq[loc-inlen:loc, :]
+          x = frame_left_pad(x, inlen)      # [I, D]
+          y: Frame = predictor(model, x)    # [O, 1]
+        preds.append(y)
+        loc += len(y) - overlap
 
-def predict_with_predicted(env:Env, x:Seq=None, prob=False) -> Frame:
-  job: Descriptor = env['job']
-  manager      = env['manager']
-  model: Model = env['model']
-  stats: Stats = env['stats']
+    ''' predict with oracle: given a seq equal to `inlen`, rolling predict in window '''
+    if how == 'prediction':
+      x = seq[-inlen:, :]
+      x = frame_left_pad(x, inlen)          # [I, D]
+      for _ in range(n_roll):
+        if is_model_arima:
+          y: Frame = predictor(model, loc)  # [1]
+        else:
+          y: Frame = predictor(model, x)    # [O, 1]
+        preds.append(y)
+        if n_roll > 1:
+          x = frame_shift(x, y)
+          loc += len(y) - overlap
 
-  if x is not None:
-    seq: Seq = apply_transforms(x, stats)
+    preds: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+    return transform.inv_transforms(preds, stats) if is_task_rgr else preds
+
+  if ret_prob:
+    return predict_rolling(manager.infer), predict_rolling(manager.infer_prob)
   else:
-    seq: Seq = env['seq']     # transformed
+    return predict_rolling(manager.infer)
 
-  inlen:   int = job.get('dataset/inlen',   1)
-  overlap: int = job.get('dataset/overlap', 0)
+def predict_from_request(job_file:Path, x:Frame, t:Frame=None, prob=False) -> Union[Frames, Tuple[Frames, Frames]]:
+  env = load_env(job_file)
+  job: Descriptor = env['job']
 
-  seq = frame_left_pad(seq, inlen)
+  # apply preprocess
+  if t is not None:
+    t: Time   = pd.Series(str(datetime.fromtimestamp(e)) for e in t)
+    x: Values = pd.DataFrame(x)
+    df = preprocess.combine_time_and_values(t, x)
 
-  is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
-  is_model_arima = 'ARIMA' in job['model/name']
-  predictor = manager.infer_prob if prob else manager.infer
+    if 'filter T':
+      for proc in job.get('preprocess/filter_T', []):
+        if not hasattr(preprocess, proc): continue
+        if proc in preprocess.IGNORE_INFER: continue
 
-  preds: List[Frame] = []
-  loc = 10 if is_model_arima else inlen
-  x = seq[loc-inlen:loc, :]
-  x = frame_left_pad(x, inlen)          # [I, D]
-  while loc < len(seq):
-    if is_model_arima:
-      y: Frame = predictor(model, loc)  # [1]
-    else:
-      y: Frame = predictor(model, x)    # [O, 1]
-    preds.append(y)
-    x = frame_shift(x, y)
-    loc += len(y) - overlap
-  preds_r: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+        df: TimeSeq = getattr(preprocess, proc)(df)
 
-  return inv_transforms(preds_r, stats) if is_task_rgr else preds_r
+    if 'project':   # NOTE: this is required!
+      proc = job.get('preprocess/project')
+      assert proc and isinstance(proc, str)
+      assert hasattr(preprocess, proc)
+      _, df = getattr(preprocess, proc)(df)
 
-def predict(task:str, job:str, x:Frame, prob=False) -> Frame:
-  env = load_env(LOG_PATH / task / job / 'job.yaml')
-  y: Frame = predict_with_oracle(env, x, prob)
-  return y
+    if 'filter V':
+      for proc in job.get('preprocess/filter_V', []):
+        if not hasattr(preprocess, proc): continue
+        if proc in preprocess.IGNORE_INFER: continue
+
+        df: Values = getattr(preprocess, proc)(df)
+
+    x = df.to_numpy()
+
+  # model infer
+  return predict_with_(env, 'prediction', x, prob)
 
 
 def process(fn:Callable[..., Any]):
@@ -617,8 +634,8 @@ def target_infer(env:Env):
   logger: Logger = env['logger']
   log_dp: Path = env['log_dp']
 
-  preds_o: Seq = predict_with_oracle   (env)
-  preds_r: Seq = predict_with_predicted(env)
+  preds_o: Seq = predict_with_(env, 'oracle')
+  preds_r: Seq = predict_with_(env, 'prediction')
   predicted = (preds_o, preds_r)
   save_pickle(predicted, log_dp / PREDICT_FILE, logger)
 

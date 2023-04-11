@@ -129,7 +129,7 @@ interface {
     "job_name": {
       type: str
       statue: str
-      inlen: int
+      inlen: int      // data length needed for query once
       scores: {       // for 'clf' task
         acc: float
         pres: float
@@ -230,6 +230,7 @@ interface {
 // request
 interface {
   data: List[List[float]]   // input frame, [T, D], length T is arbitary
+  time?: List[long]         // unix timestamp, [T]
 }
 
 // response

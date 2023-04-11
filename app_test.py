@@ -14,7 +14,7 @@ from modules.util import *
 API_BASE = f'http://localhost:{os.environ.get("PORT", 5000)}'
 EP = lambda api: f'{API_BASE}{api}'
 
-task_name = 'test'
+task_name = 'test-api'
 
 
 def test_basic_info():
@@ -105,6 +105,8 @@ def test_infer_routine():
   # [T=256, D=1], any length is ok
   data = np.random.uniform(size=[256, 1]).astype(np.float32)
   data = ndarray_to_list(data)
+  ts = ts_now()
+  T = [ts + i * 3600 for i in range(len(data))]
 
   jobs: dict = resp.json()['data']['jobs']
   for job in jobs.keys():
@@ -112,18 +114,18 @@ def test_infer_routine():
 
     resp = R.post(
       EP(f'/infer/{task_name}/{job}'),
-      json={'data': data},
+      json={'data': data, 'time': T},
     )
     assert resp.ok ; r = resp.json()
 
     if not r['ok']: breakpoint()
 
     pred = list_to_ndarray(r['data']['pred'])
-    print(pred.shape)
+    print('pred.shape:', pred.shape)
     print('pred.mean:', pred.mean())
     if 'prob' in r['data']:
       prob = list_to_ndarray(r['data']['prob'])
-      print(prob.shape)
+      print('prob.shape:', prob.shape)
       print('prob.mean:', prob.mean())
 
 
@@ -184,5 +186,5 @@ if __name__ == '__main__':
   #for i in range(10):
   #  try: test_train_pressure(i)
   #  except: pass
-  #test_infer_routine()
-  test_infer_inplace_routine()
+  test_infer_routine()
+  #test_infer_inplace_routine()

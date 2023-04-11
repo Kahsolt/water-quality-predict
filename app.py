@@ -48,6 +48,11 @@ def fix_jobs(jobs) -> List[str]:
   return jobs
 
 
+@app.route('/')
+def index():
+  return redirect('/doc/api')
+
+
 @app.route('/doc/<page>')
 def doc_(page:str):
   return render_template(f'{page}.html')
@@ -201,6 +206,7 @@ def task_(name:str):
 def infer_(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
+  job_file = job_folder / 'job.yaml'
 
   try:
     req: Dict = request.json
@@ -222,13 +228,18 @@ def infer_(task:str, job:str):
           r.update({'lbl': ndarray_to_list(lbl)})
         return resp_ok(r)
     else:
+      t: Frame = list_to_ndarray(req['time']) if 'time' in req else None
       x: Frame = list_to_ndarray(req['data'])
-      y = predict(task, job, x, prob=False)
-      pred = ndarray_to_list(y)
-      if job.startswith('rgr_'): return resp_ok({'pred': pred})
-      y_prb = predict(task, job, x, prob=True)
-      prob = ndarray_to_list(y_prb)
-      return resp_ok({'pred': pred, 'prob': prob})
+      if job.startswith('rgr_'):
+        y = predict_from_request(job_file, x, t, prob=False)
+        pred = ndarray_to_list(y)
+        return resp_ok({'pred': pred})
+      else:
+        y, y_prb = predict_from_request(job_file, x, t, prob=True)
+        pred = ndarray_to_list(y)
+        prob = ndarray_to_list(y_prb)
+        return resp_ok({'pred': pred, 'prob': prob})
+
   except:
     return resp_error(format_exc())
 
@@ -286,10 +297,6 @@ def runtime():
 
 
 if __name__ == '__main__':
-  @app.route('/')
-  def index():
-    return redirect('/doc/api')
-
   trainer = Trainer()
   try:
     trainer.start()

@@ -13,6 +13,10 @@ import pywt
 from modules.transform import *
 from modules.typing import *
 
+IGNORE_INFER = [
+  'wavlet_transform',
+]
+
 
 ''' filter_T: 含时处理，数据选择 '''
 def ticker_timer(df:TimeSeq) -> TimeSeq:
