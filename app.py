@@ -228,7 +228,7 @@ def infer_(task:str, job:str):
           r.update({'lbl': ndarray_to_list(lbl)})
         return resp_ok(r)
     else:
-      t: Frame = list_to_ndarray(req['time']) if 'time' in req else None
+      t: Frame = list_to_ndarray(req['time']).astype(np.int32) if 'time' in req else None
       x: Frame = list_to_ndarray(req['data'])
       if job.startswith('rgr_'):
         y = predict_from_request(job_file, x, t, prob=False)
