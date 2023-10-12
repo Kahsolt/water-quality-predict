@@ -330,8 +330,8 @@ def prepare_for_(what:EnvKind):
         manager = env['manager']
         model = manager.init(job.get('model/params', {}), logger)
         env['model'] = model
-        logger.info('model:')
-        logger.info(model)
+        logger.debug('model:')
+        logger.debug(model)
 
       return fn(env, *args, **kwargs)
     return wrapper
