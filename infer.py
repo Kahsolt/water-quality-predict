@@ -13,11 +13,12 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+from modules.transform import *
 from modules.util import *
 from modules.typing import *
 
 from run import *
-import matplotlib ; matplotlib.use('QtAgg')
+#import matplotlib ; matplotlib.use('QtAgg')
 
 WINDOW_TITLE  = 'Sequential Inference Demo'
 WINDOW_SIZE   = (1000, 750)
@@ -111,10 +112,10 @@ class App:
     label: Seq   = env['label']
     stats: Stats = env['stats']
 
-    self.preds_o: Seq = predict_with_oracle(env)
+    self.preds_o: Seq = predict_with_(env, how='oracle')
     self.preds_o = np.pad(self.preds_o, (len(seq) - len(self.preds_o), 0), mode='edge')
     if args.draw_rolling:
-      self.preds_r: Seq = predict_with_predicted(env)
+      self.preds_r: Seq = predict_with_(env, how='prediction')
       self.preds_r = np.pad(self.preds_o, (len(seq) - len(self.preds_r), 0), mode='edge')
     if self.is_task_rgr:
       self.truth = inv_transforms(seq, stats)

@@ -43,7 +43,7 @@ def GET(api:str) -> Dict:
 
 def POST(api:str, payload:Any) -> Dict:
   url = f'{API_BASE}{api}'
-  print(f'[GET] {url}')
+  print(f'[POST] {url}')
   resp: Response = R.post(url, json=payload, timeout=5)
   if not resp.ok:
     tkmsg.showerror('Error', vars(resp))
