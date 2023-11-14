@@ -8,10 +8,15 @@ from time import sleep
 import requests as R
 from requests import Response
 
-from config import *
-from modules.util import *
+from config import JOB_PATH
+from modules.utils import *
+from modules.typing import *
 
-API_BASE = f'http://localhost:{os.environ.get("PORT", 5000)}'
+# API test for app.py
+
+HOST = os.environ.get('HOST', 'localhost')
+PORT = os.environ.get('PORT', 5000)
+API_BASE = f'http://{HOST}:{PORT}'
 EP = lambda api: f'{API_BASE}{api}'
 
 task_name = 'test-api'
@@ -181,10 +186,10 @@ def test_train_pressure(idx:int):
 
 
 if __name__ == '__main__':
-  #test_basic_info()
-  #test_train_routine()
-  #for i in range(10):
-  #  try: test_train_pressure(i)
-  #  except: pass
+  test_basic_info()
+  test_train_routine()
+  for i in range(10):
+    try: test_train_pressure(i)
+    except: pass
   test_infer_routine()
-  #test_infer_inplace_routine()
+  test_infer_inplace_routine()

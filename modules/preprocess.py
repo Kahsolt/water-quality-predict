@@ -4,14 +4,10 @@
 
 from datetime import datetime, timedelta
 
-import numpy as np
-import pandas as pd
-from scipy.interpolate import interp1d
-import matplotlib.pyplot as plt
 import pywt
+from scipy.interpolate import interp1d
 
 from modules.transform import *
-from modules.typing import *
 
 IGNORE_INFER = [
   'wavlet_transform',
@@ -105,7 +101,8 @@ def remove_outlier(df:Values) -> Values:
     x = x.fillna(method='ffill')
     arr: Array = np.asarray(x)
     arrlen = len(arr)
-    tmp = [(arr, 'original')]
+
+    if DEBUG_PLOT: tmp = [(arr, 'original')]
 
     if 'map 3-sigma outliers to NaN':
       arr_v = arr[~np.isnan(arr)]
@@ -116,9 +113,9 @@ def remove_outlier(df:Values) -> Values:
       arr = np.asarray([arr[i] if m else np.nan for i, m in enumerate(mask)])
 
       assert len(arr) == arrlen
-      tmp.append((arr, f'3-sigma outlier ({L.item()}, {H.item()})'))
+      if DEBUG_PLOT: tmp.append((arr, f'3-sigma outlier ({L.item()}, {H.item()})'))
 
-    if 'draw plot':
+    if DEBUG_PLOT and 'draw plot':
       plt.clf()
       n_fig = len(tmp)
       for i, (arr, title) in enumerate(tmp):
@@ -135,7 +132,8 @@ def fill_nan(df:Values) -> Values:
     x = x.fillna(method='ffill')
     arr: Array = np.asarray(x)
     arrlen = len(arr)
-    tmp = [(arr, 'original')]
+
+    if DEBUG_PLOT: tmp = [(arr, 'original')]
 
     if 'padding by edge for NaNs at two endings':
       X = np.arange(arrlen)
@@ -146,7 +144,7 @@ def fill_nan(df:Values) -> Values:
           arr = np.pad(arr[i: j+1], (i, arrlen - j - 1), mode='edge')
 
       assert len(arr) == arrlen
-      tmp.append((arr, 'pad edge'))
+      if DEBUG_PLOT: tmp.append((arr, 'pad edge'))
     
     if 'interpolate for inner NaNs':
       mask = np.isnan(arr)
@@ -157,9 +155,9 @@ def fill_nan(df:Values) -> Values:
       arr = interp(X)                      # predict
 
       assert len(arr) == arrlen
-      tmp.append((arr, 'interp'))
+      if DEBUG_PLOT: tmp.append((arr, 'interp'))
 
-    if 'draw plot':
+    if DEBUG_PLOT and 'draw plot':
       plt.clf()
       n_fig = len(tmp)
       for i, (arr, title) in enumerate(tmp):
@@ -174,7 +172,8 @@ def fill_nan(df:Values) -> Values:
 def wavlet_transform(df:Values, wavelet:str='db8', threshold:float=0.04) -> Values:
   def process(x:Series) -> Series:
     arr: Array = np.asarray(x)
-    tmp = [(arr, 'original')]
+
+    if DEBUG_PLOT: tmp = [(arr, 'original')]
 
     if 'wavlet transform':
       arrlen = len(arr)
@@ -188,9 +187,9 @@ def wavlet_transform(df:Values, wavelet:str='db8', threshold:float=0.04) -> Valu
       arr = arr[:arrlen]          # length fix
 
       assert len(arr) == arrlen
-      tmp.append((arr, 'wavlet'))
+      if DEBUG_PLOT: tmp.append((arr, 'wavlet'))
 
-    if 'draw plot':
+    if DEBUG_PLOT and 'draw plot':
       plt.clf()
       n_fig = len(tmp)
       for i, (arr, title) in enumerate(tmp):

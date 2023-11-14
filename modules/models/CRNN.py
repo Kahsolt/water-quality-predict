@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch import optim
 
 from modules.dataset import FrameDataset, DataLoader
-from modules.util import device
+from modules.utils import *
 from modules.typing import *
 
 

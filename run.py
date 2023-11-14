@@ -12,15 +12,13 @@ from threading import Thread, Event, RLock
 from importlib import import_module
 from pprint import pformat
 from traceback import format_exc
+import shutil
 import gc
-
-import matplotlib ; matplotlib.use('agg')
-import matplotlib.pyplot as plt
 
 from modules import preprocess, transform
 from modules.descriptor import *
 from modules.dataset import *
-from modules.util import *
+from modules.utils import *
 from modules.typing import *
 
 from config import *
@@ -153,10 +151,15 @@ def worker(evt:Event, queue:Queue):
 class Trainer:
 
   def __init__(self, n_workers:int=8):
+    rt_fp = LOG_PATH / RUNTIME_FILE
+    bak_rt_fp = rt_fp.with_suffix('.bak')
+    if bak_rt_fp.exists(): bak_rt_fp.unlink()
+    shutil.copy2(str(rt_fp), str(bak_rt_fp))
+
     self.queue = Queue()
     self.evt = Event()
     self.lock = RLock()   # mutex of run_meta
-    self.run_meta: List[RunMeta] = load_json(LOG_PATH / RUNTIME_FILE, [])
+    self.run_meta: List[RunMeta] = load_json(rt_fp, [])
     self.workers = [Thread(target=worker, args=(self.evt, self.queue)) for _ in range(n_workers)]
     self._resume()
 
@@ -427,7 +430,7 @@ def process_preprocess(env:Env):
         save_figure(log_dp / f'filter_V_{proc}.png', logger=logger)
       except: logger.error(format_exc())
 
-  if 'plot timeline':
+  if DEBUG_PLOT and 'plot timeline':
     plt.clf()
     plt.subplot(211) ; plt.title('original')
     for col in df_r.columns: plt.plot(df_r[col], label=col)
@@ -435,7 +438,7 @@ def process_preprocess(env:Env):
     for col in df.columns: plt.plot(df[col], label=col)
     save_figure(log_dp / 'timeline_preprocess.png', logger=logger)
 
-  if 'plot histogram':
+  if DEBUG_PLOT and 'plot histogram':
     plt.clf()
     plt.subplot(211) ; plt.title('original')
     for col in df_r.columns: plt.hist(df_r[col], label=col, bins=50)
@@ -541,7 +544,7 @@ def process_transform(env:Env):
       seq, st = getattr(transform, proc)(seq)
       stats.append((proc, st))
 
-    if 'plot timeline':
+    if DEBUG_PLOT and 'plot timeline':
       plt.clf()
       plt.subplot(211) ; plt.title('preprocessed')
       for col in range(seq_r.shape[-1]): plt.plot(seq_r[:, col])
@@ -549,7 +552,7 @@ def process_transform(env:Env):
       for col in range(seq.shape[-1]): plt.plot(seq[:, col])
       save_figure(log_dp / 'timeline_transform.png', logger=logger)
 
-    if 'plot histogram':
+    if DEBUG_PLOT and 'plot histogram':
       plt.clf()
       plt.subplot(211) ; plt.title('preprocessed')
       for col in range(seq_r.shape[-1]): plt.hist(seq_r[:, col], bins=50)

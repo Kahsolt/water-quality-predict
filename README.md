@@ -1,6 +1,6 @@
 # water-quality-predict
 
-    水质检测指标的时间序列预测
+    水质检测指标的时间序列预测平台后端
 
 ----
 
@@ -19,11 +19,12 @@ Main busisness:
 
 - `POST /task` to create a task and put in processing queue
 - `GET /task/<name>` to get task results 
+- `POST /task/<name>` to retrain a old task with new data
 - `POST /infer` to predict on new data
 
 Extras:
 
-- `GET /runtime` to see running status
+- `GET /runtime` to see running queue status and history
 - `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
 - `GET /log/<task_name>` to download the task log folder
 - `GET /log/<task_name>/<job_name>` to download the job log folder

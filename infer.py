@@ -14,11 +14,10 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from modules.transform import *
-from modules.util import *
+from modules.utils import *
 from modules.typing import *
 
 from run import *
-#import matplotlib ; matplotlib.use('QtAgg')
 
 WINDOW_TITLE  = 'Sequential Inference Demo'
 WINDOW_SIZE   = (1000, 750)

@@ -2,13 +2,9 @@
 # Author: Armit
 # Create Time: 2023/02/21 
 
-from pathlib import Path
-
-import torch
-
-from modules.util import *
-from modules.preprocess import *
+from modules.utils import *
 from modules.typing import *
+
 from modules.models.CRNN import *
 
 TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])

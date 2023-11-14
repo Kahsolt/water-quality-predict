@@ -4,10 +4,9 @@
 
 from random import shuffle
 
-import numpy as np
-import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset, DataLoader
 
+from modules.utils import *
 from modules.typing import *
 
 
@@ -145,7 +144,7 @@ def frame_shift(x:Frame, y:Frame) -> Frame:
   return np.concatenate((x[len(y):, :], y), axis=0)
 
 
-class FrameDataset(torch.utils.data.Dataset):
+class FrameDataset(Dataset):
 
   def __init__(self, dataset:Dataset):
     self.X: Frames = dataset[0]      # [N, I]

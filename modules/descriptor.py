@@ -4,8 +4,8 @@
 
 from pathlib import Path
 
-from modules.util import *
-from modules.typing import Status
+from modules.utils import *
+from modules.typing import *
 
 
 # => see 'doc/log.md'

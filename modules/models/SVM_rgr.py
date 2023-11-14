@@ -2,15 +2,13 @@
 # Author: Armit
 # Create Time: 2023/02/22
 
-from pathlib import Path
-
 from sklearn import svm
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics
-from modules.preprocess import *
+from modules.utils import *
 from modules.typing import *
+
 from modules.models.XGBoost_rgr import save, load
 
 TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])

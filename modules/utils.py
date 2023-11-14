@@ -20,15 +20,20 @@ import logging
 import torch
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
 from modules.typing import *
 
-#plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
-#plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
+DEBUG_PLOT = os.environ.get('DEBUG_PLOT', False)
+if DEBUG_PLOT:
+  import matplotlib ; matplotlib.use('agg')
+  import matplotlib.pyplot as plt
 
+  #plt.rcParams['font.sans-serif'] = ['SimHei']    # 显示中文
+  #plt.rcParams['axes.unicode_minus'] = False      # 正常显示负号
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -48,8 +53,6 @@ def close_logger(logger:Logger):
       handler.flush()
       handler.close()
 
-
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def fix_seed(seed:int) -> int:
   return seed if seed > 0 else random.randrange(np.iinfo(np.int32).max)
@@ -189,10 +192,11 @@ def get_metrics(truth, pred, task:TaskType, logger:Logger=None) -> EvalMetrics:
     return mae, mse, r2
 
 def save_figure(fp:Path, title:str=None, logger:Logger=None):
+  if not DEBUG_PLOT: return
   if not plt.gcf().axes: return
 
-  #plt.tight_layout()
   plt.suptitle(title or fp.stem)
+  #plt.tight_layout()
   plt.savefig(fp, dpi=400)
   if logger: logger.info(f'  save figure to {fp}')
 

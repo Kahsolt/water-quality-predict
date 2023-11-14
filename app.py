@@ -6,12 +6,14 @@ import os
 import shutil
 import psutil
 import gc
+from argparse import ArgumentParser
+from traceback import print_exc
 
 from flask import Flask, request, Response
 from flask import redirect, jsonify, render_template, send_file
 
+from modules.utils import *
 from modules.typing import *
-from modules.util import *
 
 from config import *
 from run import *
@@ -26,11 +28,11 @@ def resp_ok(data:Union[dict, list]=None) -> Response:
     'data': data,
   })
 
-def resp_error(errmsg:str) -> Response:
+def resp_error(err:str) -> Response:
   gc.collect()
   return jsonify({
     'ok': False,
-    'error': errmsg,
+    'error': err,
   })
 
 
@@ -297,10 +299,20 @@ def runtime():
 
 
 if __name__ == '__main__':
-  trainer = Trainer()
+  parser = ArgumentParser()
+  parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
+  parser.add_argument('-P', '--port', type=int, default=5000)
+  parser.add_argument('-N', '--n_workers', type=int, default=os.cpu_count(), help='n_worker for the trainer')
+  args = parser.parse_args()
+
+  trainer = Trainer(args.n_workers)
   try:
     trainer.start()
-    app.run(host='0.0.0.0', port=os.environ.get('PORT', 5000), threaded=True, debug=False)
+    app.run(host=args.host, port=args.port, threaded=True, debug=False)
+  except KeyboardInterrupt:
+    print('Exit by Ctrl+C')
+  except:
+    print_exc()
   finally:
     trainer.stop()
     logging.shutdown()

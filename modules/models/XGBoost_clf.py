@@ -2,15 +2,13 @@
 # Author: Armit
 # Create Time: 2022/10/06 
 
-from pathlib import Path
-
 import xgboost
 from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 
-from modules.util import get_metrics, device
-from modules.preprocess import *
+from modules.utils import *
 from modules.typing import *
+
 from modules.models.XGBoost_rgr import train, save, load     # just proxy by
 
 TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])

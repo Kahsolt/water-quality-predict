@@ -13,7 +13,7 @@ from pprint import pprint as pp, pformat as pf
 import requests as R
 from requests import Response
 
-from modules.util import *
+from modules.utils import *
 from modules.typing import *
 
 WINDOW_TITLE = 'Inference Client'
@@ -25,11 +25,13 @@ TX_LINES_OUT = 6
 HOST = os.environ.get('HOST', 'localhost')
 PORT = os.environ.get('PORT', 5000)
 API_BASE = f'http://{HOST}:{PORT}'
+EP = lambda api: f'{API_BASE}{api}'
+
 HTTP_FAIL = object()
 
 
 def GET(api:str) -> Dict:
-  url = f'{API_BASE}{api}'
+  url = EP(api)
   print(f'[GET] {url}')
   resp: Response = R.get(url)
   if not resp.ok:
@@ -42,7 +44,7 @@ def GET(api:str) -> Dict:
   return r['data']
 
 def POST(api:str, payload:Any) -> Dict:
-  url = f'{API_BASE}{api}'
+  url = EP(api)
   print(f'[POST] {url}')
   resp: Response = R.post(url, json=payload, timeout=5)
   if not resp.ok:
