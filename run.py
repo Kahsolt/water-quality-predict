@@ -152,40 +152,45 @@ def worker(evt:Event, queue:Queue):
 
 class Trainer:
 
-  def __init__(self):
+  def __init__(self, n_workers:int=8):
     self.queue = Queue()
     self.evt = Event()
-    self.worker = Thread(target=worker, args=(self.evt, self.queue))
-
+    self.lock = RLock()   # mutex of run_meta
     self.run_meta: List[RunMeta] = load_json(LOG_PATH / RUNTIME_FILE, [])
+    self.workers = [Thread(target=worker, args=(self.evt, self.queue)) for _ in range(n_workers)]
     self._resume()
 
   def _resume(self):
-    for run in self.run_meta:
-      if Status(run['status']) in [Status.QUEUING, Status.CREATED, Status.RUNNING]:
-        run['status'] = Status.QUEUING    # reset to queuing
-        run['ts_update'] = ts_now()
-        self.queue.put((run, self))
+    with self.lock:
+      for run in self.run_meta:
+        if Status(run['status']) in [Status.QUEUING, Status.CREATED, Status.RUNNING]:
+          run['status'] = Status.QUEUING    # reset to queuing
+          run['ts_update'] = ts_now()
+          self.queue.put((run, self))
 
   def save_run_meta(self):
-    save_json(LOG_PATH / RUNTIME_FILE, self.run_meta)
+    with self.lock:
+      save_json(LOG_PATH / RUNTIME_FILE, self.run_meta)
 
   def add_task(self, name:str, init_fp:Path):
     print(f'>> new task: {name}')
     run = new_run_meta()    # Status.QUEUING
-    run['id'] = len(self.run_meta) + 1
-    run['name'] = name
-    run['task_init_pack'] = init_fp
-    self.run_meta.append(run)
+    with self.lock:
+      run['id'] = len(self.run_meta) + 1
+      run['name'] = name
+      run['task_init_pack'] = init_fp
+      self.run_meta.append(run)
     self.queue.put((run, self))
 
   def start(self):
     self.save_run_meta()
-    self.worker.start()
+    for worker in self.workers:
+      worker.start()
 
   def stop(self):
     self.evt.set()
-    self.worker.join()
+    for worker in self.workers:
+      worker.join()
     self.save_run_meta()
 
 
