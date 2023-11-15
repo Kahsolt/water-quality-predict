@@ -3,277 +3,38 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-      
-      
-      
-      
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
       
       
       
       
       
       <style>
-      /**
- * prism.js Github theme based on GitHub's theme.
- * @author Sam Clarke
- */
-code[class*="language-"],
-pre[class*="language-"] {
-  color: #333;
-  background: none;
-  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
-  line-height: 1.4;
-
-  -moz-tab-size: 8;
-  -o-tab-size: 8;
-  tab-size: 8;
-
-  -webkit-hyphens: none;
-  -moz-hyphens: none;
-  -ms-hyphens: none;
-  hyphens: none;
-}
-
-/* Code blocks */
-pre[class*="language-"] {
-  padding: .8em;
-  overflow: auto;
-  /* border: 1px solid #ddd; */
-  border-radius: 3px;
-  /* background: #fff; */
-  background: #f5f5f5;
-}
-
-/* Inline code */
-:not(pre) > code[class*="language-"] {
-  padding: .1em;
-  border-radius: .3em;
-  white-space: normal;
-  background: #f5f5f5;
-}
-
-.token.comment,
-.token.blockquote {
-  color: #969896;
-}
-
-.token.cdata {
-  color: #183691;
-}
-
-.token.doctype,
-.token.punctuation,
-.token.variable,
-.token.macro.property {
-  color: #333;
-}
-
-.token.operator,
-.token.important,
-.token.keyword,
-.token.rule,
-.token.builtin {
-  color: #a71d5d;
-}
-
-.token.string,
-.token.url,
-.token.regex,
-.token.attr-value {
-  color: #183691;
-}
-
-.token.property,
-.token.number,
-.token.boolean,
-.token.entity,
-.token.atrule,
-.token.constant,
-.token.symbol,
-.token.command,
-.token.code {
-  color: #0086b3;
-}
-
-.token.tag,
-.token.selector,
-.token.prolog {
-  color: #63a35c;
-}
-
-.token.function,
-.token.namespace,
-.token.pseudo-element,
-.token.class,
-.token.class-name,
-.token.pseudo-class,
-.token.id,
-.token.url-reference .token.variable,
-.token.attr-name {
-  color: #795da3;
-}
-
-.token.entity {
-  cursor: help;
-}
-
-.token.title,
-.token.title .token.punctuation {
-  font-weight: bold;
-  color: #1d3e81;
-}
-
-.token.list {
-  color: #ed6a43;
-}
-
-.token.inserted {
-  background-color: #eaffea;
-  color: #55a532;
-}
-
-.token.deleted {
-  background-color: #ffecec;
-  color: #bd2c00;
-}
-
-.token.bold {
-  font-weight: bold;
-}
-
-.token.italic {
-  font-style: italic;
-}
-
-
-/* JSON */
-.language-json .token.property {
-  color: #183691;
-}
-
-.language-markup .token.tag .token.punctuation {
-  color: #333;
-}
-
-/* CSS */
-code.language-css,
-.language-css .token.function {
-  color: #0086b3;
-}
-
-/* YAML */
-.language-yaml .token.atrule {
-  color: #63a35c;
-}
-
-code.language-yaml {
-  color: #183691;
-}
-
-/* Ruby */
-.language-ruby .token.function {
-  color: #333;
-}
-
-/* Markdown */
-.language-markdown .token.url {
-  color: #795da3;
-}
-
-/* Makefile */
-.language-makefile .token.symbol {
-  color: #795da3;
-}
-
-.language-makefile .token.variable {
-  color: #183691;
-}
-
-.language-makefile .token.builtin {
-  color: #0086b3;
-}
-
-/* Bash */
-.language-bash .token.keyword {
-  color: #0086b3;
-}
-
-/* highlight */
-pre[data-line] {
-  position: relative;
-  padding: 1em 0 1em 3em;
-}
-pre[data-line] .line-highlight-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background-color: transparent;
-  display: block;
-  width: 100%;
-}
-
-pre[data-line] .line-highlight {
-  position: absolute;
-  left: 0;
-  right: 0;
-  padding: inherit 0;
-  margin-top: 1em;
-  background: hsla(24, 20%, 50%,.08);
-  background: linear-gradient(to right, hsla(24, 20%, 50%,.1) 70%, hsla(24, 20%, 50%,0));
-  pointer-events: none;
-  line-height: inherit;
-  white-space: pre;
-}
-
-pre[data-line] .line-highlight:before, 
-pre[data-line] .line-highlight[data-end]:after {
-  content: attr(data-start);
-  position: absolute;
-  top: .4em;
-  left: .6em;
-  min-width: 1em;
-  padding: 0 .5em;
-  background-color: hsla(24, 20%, 50%,.4);
-  color: hsl(24, 20%, 95%);
-  font: bold 65%/1.5 sans-serif;
-  text-align: center;
-  vertical-align: .3em;
-  border-radius: 999px;
-  text-shadow: none;
-  box-shadow: 0 1px white;
-}
-
-pre[data-line] .line-highlight[data-end]:after {
-  content: attr(data-end);
-  top: auto;
-  bottom: .4em;
-}html body{font-family:"Helvetica Neue",Helvetica,"Segoe UI",Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ul,html body>ol{margin-bottom:16px}html body ul,html body ol{padding-left:2em}html body ul.no-list,html body ol.no-list{padding:0;list-style-type:none}html body ul ul,html body ul ol,html body ol ol,html body ol ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:bold;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:bold}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em !important;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::before,html body code::after{letter-spacing:-0.2em;content:"\00a0"}html body pre>code{padding:0;margin:0;font-size:.85em !important;word-break:normal;white-space:pre;background:transparent;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;font-size:.85em !important;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:before,html body pre tt:before,html body pre code:after,html body pre tt:after{content:normal}html body p,html body blockquote,html body ul,html body ol,html body dl,html body pre{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body pre,html body code{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview .pagebreak,.markdown-preview .newpage{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center !important}.markdown-preview:not([for="preview"]) .code-chunk .btn-group{display:none}.markdown-preview:not([for="preview"]) .code-chunk .status{display:none}.markdown-preview:not([for="preview"]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0}@media screen and (min-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode]) .markdown-preview{font-size:14px !important;padding:1em}}@media print{html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for="html-export"]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,0.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,0.66);border:4px solid rgba(150,150,150,0.66);background-clip:content-box}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p,html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div{display:inline}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% -  300px);padding:2em calc(50% - 457px -  300px/2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for="html-export"]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for="html-export"]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
 /* Please visit the URL below for more information: */
 /*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
 
       </style>
-    </head>
-    <body for="html-export">
-      <div class="mume markdown-preview  ">
-      <h1 class="mume-header" id="api-documentation">API documentation</h1>
-
+      <!-- The content below will be included at the end of the <head> element. --><script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script></head><body for="html-export">
+    
+    
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="api-documentation">API documentation </h1>
 <p>=&gt; see job.yaml doc: <a href="job">/doc/job</a> for job config<br>
 =&gt; see log folder doc: <a href="log">/doc/log</a> for log folder layout<br>
 =&gt; see encoder: <a href="encoder">/doc/encoder</a> for pred class_ids of each ecnoder</p>
-<h3 class="mume-header" id="general-%E6%80%BB%E8%AE%BA">General &#x603B;&#x8BBA;</h3>
-
+<h3 id="general-总论">General 总论 </h3>
 <p>Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).<br>
-&#x2139; All routes are RESTful-like designed.<br>
-&#x2139; For sending json with files in a single request, refer to <a href="https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request">python-requests-post-json-and-file-in-single-request</a><br>
-&#x2139; <del> For serializing NumPy arrays, refer to <a href="https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python">numpy-array-to-base64-and-back-to-numpy-array-python</a> </del></p>
+ℹ All routes are RESTful-like designed.<br>
+ℹ For sending json with files in a single request, refer to <a href="https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request">python-requests-post-json-and-file-in-single-request</a><br>
+ℹ <del> For serializing NumPy arrays, refer to <a href="https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python">numpy-array-to-base64-and-back-to-numpy-array-python</a> </del></p>
 <p>The common JSON fields for all payloads:</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
 
 <span class="token punctuation">}</span>
@@ -284,25 +45,24 @@ pre[data-line] .line-highlight[data-end]:after {
   error<span class="token operator">?</span><span class="token operator">:</span> str         <span class="token comment">// error message</span>
   data<span class="token operator">?</span><span class="token operator">:</span> list<span class="token operator">|</span>dict    <span class="token comment">// data payload</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="data-%E6%95%B0%E6%8D%AE">Data &#x6570;&#x636E;</h3>
-
+</code></pre><h3 id="data-数据">Data 数据 </h3>
 <p>Time sequence data are stored as a <strong>single</strong> <code>data.csv</code> file for each task created.<br>
 =&gt; To pre-merge multiple *.csv files, see <a href="#post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv</a></p>
 <p>Can conatin <strong>multiple</strong> columns:</p>
 <ul>
 <li>First column: datetime string in ISO format
 <ul>
-<li>&#x26A0; datetime might be temporal discontinuous</li>
+<li>⚠ datetime might be temporal discontinuous</li>
 </ul>
 </li>
 <li>Rest columns: float values reading from sensors
 <ul>
-<li>&#x26A0; values might contain NaNs</li>
-<li>&#x2139; <strong>the last column is to predict on</strong></li>
+<li>⚠ values might contain NaNs</li>
+<li>ℹ <strong>the last column is to predict on</strong></li>
 </ul>
 </li>
 </ul>
-<pre data-role="codeBlock" data-info="csv" class="language-csv"><span class="token value">monitorTime</span><span class="token punctuation">,</span><span class="token value">monitor1</span><span class="token punctuation">,</span><span class="token value">monitor2       // column names are arbitary</span>
+<pre data-role="codeBlock" data-info="csv" class="language-csv csv"><code><span class="token value">monitorTime</span><span class="token punctuation">,</span><span class="token value">monitor1</span><span class="token punctuation">,</span><span class="token value">monitor2       // column names are arbitary</span>
 <span class="token value">2021-01-01 00:00:00</span><span class="token punctuation">,</span><span class="token value">0.15</span><span class="token punctuation">,</span><span class="token value">1.25</span>
 <span class="token value">2021-01-01 01:00:00</span><span class="token punctuation">,</span><span class="token value">0.16</span><span class="token punctuation">,</span><span class="token value">           // value NaN</span>
 <span class="token value">2021-01-01 02:00:00</span><span class="token punctuation">,</span><span class="token punctuation">,</span><span class="token value">1.3</span>
@@ -310,31 +70,29 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token value">2021-01-01 06:00:00</span><span class="token punctuation">,</span><span class="token punctuation">,</span>
 <span class="token value">2021-01-01 07:00:00</span><span class="token punctuation">,</span><span class="token value">0.2</span><span class="token punctuation">,</span><span class="token value">0.9</span>
 <span class="token value">2021-01-01 09:00:00</span><span class="token punctuation">,</span><span class="token value">0.3</span><span class="token punctuation">,</span><span class="token value">1.0</span>
-</pre><h3 class="mume-header" id="enums-%E6%9E%9A%E4%B8%BE%E5%B8%B8%E9%87%8F">Enums &#x679A;&#x4E3E;&#x5E38;&#x91CF;</h3>
-
-<pre data-role="codeBlock" data-info="cpp" class="language-cpp"><span class="token keyword keyword-enum">enum</span> <span class="token class-name">Target</span> <span class="token punctuation">{</span>
-  data        <span class="token comment">// &#x6570;&#x636E; := &#x6570;&#x503C;&#x9884;&#x5904;&#x7406; + &#x6253;&#x5206;&#x7C7B;&#x6807;&#x7B7E; + &#x5212;&#x5206;&#x6570;&#x636E;&#x96C6;</span>
-  train       <span class="token comment">// &#x8BAD;&#x7EC3;</span>
-  eval        <span class="token comment">// &#x8BC4;&#x4F30;</span>
-  infer       <span class="token comment">// &#x63A8;&#x65AD; (&#x539F;&#x5730;)</span>
-  all         <span class="token comment">// &#x5168;&#x90E8;</span>
+</code></pre><h3 id="enums-枚举常量">Enums 枚举常量 </h3>
+<pre data-role="codeBlock" data-info="cpp" class="language-cpp cpp"><code><span class="token keyword keyword-enum">enum</span> <span class="token class-name">Target</span> <span class="token punctuation">{</span>
+  data        <span class="token comment">// 数据 := 数值预处理 + 打分类标签 + 划分数据集</span>
+  train       <span class="token comment">// 训练</span>
+  eval        <span class="token comment">// 评估</span>
+  infer       <span class="token comment">// 推断 (原地)</span>
+  all         <span class="token comment">// 全部</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword keyword-enum">enum</span> <span class="token class-name">Status</span> <span class="token punctuation">{</span>
-  created     <span class="token comment">// &#x521B;&#x5EFA;&#x4EFB;&#x52A1;</span>
-  queuing     <span class="token comment">// &#x6267;&#x884C;&#x961F;&#x5217;&#x4E2D;&#x7B49;&#x5F85;</span>
-  running     <span class="token comment">// &#x6B63;&#x5728;&#x6267;&#x884C;&#x4E2D;</span>
-  finished    <span class="token comment">// &#x5DF2;&#x5B8C;&#x6210;</span>
-  ignored     <span class="token comment">// &#x5FFD;&#x7565;</span>
-  failed      <span class="token comment">// &#x51FA;&#x9519;</span>
+  created     <span class="token comment">// 创建任务</span>
+  queuing     <span class="token comment">// 执行队列中等待</span>
+  running     <span class="token comment">// 正在执行中</span>
+  finished    <span class="token comment">// 已完成</span>
+  ignored     <span class="token comment">// 忽略</span>
+  failed      <span class="token comment">// 出错</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
-</pre><hr>
-<h3 class="mume-header" id="post-task-%E5%88%9B%E5%BB%BA%E6%96%B0%E4%BB%BB%E5%8A%A1%E5%B9%B6%E8%BF%90%E8%A1%8C">POST /task &#x521B;&#x5EFA;&#x65B0;&#x4EFB;&#x52A1;&#x5E76;&#x8FD0;&#x884C;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token comment">// &lt;= single *.csv file named &quot;csv&quot;</span>
-<span class="token comment">// NOTE: must send jsonify(data) as a file named &quot;json&quot;</span>
+</code></pre><hr>
+<h3 id="post-task-创建新任务并运行">POST /task 创建新任务并运行 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
+<span class="token comment">// &lt;= single *.csv file named "csv"</span>
+<span class="token comment">// NOTE: must send jsonify(data) as a file named "json"</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
+  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to 'all'</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
   name<span class="token operator">?</span><span class="token operator">:</span> str          <span class="token comment">// custom task name</span>
   thresh<span class="token operator">?</span><span class="token operator">:</span> float      <span class="token comment">// override `dataset.encoder.params.thresh` of all `clf_` jobs of this task</span>
@@ -344,39 +102,36 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   name<span class="token operator">:</span> str           <span class="token comment">// real task name allocated</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="post-taskname-%E6%9B%B4%E6%96%B0%E4%BB%BB%E5%8A%A1%E5%B9%B6%E9%87%8D%E6%96%B0%E8%BF%90%E8%A1%8C">POST /task/&lt;name&gt; &#x66F4;&#x65B0;&#x4EFB;&#x52A1;&#x5E76;&#x91CD;&#x65B0;&#x8FD0;&#x884C;</h3>
-
-<p>&#x2139; &#x4E3B;&#x8981;&#x7528;&#x4E8E;&#x6570;&#x636E;&#x66F4;&#x65B0;&#xFF0C;&#x4FEE;&#x6539;&#x4F5C;&#x4E1A;&#x9879;&#xFF0C;&#x6216;&#x8005;&#x60F3;&#x4ECE;&#x5934;&#x5236;&#x4F5C;&#x6570;&#x636E;&#x96C6;&#x91CD;&#x65B0;&#x5F00;&#x59CB; &#x1F626;</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
-<span class="token comment">// &lt;= single *.csv file (optional) named &quot;csv&quot;, **replacing** the old one</span>
-<span class="token comment">// NOTE: must send jsonify(data) as a file named &quot;json&quot;</span>
+</code></pre><h3 id="post-taskname-更新任务并重新运行">POST /task/&lt;name&gt; 更新任务并重新运行 </h3>
+<p>ℹ 主要用于数据更新，修改作业项，或者想从头制作数据集重新开始 😦</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
+<span class="token comment">// &lt;= single *.csv file (optional) named "csv", **replacing** the old one</span>
+<span class="token comment">// NOTE: must send jsonify(data) as a file named "json"</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to &apos;all&apos;</span>
+  target<span class="token operator">?</span><span class="token operator">:</span> str<span class="token operator">|</span>str<span class="token punctuation">[</span><span class="token punctuation">]</span>  <span class="token comment">// task target, choose from `Target`, default to 'all'</span>
   jobs<span class="token operator">?</span><span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// scheduled jobs, default to all applicable jobs</span>
   thresh<span class="token operator">?</span><span class="token operator">:</span> float      <span class="token comment">// override `dataset.encoder.params.thresh` of all `clf_` jobs of this task</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-tasktask-%E5%88%97%E5%87%BA%E4%BB%BB%E5%8A%A1">GET <a href="..\task">/task</a> &#x5217;&#x51FA;&#x4EFB;&#x52A1;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="get-tasktask-列出任务">GET <a href="..\task">/task</a> 列出任务 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   tasks<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>        <span class="token comment">// task name</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-taskname-%E6%9F%A5%E8%AF%A2%E4%BB%BB%E5%8A%A1">GET /task/&lt;name&gt; &#x67E5;&#x8BE2;&#x4EFB;&#x52A1;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="get-taskname-查询任务">GET /task/&lt;name&gt; 查询任务 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   status<span class="token operator">:</span> str         <span class="token comment">// task status, choose from `Status`</span>
   jobs<span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token string">&quot;job_name&quot;</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token string-property property">"job_name"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
       type<span class="token operator">:</span> str
       statue<span class="token operator">:</span> str
       inlen<span class="token operator">:</span> int      <span class="token comment">// data length needed for query once</span>
-      scores<span class="token operator">:</span> <span class="token punctuation">{</span>       <span class="token comment">// for &apos;clf&apos; task</span>
+      scores<span class="token operator">:</span> <span class="token punctuation">{</span>       <span class="token comment">// for 'clf' task</span>
         acc<span class="token operator">:</span> float
         pres<span class="token operator">:</span> float
         recall<span class="token operator">:</span> float
         f1<span class="token operator">:</span> float
-      <span class="token punctuation">}</span> <span class="token operator">|</span> <span class="token punctuation">{</span>           <span class="token comment">// for &apos;rgr&apos; task</span>
+      <span class="token punctuation">}</span> <span class="token operator">|</span> <span class="token punctuation">{</span>           <span class="token comment">// for 'rgr' task</span>
         mae<span class="token operator">:</span> float
         mse<span class="token operator">:</span> float
         r2<span class="token operator">:</span> float
@@ -386,26 +141,22 @@ pre[data-line] .line-highlight[data-end]:after {
   ts_create<span class="token operator">:</span> int
   ts_update<span class="token operator">:</span> int
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="delete-taskname-%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1%E8%AE%B0%E5%BD%95">DELETE /task/&lt;name&gt; &#x5220;&#x9664;&#x4EFB;&#x52A1;&#x8BB0;&#x5F55;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"></pre><hr>
-<h3 class="mume-header" id="get-modelmodel-%E5%88%97%E5%87%BA%E6%A8%A1%E5%9E%8B%E6%A8%A1%E6%9D%BF">GET <a href="..\model">/model</a> &#x5217;&#x51FA;&#x6A21;&#x578B;&#x6A21;&#x677F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="delete-taskname-删除任务记录">DELETE /task/&lt;name&gt; 删除任务记录 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><hr>
+<h3 id="get-modelmodel-列出模型模板">GET <a href="..\model">/model</a> 列出模型模板 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   models<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>       <span class="token comment">// model name</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-jobjob-%E5%88%97%E5%87%BA%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">GET <a href="..\job">/job</a> &#x5217;&#x51FA;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="get-jobjob-列出作业模板">GET <a href="..\job">/job</a> 列出作业模板 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   jobs<span class="token operator">:</span> str<span class="token punctuation">[</span><span class="token punctuation">]</span>         <span class="token comment">// job name</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="get-jobname-%E4%B8%8B%E8%BD%BD%E6%9F%A5%E8%AF%A2%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">GET /job/&lt;name&gt; &#x4E0B;&#x8F7D;/&#x67E5;&#x8BE2;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+</code></pre><h3 id="get-jobname-下载查询作业模板">GET /job/&lt;name&gt; 下载/查询作业模板 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token comment">// url params: ?format=</span>
-<span class="token comment">//   format: &apos;yaml&apos; or &apos;json&apos;, default: &apos;yaml&apos;</span>
+<span class="token comment">//   format: 'yaml' or 'json', default: 'yaml'</span>
 
 <span class="token comment">// response</span>
 <span class="token comment">// =&gt; &lt;job_name&gt;.yaml file or </span>
@@ -414,20 +165,17 @@ pre[data-line] .line-highlight[data-end]:after {
     <span class="token comment">// config items converted from *.yaml</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
-</pre><h3 class="mume-header" id="post-jobname-%E4%B8%8A%E4%BC%A0%E4%BD%9C%E4%B8%9A%E6%A8%A1%E6%9D%BF">POST /job/&lt;name&gt; &#x4E0A;&#x4F20;&#x4F5C;&#x4E1A;&#x6A21;&#x677F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request:</span>
+</code></pre><h3 id="post-jobname-上传作业模板">POST /job/&lt;name&gt; 上传作业模板 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request:</span>
 <span class="token comment">// &lt;= *.yaml file</span>
-<span class="token comment">// NOTE: &lt;name&gt; in url must starts with &apos;rgr_&apos; or &apos;clf_&apos;</span>
+<span class="token comment">// NOTE: &lt;name&gt; in url must starts with 'rgr_' or 'clf_'</span>
 <span class="token comment">// url params: ?overwrite=</span>
 <span class="token comment">//   overwrite: 0 or 1, default: 0</span>
-</pre><h3 class="mume-header" id="delete-jobname-%E5%88%A0%E9%99%A4%E4%BB%BB%E5%8A%A1%E6%A8%A1%E6%9D%BF">DELETE /job/&lt;name&gt; &#x5220;&#x9664;&#x4EFB;&#x52A1;&#x6A21;&#x677F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"></pre><hr>
-<h3 class="mume-header" id="post-infertask_namejob_name-%E6%8E%A8%E6%96%AD">POST /infer/&lt;task_name&gt;/&lt;job_name&gt; &#x63A8;&#x65AD;</h3>
-
-<p>&#x26AA; infer inplace</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+</code></pre><h3 id="delete-jobname-删除任务模板">DELETE /job/&lt;name&gt; 删除任务模板 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><hr>
+<h3 id="post-infertask_namejob_name-推断">POST /infer/&lt;task_name&gt;/&lt;job_name&gt; 推断 </h3>
+<p>⚪ infer inplace</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   inplace<span class="token operator">:</span> bool             <span class="token comment">// inplace prediction on original timeseq data</span>
 <span class="token punctuation">}</span>
@@ -436,11 +184,11 @@ pre[data-line] .line-highlight[data-end]:after {
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
   seq<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>          <span class="token comment">// preprocessed values, [T, 1]</span>
-  lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for &apos;clf&apos; tasks</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T&apos;, 1], T&apos; is shorter than T by `inlen`</span>
+  lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for 'clf' tasks</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`</span>
 <span class="token punctuation">}</span>
-</pre><p>&#x26AA; infer new</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+</code></pre><p>⚪ infer new</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   data<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// input frame, [T, D], length T is arbitary</span>
   time<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>long<span class="token punctuation">]</span>         <span class="token comment">// unix timestamp, [T]</span>
@@ -448,26 +196,22 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// output frame, [T&apos;, 1], T&apos; is typically smaller than T</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// output frame, [T', 1], T' is typically smaller than T</span>
 <span class="token punctuation">}</span>
-</pre><hr>
-<h3 class="mume-header" id="get-logtask_name-%E6%89%93%E5%8C%85%E4%B8%8B%E8%BD%BD%E4%BB%BB%E5%8A%A1%E6%96%87%E4%BB%B6%E5%A4%B9">GET /log/&lt;task_name&gt; &#x6253;&#x5305;&#x4E0B;&#x8F7D;&#x4EFB;&#x52A1;&#x6587;&#x4EF6;&#x5939;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><hr>
+<h3 id="get-logtask_name-打包下载任务文件夹">GET /log/&lt;task_name&gt; 打包下载任务文件夹 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; &lt;task_name&gt;.zip</span>
-</pre><h3 class="mume-header" id="get-logtask_namejob_name-%E6%89%93%E5%8C%85%E4%B8%8B%E8%BD%BD%E4%BD%9C%E4%B8%9A%E6%96%87%E4%BB%B6%E5%A4%B9">GET /log/&lt;task_name&gt;/&lt;job_name&gt; &#x6253;&#x5305;&#x4E0B;&#x8F7D;&#x4F5C;&#x4E1A;&#x6587;&#x4EF6;&#x5939;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="get-logtask_namejob_name-打包下载作业文件夹">GET /log/&lt;task_name&gt;/&lt;job_name&gt; 打包下载作业文件夹 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; &lt;task_name&gt;-&lt;job_name&gt;.zip</span>
-</pre><h3 class="mume-header" id="get-logtask_namejob_namelog-%E6%9F%A5%E7%9C%8B%E4%BD%9C%E4%B8%9A%E6%97%A5%E5%BF%97">GET /log/&lt;task_name&gt;/&lt;job_name&gt;.log &#x67E5;&#x770B;&#x4F5C;&#x4E1A;&#x65E5;&#x5FD7;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+</code></pre><h3 id="get-logtask_namejob_namelog-查看作业日志">GET /log/&lt;task_name&gt;/&lt;job_name&gt;.log 查看作业日志 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; job.log file</span>
-</pre><h3 class="mume-header" id="get-runtimeruntime-%E6%9F%A5%E7%9C%8B%E7%B3%BB%E7%BB%9F%E8%BF%90%E8%A1%8C%E6%97%B6%E7%8A%B6%E6%80%81">GET <a href="..\runtime">/runtime</a> &#x67E5;&#x770B;&#x7CFB;&#x7EDF;&#x8FD0;&#x884C;&#x65F6;&#x72B6;&#x6001;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+</code></pre><h3 id="get-runtimeruntime-查看系统运行时状态">GET <a href="..\runtime">/runtime</a> 查看系统运行时状态 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token comment">// url params: ?status=</span>
-<span class="token comment">//   status: comma seperated string select from `Status` (default: &quot;queuing,running&quot;) or &apos;all&apos;</span>
+<span class="token comment">//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'</span>
 
 <span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
@@ -477,17 +221,16 @@ pre[data-line] .line-highlight[data-end]:after {
       name<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// task name</span>
       status<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task status</span>
       info<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// cur job</span>
-      progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f&apos;{n_job_finished} / {n_job_total}&apos;</span>
+      progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f'{n_job_finished} / {n_job_total}'</span>
       ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task accept time</span>
       ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// last meta info update time</span>
       task_init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>  <span class="token comment">// path to tmp task_init_pack.pkl file (will be deleted once task marked finished)</span>
     <span class="token punctuation">}</span><span class="token punctuation">,</span>
   <span class="token punctuation">]</span>
 <span class="token punctuation">}</span>
-</pre><hr>
-<h3 class="mume-header" id="post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv &#x5408;&#x5E76;&#x591A;&#x4E2A;csv&#x6587;&#x4EF6;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// request</span>
+</code></pre><hr>
+<h3 id="post-merge_csv-合并多个csv文件">POST /merge_csv 合并多个csv文件 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token comment">// &lt;= multiple *.csv files</span>
 <span class="token comment">// for each file:</span>
 <span class="token comment">//   first column is datetime in isoformat</span>
@@ -499,19 +242,16 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <span class="token comment">// response</span>
 <span class="token comment">// =&gt; data.csv</span>
-<span class="token comment">// multi-dim time-aligned seq as described in &apos;###Data&apos; section</span>
-</pre><h3 class="mume-header" id="get-debugdebug-%E7%B3%BB%E7%BB%9F%E8%B0%83%E8%AF%95%E4%BF%A1%E6%81%AF">GET <a href="..\debug">/debug</a> &#x7CFB;&#x7EDF;&#x8C03;&#x8BD5;&#x4FE1;&#x606F;</h3>
-
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript"><span class="token comment">// response</span>
+<span class="token comment">// multi-dim time-aligned seq as described in '###Data' section</span>
+</code></pre><h3 id="get-debugdebug-系统调试信息">GET <a href="..\debug">/debug</a> 系统调试信息 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page</span>
-</pre><hr>
+</code></pre><hr>
 <p> by Armit <time> 2023/3/3 </time> </p>
 
       </div>
       
       
-    
-    
     
     
     

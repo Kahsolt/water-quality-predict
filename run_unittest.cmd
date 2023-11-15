@@ -1,26 +1,24 @@
 @REM run unit test for modules
 @ECHO OFF
 
-SET PYTHONPATH=%CD%
-
 
 ECHO ^>^> test descriptor ...
-python modules\descriptor.py
+python -m modules.descriptor
 IF ERRORLEVEL 1 GOTO ERROR
 ECHO.
 
 ECHO ^>^> test preprocess ...
-python modules\preprocess.py
+python -m modules.preprocess
 IF ERRORLEVEL 1 GOTO ERROR
 ECHO.
 
 ECHO ^>^> test dataset ...
-python modules\dataset.py
+python -m modules.dataset
 IF ERRORLEVEL 1 GOTO ERROR
 ECHO.
 
 ECHO ^>^> test transform ...
-python modules\transform.py
+python -m modules.transform
 IF ERRORLEVEL 1 GOTO ERROR
 ECHO.
 
