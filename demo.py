@@ -17,7 +17,7 @@ from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 from modules.transform import inv_transforms
-from modules.predictor import Env, load_env, predict_with_
+from modules.predictor import Env, load_env, predict_with_oracle, predict_with_prediction
 from modules.utils.config import Config
 from modules.typing import TaskType, Seq, Stats
 
@@ -114,10 +114,10 @@ class App:
     label: Seq   = env.label
     stats: Stats = env.stats
 
-    self.preds_o: Seq = predict_with_(env, how='oracle')
+    self.preds_o: Seq = predict_with_oracle(env)
     self.preds_o = np.pad(self.preds_o, (len(seq) - len(self.preds_o), 0), mode='edge')
     if self.args.rolling:
-      self.preds_r: Seq = predict_with_(env, how='prediction')
+      self.preds_r: Seq = predict_with_prediction(env)
       self.preds_r = np.pad(self.preds_o, (len(seq) - len(self.preds_r), 0), mode='edge')
     if self.is_task_rgr:
       self.truth = inv_transforms(seq, stats)

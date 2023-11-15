@@ -151,13 +151,14 @@
   time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
   seq<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>          <span class="token comment">// preprocessed values, [T, 1]</span>
   lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for 'clf' tasks</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`</span>
 <span class="token punctuation">}</span>
 </code></pre><p>⚪ infer new</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
   data<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// input frame, [T, D], length T is arbitary</span>
   time<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>long<span class="token punctuation">]</span>         <span class="token comment">// unix timestamp, [T]</span>
+  roll<span class="token operator">?</span><span class="token operator">:</span> int                <span class="token comment">// rolling predict n times, for 'rgr' tasks</span>
 <span class="token punctuation">}</span>
 
 <span class="token comment">// response</span>

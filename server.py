@@ -220,12 +220,13 @@ def infer_(task:str, job:str):
 
       t: Frame = list_to_ndarray(req['time']).astype(np.int32) if 'time' in req else None
       x: Frame = list_to_ndarray(req['data'])
+      roll: int = req.get('roll', 1)
       if job.startswith('rgr_'):
-        y = predict_from_request(job_file, x, t, prob=False)
+        y = predict_from_request(job_file, x, t, roll=roll, prob=False)
         pred = ndarray_to_list(y)
         return resp_ok({'pred': pred})
       else:
-        y, y_prb = predict_from_request(job_file, x, t, prob=True)
+        y, y_prb = predict_from_request(job_file, x, t, roll=roll, prob=True)
         pred = ndarray_to_list(y)
         prob = ndarray_to_list(y_prb)
         return resp_ok({'pred': pred, 'prob': prob})
@@ -300,18 +301,22 @@ if __name__ == '__main__':
   parser = ArgumentParser()
   parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
   parser.add_argument('-P', '--port', type=int, default=5000)
-  parser.add_argument('-N', '--n_workers', type=int, default=os.cpu_count())
+  parser.add_argument('--no_trainer', action='store_true')
+  parser.add_argument('--n_workers', type=int, default=os.cpu_count())
   parser.add_argument('--queue_timeout', type=int, default=5)
   args = parser.parse_args()
 
-  trainer = Trainer(args.n_workers, args.queue_timeout)
+  has_trainer = not args.no_trainer
+
+  if has_trainer:
+    trainer = Trainer(args.n_workers, args.queue_timeout)
   try:
-    trainer.start()
+    if has_trainer: trainer.start()
     app.run(host=args.host, port=args.port, threaded=True, debug=False)
   except KeyboardInterrupt:
     print('Exit by Ctrl+C')
   except:
     print_exc()
   finally:
-    trainer.stop()
+    if has_trainer: trainer.stop()
     logging.shutdown()

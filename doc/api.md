@@ -160,7 +160,7 @@ interface {
   time: List[str]           // preprocessed time, [T]
   seq: List[float]          // preprocessed values, [T, 1]
   lbl?: List[int]           // preprocessed labels, [T, 1], for 'clf' tasks
-  pred: List[float]         // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
+  pred: List[List[float]]   // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
 }
 ```
 
@@ -171,6 +171,7 @@ interface {
 interface {
   data: List[List[float]]   // input frame, [T, D], length T is arbitary
   time?: List[long]         // unix timestamp, [T]
+  roll?: int                // rolling predict n times, for 'rgr' tasks
 }
 
 // response

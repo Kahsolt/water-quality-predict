@@ -3,6 +3,7 @@
 # Create Time: 2022/11/15 
 
 import logging
+from functools import partial
 from pprint import pformat
 from dataclasses import dataclass
 from importlib import import_module
@@ -27,6 +28,9 @@ class Env:
   stats: Stats = None
   manager: PyModule = None
   model: Model = None
+
+PredictRet = Union[Frames, Tuple[Frames, Frames]]
+Predictor = Callable[[Env, Seq, int, bool], PredictRet]
 
 
 def prepare_for_(what:EnvKind):
@@ -57,7 +61,7 @@ def prepare_for_(what:EnvKind):
         model_name = job.get('model/name') ; assert model_name
         manager = import_module(f'modules.models.{model_name}')
         env.manager = manager
-        if False:
+        if LOG_JOB:
           logger.info('manager:')
           logger.info(manager)
 
@@ -65,7 +69,7 @@ def prepare_for_(what:EnvKind):
         manager = env.manager
         model = manager.init(job.get('model/params', {}), logger)
         env.model = model
-        if False:
+        if LOG_JOB:
           logger.debug('model:')
           logger.debug(model)
 
@@ -104,13 +108,20 @@ def load_env(job_file:Path) -> Env:
   return env
 
 
-def predict_with_(env:Env, how:PredictKind='prediction', x:Seq=None, ret_prob=False, n_roll:int=1) -> Union[Frames, Tuple[Frames, Frames]]:
+def predict_with_(how:PredictKind, env:Env, x:Seq=None, n_roll:int=1, ret_prob:bool=False) -> PredictRet:
   assert how in ['oracle', 'prediction']
+  if how == 'oracle': assert n_roll == 1, 'predict_with_ oracle does not use n_roll'
 
-  job: Config = env.job
+  job: Config  = env.job
   manager      = env.manager
   model: Model = env.model
   stats: Stats = env.stats
+
+  if env.manager.TASK_TYPE == TaskType.CLF:
+    assert n_roll == 1, 'for "clf" tasks must set n_roll=1'
+
+  is_task_rgr = env.manager.TASK_TYPE == TaskType.RGR
+  is_model_arima = 'ARIMA' in job['model/name']
 
   if x is not None:
     seq: Seq = transform.apply_transforms(x, stats)
@@ -121,9 +132,6 @@ def predict_with_(env:Env, how:PredictKind='prediction', x:Seq=None, ret_prob=Fa
   overlap: int = job.get('dataset/overlap', 0)
 
   seq = frame_left_pad(seq, inlen)
-
-  is_task_rgr = env.manager.TASK_TYPE == TaskType.RGR
-  is_model_arima = 'ARIMA' in job['model/name']
 
   def predict_rolling(predictor):
     preds: List[Frame] = []
@@ -153,18 +161,21 @@ def predict_with_(env:Env, how:PredictKind='prediction', x:Seq=None, ret_prob=Fa
         preds.append(y)
         if n_roll > 1:
           x = frame_shift(x, y)
-          loc += len(y) - overlap
+          loc += len(y) - overlap   # just for arima
 
-    preds: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
-    return transform.inv_transforms(preds, stats) if is_task_rgr else preds
+    pred: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
+    return transform.inv_transforms(pred, stats) if is_task_rgr else pred
 
   if ret_prob:
     return predict_rolling(manager.infer), predict_rolling(manager.infer_prob)
   else:
     return predict_rolling(manager.infer)
 
+predict_with_oracle:     Predictor = partial(predict_with_, 'oracle')
+predict_with_prediction: Predictor = partial(predict_with_, 'prediction')
 
-def predict_from_request(job_file:Path, x:Frame, t:Frame=None, prob=False) -> Union[Frames, Tuple[Frames, Frames]]:
+
+def predict_from_request(job_file:Path, x:Frame, t:Frame=None, roll:int=1, prob:bool=False) -> PredictRet:
   env = load_env(job_file)
   job: Config = env.job
 
@@ -172,7 +183,7 @@ def predict_from_request(job_file:Path, x:Frame, t:Frame=None, prob=False) -> Un
   if t is not None:
     t: Time   = pd.Series(str(datetime.fromtimestamp(e)) for e in t)
     x: Values = pd.DataFrame(x)
-    df = preprocess.combine_time_and_values(t, x)
+    df = preprocess.combine_time_and_values(t, x) 
 
     if 'filter T':
       for proc in job.get('preprocess/filter_T', []):
@@ -197,4 +208,4 @@ def predict_from_request(job_file:Path, x:Frame, t:Frame=None, prob=False) -> Un
     x = df.to_numpy()
 
   # model infer
-  return predict_with_(env, 'prediction', x, prob)
+  return predict_with_prediction(env, x, roll, prob)

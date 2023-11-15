@@ -11,7 +11,7 @@ from pprint import pformat
 from traceback import format_exc
 
 from modules import preprocess, transform
-from modules.predictor import Env, prepare_for_, predict_with_
+from modules.predictor import Env, prepare_for_, predict_with_oracle, predict_with_prediction
 from modules.dataset import encode_seq, slice_frames, split_dataset, check_label_presented_cover_expected
 from modules.utils import *
 
@@ -295,8 +295,8 @@ def target_infer(env:Env):
   logger: Logger = env.logger
   log_dp: Path = env.log_dp
 
-  preds_o: Seq = predict_with_(env, 'oracle')
-  preds_r: Seq = predict_with_(env, 'prediction')
+  preds_o: Seq = predict_with_oracle(env)
+  preds_r: Seq = predict_with_prediction(env)
   predicted = (preds_o, preds_r)
   save_pickle(predicted, log_dp / PREDICT_FILE, logger)
 

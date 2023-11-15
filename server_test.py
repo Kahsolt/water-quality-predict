@@ -118,6 +118,8 @@ def test_train_routine():
 def test_infer_routine():
   resp = R.get(EP(f'/task/{task_name}'))
   assert resp.ok, resp
+  job_states = resp.json()['data']['jobs']
+  #print(job_states)
 
   # [T=256, D=1], any length is ok
   data = np.random.uniform(size=[256, 1]).astype(np.float32)
@@ -128,14 +130,15 @@ def test_infer_routine():
   jobs: dict = resp.json()['data']['jobs']
   for job in jobs.keys():
     print(f'>> querying {job!r}...')
+    if job not in job_states or job_states[job]['status'] != 'finished': continue
 
     resp = R.post(
       EP(f'/infer/{task_name}/{job}'),
-      json={'data': data, 'time': T},
+      json={'data': data, 'time': T, 'roll': 6 if job.startswith('rgr_') else 1},
     )
     assert resp.ok, resp ; r = resp.json()
 
-    if not r['ok']: breakpoint()
+    if not r['ok']: breakpoint() ; continue
 
     pred = list_to_ndarray(r['data']['pred'])
     print('pred.shape:', pred.shape)
@@ -150,10 +153,13 @@ def test_infer_routine():
 def test_infer_inplace_routine():
   resp = R.get(EP(f'/task/{task_name}'))
   assert resp.ok, resp
+  job_states = resp.json()['data']['jobs']
+  #print(job_states)
 
   jobs: dict = resp.json()['data']['jobs']
   for job in jobs.keys():
     print(f'>> querying {job!r}...')
+    if job not in job_states or job_states[job]['status'] != 'finished': continue
 
     resp = R.post(
       EP(f'/infer/{task_name}/{job}'),
@@ -202,8 +208,8 @@ def test_train_pressure(idx:int):
 if __name__ == '__main__':
   test_basic_info()
   test_train_routine()
-  for i in range(10):
-    try: test_train_pressure(i)
-    except: pass
-  test_infer_routine()
   test_infer_inplace_routine()
+  test_infer_routine()
+
+  for i in range(10):
+    test_train_pressure(i)
