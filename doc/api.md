@@ -30,7 +30,6 @@ interface {
 ### Data 数据
 
 Time sequence data are stored as a **single** `data.csv` file for each task created.  
-=> To pre-merge multiple *.csv files, see [POST /merge_csv](#post-merge_csv-合并多个csv文件)
 
 
 Can conatin **multiple** columns:
@@ -65,7 +64,6 @@ enum Target {
   all         // 全部
 };
 enum Status {
-  created     // 创建任务
   queuing     // 执行队列中等待
   running     // 正在执行中
   finished    // 已完成
@@ -147,9 +145,71 @@ interface {
 }
 ```
 
+### POST /infer/\<task_name\>/\<job_name\> 推断
+
+⚪ infer inplace
+
+```typescript
+// request
+interface {
+  inplace: bool             // inplace prediction on original timeseq data
+}
+
+// response
+interface {
+  time: List[str]           // preprocessed time, [T]
+  seq: List[float]          // preprocessed values, [T, 1]
+  lbl?: List[int]           // preprocessed labels, [T, 1], for 'clf' tasks
+  pred: List[float]         // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
+}
+```
+
+⚪ infer new
+
+```typescript
+// request
+interface {
+  data: List[List[float]]   // input frame, [T, D], length T is arbitary
+  time?: List[long]         // unix timestamp, [T]
+}
+
+// response
+interface {
+  pred: List[List[float]]   // output frame, [T', 1], T' is typically smaller than T
+}
+```
+
+----
+
 ### DELETE /task/\<name\> 删除任务记录
 
 ```typescript
+```
+
+----
+
+### GET [/runtime](/runtime) 查看系统运行时状态
+
+```typescript
+// request
+// url params: ?status=
+//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'
+
+// response
+interface {
+  runtime_hist: [
+    {                       // Run
+      id: int,
+      name: str,            // task name
+      status: str,          // task status
+      info: str,            // cur job
+      progress: str,        // f'{n_job_finished} / {n_job_total}'
+      ts_create: int,       // task accept time
+      ts_update: int,       // last meta info update time
+      task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task marked finished)
+    },
+  ]
+}
 ```
 
 ----
@@ -205,42 +265,6 @@ interface {
 
 ----
 
-### POST /infer/\<task_name\>/\<job_name\> 推断
-
-⚪ infer inplace
-
-```typescript
-// request
-interface {
-  inplace: bool             // inplace prediction on original timeseq data
-}
-
-// response
-interface {
-  time: List[str]           // preprocessed time, [T]
-  seq: List[float]          // preprocessed values, [T, 1]
-  lbl?: List[int]           // preprocessed labels, [T, 1], for 'clf' tasks
-  pred: List[float]         // inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`
-}
-```
-
-⚪ infer new
-
-```typescript
-// request
-interface {
-  data: List[List[float]]   // input frame, [T, D], length T is arbitary
-  time?: List[long]         // unix timestamp, [T]
-}
-
-// response
-interface {
-  pred: List[List[float]]   // output frame, [T', 1], T' is typically smaller than T
-}
-```
-
-----
-
 ### GET /log/\<task_name\> 打包下载任务文件夹
 
 ```typescript
@@ -262,48 +286,9 @@ interface {
 // => job.log file
 ```
 
-### GET [/runtime](/runtime) 查看系统运行时状态
+### GET [/log/clean](/log/clean) 清理中间文件
 
 ```typescript
-// request
-// url params: ?status=
-//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'
-
-// response
-interface {
-  runtime_hist: [
-    {                       // Run
-      id: int,
-      name: str,            // task name
-      status: str,          // task status
-      info: str,            // cur job
-      progress: str,        // f'{n_job_finished} / {n_job_total}'
-      ts_create: int,       // task accept time
-      ts_update: int,       // last meta info update time
-      task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task marked finished)
-    },
-  ]
-}
-```
-
-----
-
-### POST /merge_csv 合并多个csv文件
-
-```typescript
-// request
-// <= multiple *.csv files
-// for each file:
-//   first column is datetime in isoformat
-//   rest columns are float value
-interface {
-  target: str         // filename, specify which file is to predict on (as last column)
-                      // target file must contain only 1 value column
-}
-
-// response
-// => data.csv
-// multi-dim time-aligned seq as described in '###Data' section
 ```
 
 ### GET [/debug](/debug) 系统调试信息

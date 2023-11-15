@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from enum import Enum
 from logging import Logger
@@ -9,6 +10,8 @@ from torch import Tensor
 from torch.nn import Module
 from torch.optim import Optimizer
 
+# python module
+PyModule = type(sys)
 
 # 任务/作业运行目标
 class Target(Enum):
@@ -21,7 +24,6 @@ class Target(Enum):
 # 任务/作业进度状态
 class Status(Enum):
   QUEUING  = 'queuing'    # 执行队列中等待
-  CREATED  = 'created'    # 创建任务日志目录
   RUNNING  = 'running'    # 作业正在执行中
   FINISHED = 'finished'   # 已完成
   FAILED   = 'failed'     # 出错
@@ -42,17 +44,6 @@ Encoder = {
   'name': str,
   'params': Params,
 }
-
-# 作业运行时环境类型
-EnvKind = Union[
-  Literal['train'],     # for train
-  Literal['infer'],     # for infer
-  Literal['demo'],      # for demo infer, `infer.py`
-]
-PredictKind = Union[
-  Literal['oracle'],
-  Literal['prediction'],
-]
 # 含时间轴的原始数据
 TimeSeq = DataFrame
 Time    = Series
@@ -75,62 +66,20 @@ Datasets = Tuple[Dataset, Dataset]
 CachedData = Union[Seq, Stats, Datasets]
 # 评估结果
 EvalMetrics = Tuple[float, ...]
-
-
-# 作业运行时环境
-Env = {
-  'job': 'Descriptor',
-  'logger': Logger,
-  'log_dp': Path,
-  'csv': str, 
-  'status': Status,     # RUNNING / IGNORED
-  'df': TimeSeq,
-  'T': Time,
-  'seq': Seq,
-  'label': Seq,
-  'dataset': Datasets,
-  'stats': Stats,
-  'manager': 'module',
-  'model': Model,
-}
-
-# 任务启动包
-TaskInit = {
-  'name': str,
-  'data': bytes,
-  'target': List[str],
-  'jobs': List[str],
-  'thresh': float,
-}
-
-# 任务运行时队列对象
-RunMeta = {
-  'id': int,
-  'name': str,
-  'status': str,
-  'info': str,
-  'progress': str,
-  'ts_create': int,
-  'ts_update': int,
-  'task_init_pack': str,
-}
-
+# 作业运行时环境类型
+EnvKind = Union[
+  Literal['train'],  # train
+  Literal['infer'],  # infer
+  Literal['demo'],   # demo inplace infer
+]
+# 预测类型
+PredictKind = Union[
+  Literal['oracle'],
+  Literal['prediction'],
+]
 # 任务日志结果
 JobResult = Union[
   Literal[Status.FINISHED],
   Literal[Status.FAILED],
   Literal[Status.IGNORED],
 ]
-JobMeta = {
-  'type': str,
-  'status': str,
-  'inlen': int,    # for ref of infer 
-  'scores': Dict[str, float],
-}
-TaskMeta = {
-  'status': str,
-  'target': List[str],
-  'jobs': Dict[str, 'JobMeta'],
-  'ts_create': int,
-  'ts_update': int,
-}

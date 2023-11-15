@@ -8,7 +8,6 @@ from torch import optim
 
 from modules.dataset import FrameDataset, DataLoader
 from modules.utils import *
-from modules.typing import *
 
 
 class CRNN(nn.Module):

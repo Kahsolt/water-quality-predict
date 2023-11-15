@@ -7,7 +7,6 @@ from random import shuffle
 from torch.utils.data import Dataset, DataLoader
 
 from modules.utils import *
-from modules.typing import *
 
 
 def ex_thresh(seq:Seq, T:Time, **kwargs) -> Seq:

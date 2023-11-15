@@ -2,30 +2,26 @@
 # Author: Armit
 # Create Time: 2023/10/09
 
-# GUI client for app.py server
+# GUI client for server
 
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmsg
 from traceback import print_exc
-from pprint import pprint as pp, pformat as pf
+from typing import Dict, Any
 
+import numpy as np
 import requests as R
 from requests import Response
 
-from modules.utils import *
-from modules.typing import *
+from modules.utils import ts_now, ndarray_to_list
+from server_test import EP
 
 WINDOW_TITLE = 'Inference Client'
 WINDOW_SIZE  = (500, 500)
 CB_WIDTH     = 200
 TX_LINES_IN  = 12
 TX_LINES_OUT = 6
-
-HOST = os.environ.get('HOST', 'localhost')
-PORT = os.environ.get('PORT', 5000)
-API_BASE = f'http://{HOST}:{PORT}'
-EP = lambda api: f'{API_BASE}{api}'
 
 HTTP_FAIL = object()
 

@@ -5,7 +5,6 @@
 from pmdarima import AutoARIMA
 
 from modules.utils import *
-from modules.typing import *
 
 from modules.models.XGBoost_rgr import save, load     # just proxy by
 

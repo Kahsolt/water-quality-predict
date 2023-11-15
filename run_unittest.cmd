@@ -2,8 +2,8 @@
 @ECHO OFF
 
 
-ECHO ^>^> test descriptor ...
-python -m modules.descriptor
+ECHO ^>^> test config ...
+python -m modules.utils.config
 IF ERRORLEVEL 1 GOTO ERROR
 ECHO.
 

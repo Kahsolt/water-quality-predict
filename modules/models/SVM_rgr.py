@@ -7,7 +7,6 @@ from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 
 from modules.utils import *
-from modules.typing import *
 
 from modules.models.XGBoost_rgr import save, load
 

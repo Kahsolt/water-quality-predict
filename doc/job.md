@@ -45,13 +45,6 @@ seed: int           # 全局随机数种子, (default: -1, ie. randomized)
 
 ### 数据制作流程
 
-##### merge_csv 合并多个csv源
-
-=> 参考 [POST /merge_csv](/#post-merge_csv-合并多个csv文件)
-
-- 以时间轴为基准对所有表做 merge
-- 列顺序整理为: 时间轴 - 特征变量xN - 目标变量
-
 ##### preprocess 数值预处理
 
 ```yaml

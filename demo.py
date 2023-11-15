@@ -2,33 +2,36 @@
 # Author: Armit
 # Create Time: 2023/02/20 
 
+from pathlib import Path
 from argparse import ArgumentParser
+from traceback import print_exc
+
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.messagebox as tkmsg
 import tkinter.filedialog as tkfdlg
-from traceback import print_exc
 
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-from modules.transform import *
-from modules.utils import *
-from modules.typing import *
+from modules.transform import inv_transforms
+from modules.predictor import Env, load_env, predict_with_
+from modules.utils.config import Config
+from modules.typing import TaskType, Seq, Stats
 
-from run import *
-
-WINDOW_TITLE  = 'Sequential Inference Demo'
+WINDOW_TITLE  = 'Inplace Inference Demo'
 WINDOW_SIZE   = (1000, 750)
 HIST_FIG_SIZE = (8, 8)
 
 
 class App:
 
-  def __init__(self):
+  def __init__(self, args):
     self.setup_gui()
 
+    self.args = args
     self.env: Env = None
 
     try:
@@ -100,20 +103,20 @@ class App:
     # init job
     self.env = load_env(fp)
     env: Env = self.env
-    job: Descriptor = env['job']
+    job: Config = env.job
 
     self.is_model_arima = 'ARIMA' in job['model/name']
-    self.is_task_rgr = env['manager'].TASK_TYPE == TaskType.RGR
+    self.is_task_rgr = env.manager.TASK_TYPE == TaskType.RGR
     print(f'  is_task_rgr: {self.is_task_rgr}')
 
     # precalc whole seq
-    seq:   Seq   = env['seq']     # transformed
-    label: Seq   = env['label']
-    stats: Stats = env['stats']
+    seq:   Seq   = env.seq     # transformed
+    label: Seq   = env.label
+    stats: Stats = env.stats
 
     self.preds_o: Seq = predict_with_(env, how='oracle')
     self.preds_o = np.pad(self.preds_o, (len(seq) - len(self.preds_o), 0), mode='edge')
-    if args.draw_rolling:
+    if self.args.rolling:
       self.preds_r: Seq = predict_with_(env, how='prediction')
       self.preds_r = np.pad(self.preds_o, (len(seq) - len(self.preds_r), 0), mode='edge')
     if self.is_task_rgr:
@@ -145,21 +148,21 @@ class App:
     if 'select range & channel':
       truth   = self.truth  [L:R, 0]
       preds_o = self.preds_o[L:R, 0]      # [T'=R-L+1]
-      if args.draw_rolling:
+      if self.args.rolling:
         preds_r = self.preds_r[L:R, 0]    # [T'=R-L+1]
 
-    if 'show acc':
+    if 'show metrics':
       if self.is_task_rgr:
-        mae = np.abs(truth - preds_o).mean()
+        mae = np.mean(np.abs(truth - preds_o))
         print(f'>> mae: {mae}')
       else:
-        acc = (truth == preds_o).sum() / len(truth)
+        acc = np.mean(truth == preds_o)
         print(f'>> acc: {acc:.3%}')
 
     self.ax.cla()
     self.ax.plot(truth,   'b', label='truth')
     self.ax.plot(preds_o, 'r', label='pred (oracle)')
-    if args.draw_rolling:
+    if self.args.rolling:
       self.ax.plot(preds_r, 'g', label='pred (rolling)')
     if not self.is_task_rgr:
       self.ax.yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -170,7 +173,7 @@ class App:
 
 if __name__ == '__main__':
   parser = ArgumentParser()
-  parser.add_argument('--draw_rolling', action='store_true', help='whether draw rolling prediction')
+  parser.add_argument('--rolling', action='store_true', help='whether draw rolling prediction')
   args = parser.parse_args()
 
-  App()
+  App(args)

@@ -15,5 +15,4 @@ tmp/
 
 # local debug
 bug/
-run_bug.cmd
 host.txt

@@ -3,7 +3,6 @@
 # Create Time: 2023/02/21 
 
 from modules.utils import *
-from modules.typing import *
 
 from modules.models.CRNN import *
 

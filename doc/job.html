@@ -60,12 +60,6 @@
 
 <span class="token key atrule">seed</span><span class="token punctuation">:</span> int           <span class="token comment"># 全局随机数种子, (default: -1, ie. randomized)</span>
 </code></pre><h3 id="数据制作流程">数据制作流程 </h3>
-<h5 id="merge_csv-合并多个csv源">merge_csv 合并多个csv源 </h5>
-<p>=&gt; 参考 <a href="..\#post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv</a></p>
-<ul>
-<li>以时间轴为基准对所有表做 merge</li>
-<li>列顺序整理为: 时间轴 - 特征变量xN - 目标变量</li>
-</ul>
 <h5 id="preprocess-数值预处理">preprocess 数值预处理 </h5>
 <pre data-role="codeBlock" data-info="yaml" class="language-yaml yaml"><code><span class="token key atrule">preprocess</span><span class="token punctuation">:</span>         <span class="token comment"># 预处理，可选项为 modules/preprocess.py 文件内节的各函数名</span>
   <span class="token key atrule">filter_T</span><span class="token punctuation">:</span>

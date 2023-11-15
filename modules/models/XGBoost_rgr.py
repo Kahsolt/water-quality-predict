@@ -8,7 +8,6 @@ from xgboost import XGBRegressor
 from sklearn.model_selection import GridSearchCV
 
 from modules.utils import *
-from modules.typing import *
 
 TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 

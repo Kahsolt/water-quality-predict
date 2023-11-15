@@ -2,7 +2,7 @@
 # Author: Armit
 # Create Time: 2023/02/19 
 
-from modules.utils import *
+import numpy as np
 from modules.typing import *
 
 
@@ -78,5 +78,5 @@ if __name__ == '__main__':
     z, st = p_func(p)
     q = q_func(z, *st)
 
-    e = np.abs(q - p).mean()
+    e = np.mean(np.abs(q - p))
     print(f'{T} error: {e}')

@@ -5,24 +5,22 @@
 import os
 import shutil
 import psutil
-import gc
 from argparse import ArgumentParser
-from traceback import print_exc
+from traceback import print_exc, format_exc
+import logging
+import gc
 
 from flask import Flask, request, Response
 from flask import redirect, jsonify, render_template, send_file
 
+from modules.trainer import Trainer, TaskInit, RunMeta
+from modules.predictor import predict_from_request
 from modules.utils import *
-from modules.typing import *
-
-from config import *
-from run import *
 
 app = Flask(__name__, template_folder=HTML_PATH)
 
 
 def resp_ok(data:Union[dict, list]=None) -> Response:
-  gc.collect()
   return jsonify({
     'ok': True,
     'data': data,
@@ -36,31 +34,17 @@ def resp_error(err:str) -> Response:
   })
 
 
-def fix_target(target) -> List[str]:
-  if not target: return ['all']
-  if isinstance(target, str): target = [target]
-  valid_tgt = enum_values(Target)
-  for tgt in target: assert tgt in valid_tgt
-  return target
-
-def fix_jobs(jobs) -> List[str]:
-  valid_job = [job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml']
-  if not jobs: return valid_job
-  for job in jobs: assert job in valid_job
-  return jobs
-
-
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
   return redirect('/doc/api')
 
 
-@app.route('/doc/<page>')
+@app.route('/doc/<page>', methods=['GET'])
 def doc_(page:str):
   return render_template(f'{page}.html')
 
 
-@app.route('/debug')
+@app.route('/debug', methods=['GET'])
 def debug():
   pid = os.getpid()
   loadavg = psutil.getloadavg()
@@ -68,29 +52,30 @@ def debug():
   meminfo = p.memory_full_info()
   
   return f'''
-<div>
-  <p>pwd: {os.getcwd()}</p>
-  <p>BASE_PATH: {BASE_PATH}</p>
-  <p>HTML_PATH: {HTML_PATH}</p>
-  <p>JOB_PATH: {JOB_PATH}</p>
-  <p>LOG_PATH: {LOG_PATH}</p>
-  <p>loadavg: {loadavg}</p>
-  <p>mem use: {meminfo.rss / 2**20:.3f} MB</p>
-  <p>mem vms: {meminfo.vms / 2**20:.3f} MB</p>
-  <p>mem percent: {p.memory_percent()} %</p>
-</div>
-'''
+      <div>
+        <p>pwd: {os.getcwd()}</p>
+        <p>BASE_PATH: {BASE_PATH}</p>
+        <p>HTML_PATH: {HTML_PATH}</p>
+        <p>JOB_PATH: {JOB_PATH}</p>
+        <p>LOG_PATH: {LOG_PATH}</p>
+        <p>loadavg: {loadavg}</p>
+        <p>mem use: {meminfo.rss / 2**20:.3f} MB</p>
+        <p>mem vms: {meminfo.vms / 2**20:.3f} MB</p>
+        <p>mem percent: {p.memory_percent()} %</p>
+      </div>
+    '''
 
 
-@app.route('/model')
+@app.route('/model', methods=['GET'])
 def model():
-  return resp_ok({'models': [job.stem for job in (BASE_PATH / 'modules' / 'models').iterdir() 
-                                      if job.suffix == '.py' and job.stem != '___init___']})
+  models = [fp.stem for fp in MODEL_PATH.iterdir() if fp.suffix == '.py' and fp.stem != '___init___']
+  return resp_ok({'models': models})
 
 
-@app.route('/job')
+@app.route('/job', methods=['GET'])
 def job():
-  return resp_ok({'jobs': [job.stem for job in JOB_PATH.iterdir() if job.suffix == '.yaml']})
+  jobs = [fp.stem for fp in JOB_PATH.iterdir() if fp.suffix == '.yaml']
+  return resp_ok({'jobs': jobs})
 
 
 @app.route('/job/<name>', methods=['POST', 'GET', 'DELETE'])
@@ -136,23 +121,24 @@ def task():
     if 'csv' not in request.files: return resp_error(f'not found required "csv" in uploaded files')
 
     fjson = request.files['json'].stream.read() if 'json' in request.files else None
-    fcsv  = request.files['csv'] .stream.read()
-
     req: Dict = json.loads(fjson) if fjson is not None else {}
-    if 'name' in req and (LOG_PATH / req['name']).exists(): return resp_error('task already exists, should use POST /task/<name> to retrain/modify')
+    if 'name' in req and Path(LOG_PATH / req['name']).exists(): return resp_error('task already exists, should use POST /task/<name> to retrain/modify')
 
-    name = req.get('name', timestr())
-    target = fix_target(req.get('target'))
+    name = req.get('name', datetime_str())
+    target = fix_targets(req.get('target'))
+    if not len(target): return resp_error('bad target')
     jobs = fix_jobs(req.get('jobs'))
+    if not len(jobs): return resp_error('bad jobs')
     thresh: float = req.get('thresh')
-    task_init: TaskInit = {   # new_task_init()
-      'name': name,
-      'data': fcsv,
-      'target': target,
-      'jobs': jobs,
-      'thresh': thresh,
-    }
-    TMP_PATH.mkdir(exist_ok=True, parents=True)
+
+    fcsv = request.files['csv'].stream.read()
+    task_init = TaskInit(
+      name=name,
+      data=fcsv,
+      target=target,
+      jobs=jobs,
+      thresh=thresh,
+    )
     init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
     save_pickle(task_init, init_fp)
     trainer.add_task(name, init_fp)
@@ -175,18 +161,19 @@ def task_(name:str):
     try:
       req: Dict = request.json
 
-      data = request.files[0].stream.read() if len(request.files) else None
-      target = fix_target(req.get('target'))
+      target = fix_targets(req.get('target'))
+      if not len(target): return resp_error('bad target')
       jobs = fix_jobs(req.get('jobs'))
+      if not len(jobs): return resp_error('bad jobs')
+      data = request.files[0].stream.read() if len(request.files) else None
       thresh: float = req.get('thresh')
-      task_init: TaskInit = {   # new_task_init()
-        'name': name,
-        'data': data,
-        'target': target,
-        'jobs': jobs,
-        'thresh': thresh,
-      }
-      TMP_PATH.mkdir(exist_ok=True, parents=True)
+      task_init = TaskInit(
+        name=name,
+        data=data,
+        target=target,
+        jobs=jobs,
+        thresh=thresh,
+      )
       init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
       save_pickle(task_init, init_fp)
       trainer.add_task(name, init_fp)
@@ -208,28 +195,29 @@ def task_(name:str):
 def infer_(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
-  job_file = job_folder / 'job.yaml'
 
   try:
     req: Dict = request.json
 
     if req.get('inplace', False):
-        time: Time = load_pickle(job_folder / TIME_FILE)
-        seq:  Seq  = load_pickle(job_folder / PREPROCESS_FILE)
-        lbl:  Seq  = load_pickle(job_folder / LABEL_FILE)
-        pred: Seq  = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
-        time = time.to_list()
-        seq  = ndarray_to_list(seq)
-        pred = ndarray_to_list(pred)
-        r = {
-          'time': time,
-          'seq':  seq, 
-          'pred': pred, 
-        }
-        if lbl is not None:
-          r.update({'lbl': ndarray_to_list(lbl)})
-        return resp_ok(r)
+      time: Time = load_pickle(job_folder / TIME_FILE)
+      seq:  Seq  = load_pickle(job_folder / PREPROCESS_FILE)
+      lbl:  Seq  = load_pickle(job_folder / LABEL_FILE)
+      pred: Seq  = load_pickle(job_folder / PREDICT_FILE)[0]    # only need pred_o
+      time = time.to_list()
+      seq  = ndarray_to_list(seq)
+      pred = ndarray_to_list(pred)
+      r = {
+        'time': time,
+        'seq':  seq, 
+        'pred': pred, 
+      }
+      if lbl is not None:
+        r.update({'lbl': ndarray_to_list(lbl)})
+      return resp_ok(r)
     else:
+      job_file = job_folder / JOB_FILE
+
       t: Frame = list_to_ndarray(req['time']).astype(np.int32) if 'time' in req else None
       x: Frame = list_to_ndarray(req['data'])
       if job.startswith('rgr_'):
@@ -244,6 +232,25 @@ def infer_(task:str, job:str):
 
   except:
     return resp_error(format_exc())
+
+
+@app.route('/runtime', methods=['GET'])
+def runtime():
+  filters_str = ','.join([e.value for e in [Status.QUEUING, Status.RUNNING]])
+  try: filters_str = request.args.get('status', filters_str)
+  except: pass
+  filters = filters_str.split(',')
+
+  if 'all' in filters:
+    runtime_hist = trainer.run_meta_list
+  else:
+    filtered: List[RunMeta] = []
+    for run_meta in trainer.run_meta_list:
+      if run_meta.status.value in filters:
+        filtered.append(run_meta)
+    runtime_hist = filtered
+  runtime_hist = RunMeta.to_dict_list(runtime_hist)
+  return resp_ok({'runtime_hist': serialize_json(runtime_hist)})
 
 
 @app.route('/log/<task>', methods=['GET'])
@@ -261,7 +268,7 @@ def log__(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
 
-  zip_fp = TMP_PATH / f'{task}@{job}.zip'
+  zip_fp = TMP_PATH / f'{get_fullname(task, job)}.zip'
   make_zip(job_folder, zip_fp)
   return send_file(zip_fp, mimetype='application/zip')
 
@@ -271,41 +278,33 @@ def log__log(task:str, job:str):
   job_folder = LOG_PATH / task / job
   if not job_folder.exists(): return resp_error('job folder not exists')
 
-  with open(job_folder / LOG_FILE, 'r', encoding='utf-8') as fh:
-    logs = fh.read().strip()
-  return '<br/>'.join(logs.split('\n'))
+  logs = read_txt(job_folder / LOG_FILE)
+  return '<br/>'.join(logs)
 
 
-@app.route('/merge_csv', methods=['POST'])
-def merge_csv():
-  return resp_ok({'status': 'not impl'})
-
-
-@app.route('/runtime', methods=['GET'])
-def runtime():
-  filters = ','.join([e.value for e in [Status.QUEUING, Status.RUNNING]])
-  try: filters = request.args.get('status', filters)
-  except: pass
-  filters = filters.split(',')
-
-  if 'all' in filters:
-    return resp_ok({'runtime_hist': serialize_json(trainer.run_meta)})
-  else:
-    filtered: List[RunMeta] = []
-    for run in trainer.run_meta:
-      if isinstance(run['status'], str)    and run['status']       in filters: filtered.append(run)
-      if isinstance(run['status'], Status) and run['status'].value in filters: filtered.append(run)
-    return resp_ok({'runtime_hist': serialize_json(filtered)})
+@app.route('/log/clean', methods=['GET'])
+def log_clean():
+  def walk(dp:Path):
+    for fp in dp.iterdir():
+      if fp.is_dir():
+        walk(fp)
+      else:
+        if fp.suffix == '.png':
+          print(f'>> delete {fp.relative_to(BASE_PATH)}')
+          fp.unlink()
+  walk(LOG_PATH)
+  return resp_ok()
 
 
 if __name__ == '__main__':
   parser = ArgumentParser()
   parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
   parser.add_argument('-P', '--port', type=int, default=5000)
-  parser.add_argument('-N', '--n_workers', type=int, default=os.cpu_count(), help='n_worker for the trainer')
+  parser.add_argument('-N', '--n_workers', type=int, default=os.cpu_count())
+  parser.add_argument('--queue_timeout', type=int, default=5)
   args = parser.parse_args()
 
-  trainer = Trainer(args.n_workers)
+  trainer = Trainer(args.n_workers, args.queue_timeout)
   try:
     trainer.start()
     app.run(host=args.host, port=args.port, threaded=True, debug=False)

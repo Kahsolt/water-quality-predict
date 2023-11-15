@@ -46,8 +46,7 @@
   data<span class="token operator">?</span><span class="token operator">:</span> list<span class="token operator">|</span>dict    <span class="token comment">// data payload</span>
 <span class="token punctuation">}</span>
 </code></pre><h3 id="data-数据">Data 数据 </h3>
-<p>Time sequence data are stored as a <strong>single</strong> <code>data.csv</code> file for each task created.<br>
-=&gt; To pre-merge multiple *.csv files, see <a href="#post-merge_csv-%E5%90%88%E5%B9%B6%E5%A4%9A%E4%B8%AAcsv%E6%96%87%E4%BB%B6">POST /merge_csv</a></p>
+<p>Time sequence data are stored as a <strong>single</strong> <code>data.csv</code> file for each task created.</p>
 <p>Can conatin <strong>multiple</strong> columns:</p>
 <ul>
 <li>First column: datetime string in ISO format
@@ -79,7 +78,6 @@
   all         <span class="token comment">// 全部</span>
 <span class="token punctuation">}</span><span class="token punctuation">;</span>
 <span class="token keyword keyword-enum">enum</span> <span class="token class-name">Status</span> <span class="token punctuation">{</span>
-  created     <span class="token comment">// 创建任务</span>
   queuing     <span class="token comment">// 执行队列中等待</span>
   running     <span class="token comment">// 正在执行中</span>
   finished    <span class="token comment">// 已完成</span>
@@ -141,8 +139,55 @@
   ts_create<span class="token operator">:</span> int
   ts_update<span class="token operator">:</span> int
 <span class="token punctuation">}</span>
-</code></pre><h3 id="delete-taskname-删除任务记录">DELETE /task/&lt;name&gt; 删除任务记录 </h3>
+</code></pre><h3 id="post-infertask_namejob_name-推断">POST /infer/&lt;task_name&gt;/&lt;job_name&gt; 推断 </h3>
+<p>⚪ infer inplace</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  inplace<span class="token operator">:</span> bool             <span class="token comment">// inplace prediction on original timeseq data</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// response</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
+  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>          <span class="token comment">// preprocessed values, [T, 1]</span>
+  lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for 'clf' tasks</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`</span>
+<span class="token punctuation">}</span>
+</code></pre><p>⚪ infer new</p>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  data<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// input frame, [T, D], length T is arbitary</span>
+  time<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>long<span class="token punctuation">]</span>         <span class="token comment">// unix timestamp, [T]</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// response</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// output frame, [T', 1], T' is typically smaller than T</span>
+<span class="token punctuation">}</span>
+</code></pre><hr>
+<h3 id="delete-taskname-删除任务记录">DELETE /task/&lt;name&gt; 删除任务记录 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><hr>
+<h3 id="get-runtimeruntime-查看系统运行时状态">GET <a href="..\runtime">/runtime</a> 查看系统运行时状态 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
+<span class="token comment">// url params: ?status=</span>
+<span class="token comment">//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'</span>
+
+<span class="token comment">// response</span>
+<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
+  runtime_hist<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>                       <span class="token comment">// Run</span>
+      id<span class="token operator">:</span> int<span class="token punctuation">,</span>
+      name<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// task name</span>
+      status<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task status</span>
+      info<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// cur job</span>
+      progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f'{n_job_finished} / {n_job_total}'</span>
+      ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task accept time</span>
+      ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// last meta info update time</span>
+      task_init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>  <span class="token comment">// path to tmp task_init_pack.pkl file (will be deleted once task marked finished)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre><hr>
 <h3 id="get-modelmodel-列出模型模板">GET <a href="..\model">/model</a> 列出模型模板 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
@@ -173,32 +218,6 @@
 <span class="token comment">//   overwrite: 0 or 1, default: 0</span>
 </code></pre><h3 id="delete-jobname-删除任务模板">DELETE /job/&lt;name&gt; 删除任务模板 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><hr>
-<h3 id="post-infertask_namejob_name-推断">POST /infer/&lt;task_name&gt;/&lt;job_name&gt; 推断 </h3>
-<p>⚪ infer inplace</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  inplace<span class="token operator">:</span> bool             <span class="token comment">// inplace prediction on original timeseq data</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  time<span class="token operator">:</span> List<span class="token punctuation">[</span>str<span class="token punctuation">]</span>           <span class="token comment">// preprocessed time, [T]</span>
-  seq<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>          <span class="token comment">// preprocessed values, [T, 1]</span>
-  lbl<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>int<span class="token punctuation">]</span>           <span class="token comment">// preprocessed labels, [T, 1], for 'clf' tasks</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>float<span class="token punctuation">]</span>         <span class="token comment">// inplace predicted timeseq, [T', 1], T' is shorter than T by `inlen`</span>
-<span class="token punctuation">}</span>
-</code></pre><p>⚪ infer new</p>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  data<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// input frame, [T, D], length T is arbitary</span>
-  time<span class="token operator">?</span><span class="token operator">:</span> List<span class="token punctuation">[</span>long<span class="token punctuation">]</span>         <span class="token comment">// unix timestamp, [T]</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  pred<span class="token operator">:</span> List<span class="token punctuation">[</span>List<span class="token punctuation">[</span>float<span class="token punctuation">]</span><span class="token punctuation">]</span>   <span class="token comment">// output frame, [T', 1], T' is typically smaller than T</span>
-<span class="token punctuation">}</span>
-</code></pre><hr>
 <h3 id="get-logtask_name-打包下载任务文件夹">GET /log/&lt;task_name&gt; 打包下载任务文件夹 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; &lt;task_name&gt;.zip</span>
@@ -208,42 +227,8 @@
 </code></pre><h3 id="get-logtask_namejob_namelog-查看作业日志">GET /log/&lt;task_name&gt;/&lt;job_name&gt;.log 查看作业日志 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; job.log file</span>
-</code></pre><h3 id="get-runtimeruntime-查看系统运行时状态">GET <a href="..\runtime">/runtime</a> 查看系统运行时状态 </h3>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
-<span class="token comment">// url params: ?status=</span>
-<span class="token comment">//   status: comma seperated string select from `Status` (default: "queuing,running") or 'all'</span>
-
-<span class="token comment">// response</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  runtime_hist<span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token punctuation">{</span>                       <span class="token comment">// Run</span>
-      id<span class="token operator">:</span> int<span class="token punctuation">,</span>
-      name<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// task name</span>
-      status<span class="token operator">:</span> str<span class="token punctuation">,</span>          <span class="token comment">// task status</span>
-      info<span class="token operator">:</span> str<span class="token punctuation">,</span>            <span class="token comment">// cur job</span>
-      progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f'{n_job_finished} / {n_job_total}'</span>
-      ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task accept time</span>
-      ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// last meta info update time</span>
-      task_init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>  <span class="token comment">// path to tmp task_init_pack.pkl file (will be deleted once task marked finished)</span>
-    <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-</code></pre><hr>
-<h3 id="post-merge_csv-合并多个csv文件">POST /merge_csv 合并多个csv文件 </h3>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
-<span class="token comment">// &lt;= multiple *.csv files</span>
-<span class="token comment">// for each file:</span>
-<span class="token comment">//   first column is datetime in isoformat</span>
-<span class="token comment">//   rest columns are float value</span>
-<span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
-  target<span class="token operator">:</span> str         <span class="token comment">// filename, specify which file is to predict on (as last column)</span>
-                      <span class="token comment">// target file must contain only 1 value column</span>
-<span class="token punctuation">}</span>
-
-<span class="token comment">// response</span>
-<span class="token comment">// =&gt; data.csv</span>
-<span class="token comment">// multi-dim time-aligned seq as described in '###Data' section</span>
-</code></pre><h3 id="get-debugdebug-系统调试信息">GET <a href="..\debug">/debug</a> 系统调试信息 </h3>
+</code></pre><h3 id="get-logcleanlogclean-清理中间文件">GET <a href="..\log\clean">/log/clean</a> 清理中间文件 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><h3 id="get-debugdebug-系统调试信息">GET <a href="..\debug">/debug</a> 系统调试信息 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page</span>
 </code></pre><hr>

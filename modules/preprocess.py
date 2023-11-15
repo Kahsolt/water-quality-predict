@@ -4,10 +4,11 @@
 
 from datetime import datetime, timedelta
 
-import pywt
 from scipy.interpolate import interp1d
+import pywt
 
 from modules.transform import *
+from modules.utils import *
 
 IGNORE_INFER = [
   'wavlet_transform',
@@ -212,10 +213,6 @@ def combine_time_and_values(T:Time, df:Values) -> TimeSeq:
   val_cols = list(df.columns)
   df['Time'] = T
   return df[['Time'] + val_cols]
-
-
-def merge_csv():
-  pass
 
 
 if __name__ == '__main__':

@@ -7,7 +7,6 @@ from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV
 
 from modules.utils import *
-from modules.typing import *
 
 from modules.models.SVM_rgr import train, save, load      # just proxy by
 from modules.models.XGBoost_clf import infer, infer_prob  # just proxy by

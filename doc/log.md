@@ -1,6 +1,6 @@
 # 工作目录结构
 
-    存储完整的任务结果、系统元数据、临时转储
+    存储完整的任务结果、数据记录
 
 ----
 
@@ -8,12 +8,10 @@
 
 ```c
 LOG_PATH
-├── README.md
 ├── runtime.json            // system runtime & history
 ├── <task_name>
 │   ├── task.json           // task descriptor
 │   ├── data.csv            // data shared by all jobs of the same task
-│   ├── data_hist.zip       // history archive of raw data
 │   ├── <job_name>
 │   │   ├── job.yaml        // job config
 │   │   ├── time.pkl        // seq time (preprocessed), for visualize
@@ -37,22 +35,11 @@ TMP_PATH
 └── *.zip                   // download log folders
 ```
 
-### 系统元数据
+### 数据记录
 
-=> see `modules/descriptor.py`
+=> see [`modules/trainer.py`](../modules/trainer.py)
 
-⚪ task_init `/tmp/\<task_init_pack\>.pkl` 任务请求临时转储
-
-```python
-task_init_pack = {          # => see `POST /task`
-  'name': str,              # task name
-  'data': bytes,            # files[0].stream().read()
-  'target': List[str],      # target
-  'jobs': List[str],        # scheduled jobs
-}
-```
-
-⚪ run_meta `/log/runtime.json`
+⚪ RunMeta `/log/runtime.json`
 
 ```json
 [                         // => `GET /runtime`
@@ -64,12 +51,12 @@ task_init_pack = {          # => see `POST /task`
     progress: str,        // f'{n_job_finished} / {n_job_total}'
     ts_create: int,       // task accept time
     ts_update: int,       // last meta info update time
-    task_init_pack: str,  // path to tmp task_init_pack.pkl file (will be deleted once task marked finished)
-  },
+    init_pack: str,       // path to tmp/<init_pack>.pkl file
+  }
 ]
 ```
 
-⚪ task_meta `/log/\<task_name\>/task.json`
+⚪ TaskMeta `/log/<task_name>/task.json`
 
 ```json
 [
@@ -95,6 +82,6 @@ task_init_pack = {          # => see `POST /task`
     },
     ts_create: int,       // task create time
     ts_update: int,
-  },
+  }
 ]
 ```

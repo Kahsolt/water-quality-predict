@@ -7,7 +7,6 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 
 from modules.utils import *
-from modules.typing import *
 
 from modules.models.XGBoost_rgr import train, save, load     # just proxy by
 

@@ -4,47 +4,14 @@
 
 from pathlib import Path
 
-from modules.utils import *
-from modules.typing import *
+from .io import load_json, load_yaml, save_json, save_yaml, Data
 
 
-# => see 'doc/log.md'
-def new_task_init() -> TaskInit:
-  return {
-    'name': None,         # task name
-    'data': None,         # *.csv file
-    'target': None,       # target
-    'jobs': None,         # scheduled jobs
-    'thresh': None,       # override `dataset.encoder.params.thresh`
-  }
-
-def new_run_meta() -> RunMeta:
-  return {
-    'id': None,
-    'name': None,         # task name
-    'status': Status.QUEUING,
-    'info': '',           # accumulative
-    'progress': None,     # f'{n_job_finished} / {n_job_total}'
-    'ts_create': ts_now(),
-    'ts_update': None,
-    'task_init_pack': None,
-  }
-
-def new_task_meta() -> TaskMeta:
-  return {
-    'status': Status.QUEUING,
-    'target': None,
-    'jobs': { },
-    'ts_create': ts_now(),
-    'ts_update': None,
-  }
-
-
-class Descriptor:
+class Config:
 
   SEP = '/'
-    
-  def __init__(self, cfg, fp:Path=None):
+
+  def __init__(self, cfg:Data, fp:Path=None):
     self.cfg = cfg
     self.fp = fp
 
@@ -69,9 +36,9 @@ class Descriptor:
     assert fp, 'must specify a file path to save'
 
     if fp.suffix == '.yaml':
-      save_yaml(fp, self.cfg)
+      save_yaml(self.cfg, fp)
     elif fp.suffix == '.json':
-      save_json(fp, self.cfg)
+      save_json(self.cfg, fp)
     else:
       raise ValueError(f'invalid file suffix {fp.suffix}, should be either .yaml or .json')
 
@@ -97,7 +64,11 @@ class Descriptor:
 
 
 if __name__ == '__main__':
-  cfg = Descriptor(new_run_meta())
+  from modules.trainer import RunMeta
+  from modules.utils import ts_now
+
+  run_meta = RunMeta(id=1, name='test', init_fp='no_file.csv')
+  cfg = Config(run_meta.to_dict())
   print(cfg)
 
   print(cfg['status'])

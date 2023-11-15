@@ -10,28 +10,41 @@
 
 ### Web API
 
-⚪ Native API
+Run server:
 
-- start server `python app.py`
+- start server `python server.py`
 - point your browser to `http://127.0.0.1:5000/` to see API documentation
+- env vars
+  - `DEBUG_PLOT`: save intermediate plots during training for debug
+  - `LOG_JOB`: log job setting & model details when loading a pretrained job
 
-Main busisness:
+Brief API list:
 
-- `POST /task` to create a task and put in processing queue
-- `GET /task/<name>` to get task results 
-- `POST /task/<name>` to retrain a old task with new data
-- `POST /infer` to predict on new data
+- basic routine
+  - `GET /task`: list up all existing tasks
+  - `POST /task`: create new task (put in queue)
+    - `POST /task/<name>`: retrain old task with new data
+  - `GET /runtime`: see running queue, or all history
+  - `GET /task/<name>`: get task results
+  - `POST /infer/<task>/<job>`: predict on new data
+  - `DELETE /task/<name>`: delete a task
+- others
+  - `GET /model`: list up models
+  - `GET|POST /job/<name>`: manage your job plans
+  - `GET /log/<task_name>`: download task logs
+  - `GET /log/<task_name>/<job_name>`: download job logs
+  - `GET /log/<task_name>/<job_name>.log`: show job log file
+  - `GET /log/clean`: delete *.png plot files from disk to save space
 
-Extras:
+CUI client demo:
 
-- `GET /runtime` to see running queue status and history
-- `GET /job/<name>` or `POST /job/<name>` to prepare your job plans
-- `GET /log/<task_name>` to download the task log folder
-- `GET /log/<task_name>/<job_name>` to download the job log folder
-- `GET /log/<task_name>/<job_name>.log` to see job log
-- `POST /merge_csv` to merge data all-in-one if you have multiple data source
+- see API test: [server_test.py](server_test.py)
 
-=> see client demo: [app_test.py](app_test.py)
+GUI client demo:
+
+- run `python client.py`
+
+![client](img/client.png)
 
 
 ### Local run
@@ -47,18 +60,19 @@ Extras:
 ⚪ Dataset & Train & Eval
 
 - write a job file, see guide => [doc/job.md](doc/job.md)
-- run a single job: `python run.py -D path/to/*.csv -J path/to/*.yaml --target all`
-- run folder of jobs: `py run.py -D data\test.csv -X job`
-  - run all test demo: `run_test.cmd`
+- run a single job: `python run.py -D path\to\*.csv -J path\to\*.yaml --target all`
+- run folder of jobs: `python run.py -D data\test.csv -X job`
+  - run all test demo: `run_local.cmd`
 
-⚪ Infer
+⚪ Infer (inplace)
 
 ![demo](img/demo.png)
 
-- run `python infer.py`
+- run `python demo.py`
 
 
 ----
 by Armit
 2022/09/15  
 2023/02/14  
+2023/11/15
