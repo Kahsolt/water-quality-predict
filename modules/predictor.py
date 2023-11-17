@@ -78,13 +78,16 @@ def prepare_for_(what:EnvKind):
   return wrapper
 
 
-def load_env(job_file:Path) -> Env:
+def load_env(job_or_file:Union[Path, Config]) -> Env:
   ''' load a pretrained job env '''
 
   # job
-  assert job_file.exists()
-  log_dp: Path = job_file.parent
-  job = Config.load(job_file)
+  if isinstance(job_or_file, Path):
+    assert job_or_file.exists()
+    log_dp: Path = job_or_file.parent
+    job = Config.load(job_or_file)
+  else:
+    job = job_or_file
 
   # logger
   logger = logging
@@ -176,8 +179,11 @@ predict_with_prediction: Predictor = partial(predict_with_, 'prediction')
 
 
 def predict_from_request(job_file:Path, x:Frame, t:Frame=None, roll:int=1, prob:bool=False) -> PredictRet:
-  env = load_env(job_file)
-  job: Config = env.job
+  # NOTE: begin lock infer
+  job = Config.load(job_file)
+  if 'CRNN' in job.get('model/name'): lock_cuda.acquire()
+
+  env = load_env(job)
 
   # apply preprocess
   if t is not None:
@@ -208,4 +214,9 @@ def predict_from_request(job_file:Path, x:Frame, t:Frame=None, roll:int=1, prob:
     x = df.to_numpy()
 
   # model infer
-  return predict_with_prediction(env, x, roll, prob)
+  res = predict_with_prediction(env, x, roll, prob)
+
+  # NOTE: begin lock infer
+  if 'CRNN' in job.get('model/name'): lock_cuda.release()
+
+  return res

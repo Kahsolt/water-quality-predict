@@ -7,6 +7,7 @@ import random
 import string
 import subprocess
 from time import time
+from threading import RLock
 from pathlib import Path
 from datetime import datetime
 
@@ -14,6 +15,7 @@ import torch
 import numpy as np
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+lock_cuda = RLock()
 
 try:
   from sklearnex import patch_sklearn
@@ -34,6 +36,12 @@ def timer(fn:Callable[..., Any]):
     r = fn(*args, **kwargs)
     print(f'All things done in {time() - t:.3f}s')
     return r
+  return wrapper
+
+def with_lock_cuda(fn:Callable[..., Any]):
+  def wrapper(*args, **kwargs):
+    with lock_cuda:
+      return fn(*args, **kwargs)
   return wrapper
 
 

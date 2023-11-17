@@ -198,7 +198,7 @@ class Trainer:
 
   def _enqueue_unfinished_tasks(self):
     for run in self.run_meta_list:
-      if run.status in [Status.QUEUING, Status.RUNNING]:
+      if run.status in [Status.QUEUING, Status.RUNNING, Status.FAILED]:
         run.status = Status.QUEUING    # reset to queuing
         run.ts_update = ts_now()
         self.queue.put((run, self))
