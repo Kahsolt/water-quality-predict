@@ -179,11 +179,8 @@ predict_with_prediction: Predictor = partial(predict_with_, 'prediction')
 
 
 def predict_from_request(job_file:Path, x:Frame, t:Frame=None, roll:int=1, prob:bool=False) -> PredictRet:
-  # NOTE: begin lock infer
-  job = Config.load(job_file)
-  if 'CRNN' in job.get('model/name'): lock_cuda.acquire()
-
-  env = load_env(job)
+  env = load_env(job_file)
+  job = env.job
 
   # apply preprocess
   if t is not None:
@@ -214,9 +211,4 @@ def predict_from_request(job_file:Path, x:Frame, t:Frame=None, roll:int=1, prob:
     x = df.to_numpy()
 
   # model infer
-  res = predict_with_prediction(env, x, roll, prob)
-
-  # NOTE: begin lock infer
-  if 'CRNN' in job.get('model/name'): lock_cuda.release()
-
-  return res
+  return predict_with_prediction(env, x, roll, prob)

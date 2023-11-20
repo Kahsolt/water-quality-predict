@@ -16,16 +16,10 @@ TASK_TYPE: TaskType = TaskType(Path(__file__).stem.split('_')[-1])
 def init(params:Params, logger:Logger=None) -> GridSearchCV:
   model_cls: type[XGBClassifier] = getattr(xgboost, params['model'])
   if 'gs_params' in params:
-    if device == 'cuda':
-      model = model_cls(objective=params['objective'], tree_method='gpu_hist', gpu_id=0)
-    else:
-      model = model_cls(objective=params['objective'])
+    model = model_cls(objective=params['objective'])
     model = GridSearchCV(model, **params['gs_params'])
   else:
-    if device == 'cuda':
-      model = model_cls(objective=params['objective'], tree_method='gpu_hist', gpu_id=0, **params['param'])
-    else:
-      model = model_cls(objective=params['objective'], **params['param'])
+    model = model_cls(objective=params['objective'], **params['param'])
   return model
 
 

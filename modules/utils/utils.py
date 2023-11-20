@@ -14,8 +14,7 @@ from datetime import datetime
 import torch
 import numpy as np
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
-lock_cuda = RLock()
+device = 'cpu'  # cuda is not multi-thread safe! 
 
 try:
   from sklearnex import patch_sklearn
@@ -38,12 +37,6 @@ def timer(fn:Callable[..., Any]):
     return r
   return wrapper
 
-def with_lock_cuda(fn:Callable[..., Any]):
-  def wrapper(*args, **kwargs):
-    with lock_cuda:
-      return fn(*args, **kwargs)
-  return wrapper
-
 
 def fix_seed(seed:int) -> int:
   return seed if seed > 0 else random.randrange(np.iinfo(np.int32).max)
@@ -53,9 +46,6 @@ def seed_everything(seed:int):
   os.environ["PYTHONHASHSEED"] = str(seed)
   np.random.seed(seed)
   torch.manual_seed(seed)
-  torch.cuda.manual_seed_all(seed)
-  torch.backends.cudnn.deterministic = True
-  torch.backends.cudnn.benchmark = False
 
 def ts_now() -> int:
   return int(time())

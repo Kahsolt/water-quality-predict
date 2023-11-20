@@ -302,7 +302,7 @@ if __name__ == '__main__':
   parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
   parser.add_argument('-P', '--port', type=int, default=5000)
   parser.add_argument('--no_trainer', action='store_true')
-  parser.add_argument('--n_workers', type=int, default=os.cpu_count())
+  parser.add_argument('--n_workers', type=int, default=1)
   parser.add_argument('--queue_timeout', type=int, default=5)
   args = parser.parse_args()
 

@@ -335,9 +335,6 @@ def run_file(args, override_cfg:Dict={}) -> JobResult:
     except: print(f'[run_file] override_cfg failed to find key: {key}')
   job.save(log_dp / JOB_FILE)
 
-  # NOTE: begin lock train
-  if 'CRNN' in job.get('model/name'): lock_cuda.acquire()
-
   # logger
   logger = logger or get_logger(fullname, log_dp)
   if LOG_JOB:
@@ -368,9 +365,6 @@ def run_file(args, override_cfg:Dict={}) -> JobResult:
       logger.error(format_exc())
       close_logger(logger)
       return Status.FAILED
-
-  # NOTE: end lock train
-  if 'CRNN' in job.get('model/name'): lock_cuda.release()
 
   close_logger(logger)
   return Status.FINISHED
