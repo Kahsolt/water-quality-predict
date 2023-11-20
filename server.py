@@ -176,6 +176,11 @@ def task_(name:str):
       )
       init_fp = TMP_PATH / f'{name}-{rand_str(4)}.pkl'
       save_pickle(task_init, init_fp)
+
+      for dp in task_folder.iterdir():
+        if dp.is_dir():
+          shutil.rmtree(str(dp))
+
       trainer.add_task(name, init_fp)
 
       for f in request.files.values(): f.close()

@@ -9,13 +9,13 @@ import tkinter.ttk as ttk
 import tkinter.messagebox as tkmsg
 from traceback import print_exc
 from typing import Dict, Any
+from argparse import ArgumentParser
 
 import numpy as np
 import requests as R
 from requests import Response
 
 from modules.utils import ts_now, ndarray_to_list
-from server_test import EP
 
 WINDOW_TITLE = 'Inference Client'
 WINDOW_SIZE  = (500, 500)
@@ -270,6 +270,14 @@ class App:
 
 
 if __name__ == '__main__':
+  parser = ArgumentParser()
+  parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
+  parser.add_argument('-P', '--port', type=int, default=5000)
+  args = parser.parse_args()
+
+  API_BASE = f'http://{args.host}:{args.port}'
+  EP = lambda api: f'{API_BASE}{api}'
+
   try:
     App()
   except KeyboardInterrupt:

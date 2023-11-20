@@ -38,11 +38,12 @@ Brief API list:
 
 CUI client demo:
 
+- set env var `HOST` and `PORT`
 - see API test: [server_test.py](server_test.py)
 
 GUI client demo:
 
-- run `python client.py`
+- run `python client.py -H <host> -P <port>`
 
 ![client](img/client.png)
 
