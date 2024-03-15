@@ -9,3 +9,4 @@ matplotlib
 pywavelets
 Flask
 requests
+dataclass_wizard

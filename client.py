@@ -2,7 +2,7 @@
 # Author: Armit
 # Create Time: 2023/10/09
 
-# GUI client for server
+# client (webapp)
 
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -271,7 +271,7 @@ class App:
 
 if __name__ == '__main__':
   parser = ArgumentParser()
-  parser.add_argument('-H', '--host', type=str, default='0.0.0.0')
+  parser.add_argument('-H', '--host', type=str, default='127.0.0.1')
   parser.add_argument('-P', '--port', type=int, default=5000)
   args = parser.parse_args()
 

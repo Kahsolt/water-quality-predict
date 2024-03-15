@@ -2,6 +2,8 @@
 # Author: Armit
 # Create Time: 2023/02/20 
 
+# demo app (local)
+
 from pathlib import Path
 from argparse import ArgumentParser
 from traceback import print_exc

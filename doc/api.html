@@ -25,14 +25,40 @@
       <div class="crossnote markdown-preview  ">
       
 <h1 id="api-documentation">API documentation </h1>
-<p>=&gt; see job.yaml doc: <a href="job">/doc/job</a> for job config<br>
+<p>=&gt; see job.yaml doc: <a href="job">/doc/job</a> for job plans<br>
 =&gt; see log folder doc: <a href="log">/doc/log</a> for log folder layout<br>
 =&gt; see encoder: <a href="encoder">/doc/encoder</a> for pred class_ids of each ecnoder</p>
+<h3 id="quick-start-快速上手">Quick Start 快速上手 </h3>
+<ul>
+<li>basic train-infer routine 基本工作流
+<ul>
+<li><code>GET /task</code>: list up all existing tasks</li>
+<li><code>POST /task</code>: create new task (put in queue)
+<ul>
+<li><code>POST /task/&lt;name&gt;</code>: retrain old task with new data or config</li>
+</ul>
+</li>
+<li><code>GET /runtime</code>: view running queue or history</li>
+<li><code>GET /task/&lt;name&gt;</code>: get task results</li>
+<li><code>POST /infer/&lt;task&gt;/&lt;job&gt;</code>: predict on new data</li>
+<li><code>DELETE /task/&lt;name&gt;</code>: delete a task</li>
+</ul>
+</li>
+<li>others 其他功能
+<ul>
+<li><code>GET /model</code>: list up available models</li>
+<li><code>GET|POST /job/&lt;name&gt;</code>: manage your job plans</li>
+<li><code>GET /log/&lt;task_name&gt;</code>: download task logs</li>
+<li><code>GET /log/&lt;task_name&gt;/&lt;job_name&gt;</code>: download job logs</li>
+<li><code>GET /log/&lt;task_name&gt;/&lt;job_name&gt;.log</code>: download job log file</li>
+<li><code>GET /log/clean</code>: perform server cleanup to save disk space</li>
+</ul>
+</li>
+</ul>
 <h3 id="general-总论">General 总论 </h3>
 <p>Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).<br>
 ℹ All routes are RESTful-like designed.<br>
-ℹ For sending json with files in a single request, refer to <a href="https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request">python-requests-post-json-and-file-in-single-request</a><br>
-ℹ <del> For serializing NumPy arrays, refer to <a href="https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python">numpy-array-to-base64-and-back-to-numpy-array-python</a> </del></p>
+ℹ For sending json with files in a single request, refer to <a href="https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request">python-requests-post-json-and-file-in-single-request</a></p>
 <p>The common JSON fields for all payloads:</p>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// request</span>
 <span class="token keyword keyword-interface">interface</span> <span class="token punctuation">{</span>
@@ -229,7 +255,9 @@
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; job.log file</span>
 </code></pre><h3 id="get-logcleanlogclean-清理中间文件">GET <a href="..\log\clean">/log/clean</a> 清理中间文件 </h3>
-<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code></code></pre><h3 id="get-debugdebug-系统调试信息">GET <a href="..\debug">/debug</a> 系统调试信息 </h3>
+<pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
+<span class="token comment">// =&gt; ok</span>
+</code></pre><h3 id="get-debugdebug-系统调试信息">GET <a href="..\debug">/debug</a> 系统调试信息 </h3>
 <pre data-role="codeBlock" data-info="typescript" class="language-typescript typescript"><code><span class="token comment">// response</span>
 <span class="token comment">// =&gt; plain html page</span>
 </code></pre><hr>

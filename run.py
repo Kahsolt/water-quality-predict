@@ -2,7 +2,7 @@
 # Author: Armit
 # Create Time: 2023/02/19 
 
-# CUI client for local train
+# run train jobs (local)
 
 from modules.runner import cmd_args, run_file, run_folder
 

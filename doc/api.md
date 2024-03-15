@@ -1,15 +1,32 @@
 # API documentation
 
-=> see job.yaml doc: [/doc/job](/doc/job) for job config  
+=> see job.yaml doc: [/doc/job](/doc/job) for job plans  
 => see log folder doc: [/doc/log](/doc/log) for log folder layout  
 => see encoder: [/doc/encoder](/doc/encoder) for pred class_ids of each ecnoder 
+
+### Quick Start 快速上手
+
+- basic train-infer routine 基本工作流
+  - `GET /task`: list up all existing tasks
+  - `POST /task`: create new task (put in queue)
+    - `POST /task/<name>`: retrain old task with new data or config
+  - `GET /runtime`: view running queue or history
+  - `GET /task/<name>`: get task results
+  - `POST /infer/<task>/<job>`: predict on new data
+  - `DELETE /task/<name>`: delete a task
+- others 其他功能
+  - `GET /model`: list up available models
+  - `GET|POST /job/<name>`: manage your job plans
+  - `GET /log/<task_name>`: download task logs
+  - `GET /log/<task_name>/<job_name>`: download job logs
+  - `GET /log/<task_name>/<job_name>.log`: download job log file
+  - `GET /log/clean`: perform server cleanup to save disk space
 
 ### General 总论
 
 Serving through HTTP protocol, the payload for both requests and responses are JSON and files (optional).  
 ℹ All routes are RESTful-like designed.  
 ℹ For sending json with files in a single request, refer to [python-requests-post-json-and-file-in-single-request](https://stackoverflow.com/questions/19439961/python-requests-post-json-and-file-in-single-request)  
-ℹ <del> For serializing NumPy arrays, refer to [numpy-array-to-base64-and-back-to-numpy-array-python](https://stackoverflow.com/questions/6485790/numpy-array-to-base64-and-back-to-numpy-array-python) </del>  
 
 The common JSON fields for all payloads:
 
@@ -31,7 +48,6 @@ interface {
 
 Time sequence data are stored as a **single** `data.csv` file for each task created.  
 
-
 Can conatin **multiple** columns:
 
   - First column: datetime string in ISO format
@@ -50,8 +66,6 @@ monitorTime,monitor1,monitor2       // column names are arbitary
 2021-01-01 07:00:00,0.2,0.9
 2021-01-01 09:00:00,0.3,1.0
 ```
-
-
 
 ### Enums 枚举常量
 
@@ -290,6 +304,8 @@ interface {
 ### GET [/log/clean](/log/clean) 清理中间文件
 
 ```typescript
+// response
+// => ok
 ```
 
 ### GET [/debug](/debug) 系统调试信息
