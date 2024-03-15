@@ -18,7 +18,6 @@ LOG_PATH
 │   │   ├── preprocess.pkl  // seq values (preprocessed), for visualize
 │   │   ├── label.pkl       // encoded target/label, for visualize
 │   │   ├── stats.pkl       // stats of transform, for postprocess
-│   │   ├── transform.pkl   // seq (transformed), for ARIMA train/eval
 │   │   ├── dataset.pkl     // dataset (transformed), for other model train/eval
 │   │   ├── scores.txt      // evaluated scores
 │   │   ├── predict.pkl     // inplace prediction

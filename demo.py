@@ -105,7 +105,6 @@ class App:
     env: Env = self.env
     job: Config = env.job
 
-    self.is_model_arima = 'ARIMA' in job['model/name']
     self.is_task_rgr = env.manager.TASK_TYPE == TaskType.RGR
     print(f'  is_task_rgr: {self.is_task_rgr}')
 

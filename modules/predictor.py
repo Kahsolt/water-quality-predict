@@ -124,7 +124,6 @@ def predict_with_(how:PredictKind, env:Env, x:Seq=None, n_roll:int=1, ret_prob:b
     assert n_roll == 1, 'for "clf" tasks must set n_roll=1'
 
   is_task_rgr = env.manager.TASK_TYPE == TaskType.RGR
-  is_model_arima = 'ARIMA' in job['model/name']
 
   if x is not None:
     seq: Seq = transform.apply_transforms(x, stats)
@@ -138,33 +137,27 @@ def predict_with_(how:PredictKind, env:Env, x:Seq=None, n_roll:int=1, ret_prob:b
 
   def predict_rolling(predictor):
     preds: List[Frame] = []
-    loc = 10 if is_model_arima else inlen
+    loc = inlen
 
     ''' predict with oracle: given a seq longer than `inlen`, rolling predict in window '''
     if how == 'oracle':
       while loc < len(seq):
-        if is_model_arima:
-          y: Frame = predictor(model, loc)  # [NC]
-        else:
-          x = seq[loc-inlen:loc, :]
-          x = frame_left_pad(x, inlen)      # [I, D]
-          y: Frame = predictor(model, x)    # [O, 1]
+        x = seq[loc-inlen:loc, :]
+        x = frame_left_pad(x, inlen)      # [I, D]
+        y: Frame = predictor(model, x)    # [O, 1]
         preds.append(y)
         loc += len(y) - overlap
 
     ''' predict with oracle: given a seq equal to `inlen`, rolling predict in window '''
     if how == 'prediction':
       x = seq[-inlen:, :]
-      x = frame_left_pad(x, inlen)          # [I, D]
+      x = frame_left_pad(x, inlen)        # [I, D]
       for _ in range(n_roll):
-        if is_model_arima:
-          y: Frame = predictor(model, loc)  # [1]
-        else:
-          y: Frame = predictor(model, x)    # [O, 1]
+        y: Frame = predictor(model, x)    # [O, 1]
         preds.append(y)
         if n_roll > 1:
           x = frame_shift(x, y)
-          loc += len(y) - overlap   # just for arima
+          loc += len(y) - overlap
 
     pred: Seq = np.concatenate(preds, axis=0)    # [T'=R-L+1, 1]
     return transform.inv_transforms(pred, stats) if is_task_rgr else pred

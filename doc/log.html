@@ -25,12 +25,11 @@
       <div class="crossnote markdown-preview  ">
       
 <h1 id="工作目录结构">工作目录结构 </h1>
-<pre class="language-text">存储完整的任务结果、系统元数据、临时转储
+<pre class="language-text">存储完整的任务结果、数据记录
 </pre>
 <hr>
 <h3 id="文件系统布局">文件系统布局 </h3>
 <pre data-role="codeBlock" data-info="c" class="language-c c"><code>LOG_PATH
-├── README<span class="token punctuation">.</span>md
 ├── runtime<span class="token punctuation">.</span>json            <span class="token comment">// system runtime &amp; history</span>
 ├── <span class="token operator">&lt;</span>task_name<span class="token operator">&gt;</span>
 │   ├── task<span class="token punctuation">.</span>json           <span class="token comment">// task descriptor</span>
@@ -41,7 +40,6 @@
 │   │   ├── preprocess<span class="token punctuation">.</span>pkl  <span class="token comment">// seq values (preprocessed), for visualize</span>
 │   │   ├── label<span class="token punctuation">.</span>pkl       <span class="token comment">// encoded target/label, for visualize</span>
 │   │   ├── stats<span class="token punctuation">.</span>pkl       <span class="token comment">// stats of transform, for postprocess</span>
-│   │   ├── transform<span class="token punctuation">.</span>pkl   <span class="token comment">// seq (transformed), for ARIMA train/eval</span>
 │   │   ├── dataset<span class="token punctuation">.</span>pkl     <span class="token comment">// dataset (transformed), for other model train/eval</span>
 │   │   ├── scores<span class="token punctuation">.</span>txt      <span class="token comment">// evaluated scores</span>
 │   │   ├── predict<span class="token punctuation">.</span>pkl     <span class="token comment">// inplace prediction</span>
@@ -56,16 +54,9 @@
 TMP_PATH
 ├── <span class="token operator">*</span><span class="token punctuation">.</span>pkl                   <span class="token comment">// task init pack</span>
 └── <span class="token operator">*</span><span class="token punctuation">.</span>zip                   <span class="token comment">// download log folders</span>
-</code></pre><h3 id="系统元数据">系统元数据 </h3>
-<p>=&gt; see <code>modules/descriptor.py</code></p>
-<p>⚪ task_init <code>/tmp/\&lt;task_init_pack\&gt;.pkl</code> 任务请求临时转储</p>
-<pre data-role="codeBlock" data-info="python" class="language-python python"><code>task_init_pack <span class="token operator">=</span> <span class="token punctuation">{</span>          <span class="token comment"># =&gt; see `POST /task`</span>
-  <span class="token string">'name'</span><span class="token punctuation">:</span> <span class="token builtin">str</span><span class="token punctuation">,</span>              <span class="token comment"># task name</span>
-  <span class="token string">'data'</span><span class="token punctuation">:</span> <span class="token builtin">bytes</span><span class="token punctuation">,</span>            <span class="token comment"># files[0].stream().read()</span>
-  <span class="token string">'target'</span><span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span>      <span class="token comment"># target</span>
-  <span class="token string">'jobs'</span><span class="token punctuation">:</span> List<span class="token punctuation">[</span><span class="token builtin">str</span><span class="token punctuation">]</span><span class="token punctuation">,</span>        <span class="token comment"># scheduled jobs</span>
-<span class="token punctuation">}</span>
-</code></pre><p>⚪ run_meta <code>/log/runtime.json</code></p>
+</code></pre><h3 id="数据记录">数据记录 </h3>
+<p>=&gt; see <a href="../modules/trainer.py"><code>modules/trainer.py</code></a></p>
+<p>⚪ RunMeta <code>/log/runtime.json</code></p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>                         <span class="token comment">// =&gt; `GET /runtime`</span>
   <span class="token punctuation">{</span>                       <span class="token comment">// Run</span>
     id<span class="token operator">:</span> int<span class="token punctuation">,</span>
@@ -75,10 +66,10 @@ TMP_PATH
     progress<span class="token operator">:</span> str<span class="token punctuation">,</span>        <span class="token comment">// f'{n_job_finished} / {n_job_total}'</span>
     ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task accept time</span>
     ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// last meta info update time</span>
-    task_init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>  <span class="token comment">// path to tmp task_init_pack.pkl file (will be deleted once task marked finished)</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    init_pack<span class="token operator">:</span> str<span class="token punctuation">,</span>       <span class="token comment">// path to tmp/&lt;init_pack&gt;.pkl file</span>
+  <span class="token punctuation">}</span>
 <span class="token punctuation">]</span>
-</code></pre><p>⚪ task_meta <code>/log/\&lt;task_name\&gt;/task.json</code></p>
+</code></pre><p>⚪ TaskMeta <code>/log/&lt;task_name&gt;/task.json</code></p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
   <span class="token punctuation">{</span>                       <span class="token comment">// =&gt; `GET /task/&lt;name&gt;`</span>
     status<span class="token operator">:</span> str<span class="token punctuation">,</span>
@@ -102,7 +93,7 @@ TMP_PATH
     <span class="token punctuation">}</span><span class="token punctuation">,</span>
     ts_create<span class="token operator">:</span> int<span class="token punctuation">,</span>       <span class="token comment">// task create time</span>
     ts_update<span class="token operator">:</span> int<span class="token punctuation">,</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span>
 <span class="token punctuation">]</span>
 </code></pre>
       </div>
