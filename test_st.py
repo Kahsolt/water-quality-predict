@@ -204,7 +204,7 @@ def test_train_pressure(idx:int):
     },
   )
   assert resp.ok, resp ; r = resp.json() ; print(r)
-  assert task_name == r['data']['name']
+  assert real_task_name == r['data']['name']
 
 
 if __name__ == '__main__':

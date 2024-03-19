@@ -8,7 +8,7 @@ import logging
 from logging import Logger
 from typing import Dict
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+logging.basicConfig(stream=sys.stdout, level=logging.ERROR)
 
 loggers: Dict[str, Logger] = {}
 
@@ -16,7 +16,7 @@ loggers: Dict[str, Logger] = {}
 def get_logger(name, log_dp=Path('.')) -> Logger:
   if name not in loggers:
     logger = logging.getLogger(name)
-    logger.setLevel(logging.WARN)
+    logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s")
     h = logging.FileHandler(log_dp / 'job.log')
     h.setLevel(logging.DEBUG)

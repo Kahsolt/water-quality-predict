@@ -10,3 +10,4 @@ pywavelets
 Flask
 requests
 dataclass_wizard
+psutil

@@ -4,6 +4,8 @@
 
 # server (webapp)
 
+import warnings ; warnings.filterwarnings('ignore', category=UserWarning)
+
 import os
 import shutil
 import psutil

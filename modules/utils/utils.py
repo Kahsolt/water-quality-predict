@@ -2,12 +2,13 @@
 # Author: Armit
 # Create Time: 2022/09/15 
 
+import warnings ; warnings.filterwarnings('ignore', category=UserWarning)
+
 import os
 import random
 import string
 import subprocess
 from time import time
-from threading import RLock
 from pathlib import Path
 from datetime import datetime
 
@@ -33,7 +34,7 @@ def timer(fn:Callable[..., Any]):
   def wrapper(*args, **kwargs):
     t = time()
     r = fn(*args, **kwargs)
-    print(f'All things done in {time() - t:.3f}s')
+    print(f'[{fn.__name__}] done in {time() - t:.3f}s')
     return r
   return wrapper
 
